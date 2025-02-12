@@ -1,0 +1,16 @@
+{
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:electron\" \"npm run dev:react\"",
+    "dev:electron": "cross-env NODE_ENV=development electron electron/main.js",
+    "dev:react": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build && npm run build:electron",
+    "build:electron": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^34.1.1",
+    "electron-builder": "^25.1.8",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3"
+  }
+}
