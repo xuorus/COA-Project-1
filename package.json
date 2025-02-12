@@ -1,9 +1,10 @@
 {
   "main": "electron/main.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:electron\" \"npm run dev:react\"",
+    "dev": "concurrently \"npm run dev:electron\" \"npm run dev:react\" \"npm run dev:backend\"",
     "dev:electron": "cross-env NODE_ENV=development electron electron/main.js",
     "dev:react": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
     "build": "cd frontend && npm run build && npm run build:electron",
     "build:electron": "electron-builder"
   },
