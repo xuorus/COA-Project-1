@@ -100,6 +100,7 @@ const Records = () => {
             justifyContent: 'space-between',
             padding: '0 24px',
             zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -285,6 +286,7 @@ const Records = () => {
             justifyContent: 'flex-end',
             padding: '0 24px',
             zIndex: 1,
+            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Typography
