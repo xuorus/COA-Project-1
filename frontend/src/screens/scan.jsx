@@ -322,7 +322,7 @@ const Main = () => {
                   sx={{
                     width: '100%',
                     flex: 1,
-                    maxWidth: '400px',
+                    maxWidth: '300px',
                     aspectRatio: '1 / 1.4142', // A4 paper ratio
                     margin: '0 auto',
                     border: '1px solid rgba(0, 0, 0, 0.2)', // Changed from dashed to solid
