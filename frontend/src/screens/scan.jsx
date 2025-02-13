@@ -179,27 +179,7 @@ const Main = () => {
                   Scan Document
                 </Typography>
 
-                {/* Image Upload Box */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 200,
-                    border: '2px dashed rgba(0, 0, 0, 0.2)',
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      borderColor: '#1976d2',
-                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                    }
-                  }}
-                >
-                  <Typography color="textSecondary">Click or drag to add image</Typography>
-                </Box>
-
+                {/* Document Type Dropdown - Moved up */}
                 <FormControl 
                   sx={{ 
                     width: '100%',
@@ -254,8 +234,8 @@ const Main = () => {
                       }
                     }}
                   >
-                    <MenuItem value="PDS">PDS</MenuItem>
-                    <MenuItem value="SALN">SALN</MenuItem>
+                    <MenuItem value="PDS">Personal Data Sheet</MenuItem>
+                    <MenuItem value="SALN">Statement of Assets, Liabilities and Net Worth</MenuItem>
                     {[...Array(13)].map((_, index) => (
                       <MenuItem key={index + 3} value={`DOC${index + 3}`}>
                         DOC{index + 3}
@@ -263,6 +243,27 @@ const Main = () => {
                     ))}
                   </Select>
                 </FormControl>
+
+                {/* Image Upload Box - Moved down */}
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: 200,
+                    border: '2px dashed rgba(0, 0, 0, 0.2)',
+                    borderRadius: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      borderColor: '#1976d2',
+                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    }
+                  }}
+                >
+                  <Typography color="textSecondary">Click or drag to add image</Typography>
+                </Box>
 
                 <Button
                   variant="contained"
