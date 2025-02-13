@@ -19,11 +19,6 @@ async function createWindow() {
       ? 'http://localhost:5173' // Vite dev server URL
       : `file://${path.join(__dirname, '../frontend/dist/index.html')}`
   );
-
-  // Open DevTools in development
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
 }
 
 app.whenReady().then(createWindow);
