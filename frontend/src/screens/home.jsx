@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -15,6 +15,15 @@ const theme = createTheme({
 
 const Main = () => {
   const navigate = useNavigate();
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -52,7 +61,7 @@ const Main = () => {
             zIndex: 1,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2     }}>
             <img 
               src={logo} 
               alt="COA Logo" 
@@ -122,7 +131,7 @@ const Main = () => {
             top: '64px', // Add offset for header
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: '40px', // Add this line to account for footer height
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -133,30 +142,54 @@ const Main = () => {
             color: 'white',
           }}
         >
-          <Button
-            variant="contained"
-            size="large"
-            fullWidth
-            onClick={() => navigate('/scan')}
-            sx={{ 
-              marginBottom: 2,
-              maxWidth: '400px'
+          <Box
+            sx={{
+              width: '92%',
+              maxWidth: 1500,
+              minHeight: 450,
+              background: 'linear-gradient(135deg, rgba(98, 255, 200, 0.4) 0%, rgba(255, 255, 255, 0.2) 100%)',
+              backdropFilter: 'blur(3px)',
+              borderRadius: 2,
+              padding: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 3,
+              boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }}
           >
-            Scan New Document
-          </Button>
+            {/* Add your content here */}
+          </Box>
+        </Box>
 
-          <Button
-            variant="contained"
-            size="large"
-            fullWidth
-            onClick={() => navigate('/records')}
-            sx={{ 
-              maxWidth: '400px'
+        {/* Add Footer */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '40px',
+            backgroundColor: '#F5F5F4',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            padding: '0 24px',
+            zIndex: 1,
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#000',
+              fontSize: '0.9rem',
+              fontFamily: 'monospace'
             }}
           >
-            View Records
-          </Button>
+            {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
+          </Typography>
         </Box>
       </Box>
     </ThemeProvider>
