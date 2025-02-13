@@ -1,5 +1,6 @@
 import React from 'react';
-import { Drawer, Box, Typography, Button, IconButton } from '@mui/material';
+import PropTypes from 'prop-types';
+import { Drawer, Box, Button, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
@@ -10,7 +11,10 @@ const Sidebar = ({ open, onClose }) => {
     navigate(path);
     onClose();
   };
-
+  Sidebar.propTypes = {
+    open: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired
+  };
   return (
     <Drawer
       anchor="right"
