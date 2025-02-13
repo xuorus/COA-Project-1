@@ -44,6 +44,7 @@ const Sidebar = ({ open, onClose }) => {
             onClick={onClose}
             sx={{ 
               p: 0,
+              mt: 1.5,
               '&:hover': {
                 backgroundColor: 'transparent'
               }
