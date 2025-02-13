@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { Drawer } from '@mui/material';
 import backgroundImage from '../assets/bldg.jpg';
-import logo from '../assets/logo.png';  // Add this import
+import logo from '../assets/logo.png';
 
 const theme = createTheme({
   palette: {
@@ -16,7 +17,11 @@ const theme = createTheme({
 const Main = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+  
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -38,11 +43,21 @@ const Main = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
           overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.4,
+            zIndex: -1,
+          }
         }}
       >
         {/* Header Box */}
@@ -56,12 +71,12 @@ const Main = () => {
             backgroundColor: '#F5F5F4',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between', // This will push the menu icon to the right
+            justifyContent: 'space-between',
             padding: '0 24px',
             zIndex: 1,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2     }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img 
               src={logo} 
               alt="COA Logo" 
@@ -106,16 +121,18 @@ const Main = () => {
               </Typography>
             </Box>
           </Box>
+
           <IconButton
             size="large"
             edge="end"
             color="inherit"
             aria-label="menu"
-            disableRipple  // Add this to remove ripple effect
+            disableRipple
+            onClick={() => setSidebarOpen(true)}
             sx={{ 
               color: '#000',
-              borderRadius: 0,  // Make button square
-              '&:hover': {      // Optional: customize hover state
+              borderRadius: 0,
+              '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
               }
             }}
@@ -124,14 +141,62 @@ const Main = () => {
           </IconButton>
         </Box>
 
-        {/* Adjust main content box to account for header */}
+        {/* Sidebar Drawer */}
+        <Drawer
+    anchor="left"
+    open={sidebarOpen}
+    onClose={() => setSidebarOpen(false)}
+    sx={{
+      '& .MuiDrawer-paper': {
+        width: 472,
+        boxSizing: 'border-box',
+        backgroundColor: '#F5F5F4',
+        borderRight: '1px solid rgba(0, 0, 0, 0.12)'
+      },
+    }}
+  >
+    <Box sx={{ 
+      padding: 2,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2 
+    }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>Navigation Menu</Typography>
+      
+      <Button
+        fullWidth
+        onClick={() => handleNavigation('/')}
+        sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
+      >
+        Home
+      </Button>
+      
+      <Button
+        fullWidth
+        onClick={() => handleNavigation('/scan')}
+        sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
+      >
+        Scan Documents
+      </Button>
+      
+      <Button
+        fullWidth
+        onClick={() => handleNavigation('/records')}
+        sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
+      >
+        View Records
+      </Button>
+    </Box>
+  </Drawer>
+
+        {/* Main Content */}
         <Box
           sx={{
             position: 'absolute',
-            top: '64px', // Add offset for header
+            top: '64px',
             left: 0,
             right: 0,
-            bottom: '40px', // Add this line to account for footer height
+            bottom: '40px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -164,7 +229,7 @@ const Main = () => {
           </Box>
         </Box>
 
-        {/* Add Footer */}
+        {/* Footer */}
         <Box
           sx={{
             position: 'absolute',
