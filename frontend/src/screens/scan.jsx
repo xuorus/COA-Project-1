@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import backgroundImage from '../assets/bldg.jpg';
-import logo from '../assets/logo.png';  // Add this import
+import logo from '../assets/logo.png';
+import Sidebar from '../components/sidebar';
 
 const theme = createTheme({
   palette: {
@@ -15,6 +16,16 @@ const theme = createTheme({
 
 const Main = () => {
   const navigate = useNavigate();
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -29,12 +40,21 @@ const Main = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          opacity: 0.4,
           overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.4,
+            zIndex: -1,
+          }
         }}
       >
         {/* Header Box */}
@@ -104,6 +124,7 @@ const Main = () => {
             color="inherit"
             aria-label="menu"
             disableRipple  // Add this to remove ripple effect
+            onClick={() => setSidebarOpen(true)}
             sx={{ 
               color: '#000',
               borderRadius: 0,  // Make button square
@@ -112,9 +133,15 @@ const Main = () => {
               }
             }}
           >
-            <MenuIcon />
+            <MenuRoundedIcon />
           </IconButton>
         </Box>
+
+        {/* Add Sidebar Component */}
+        <Sidebar 
+          open={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)} 
+        />
 
         {/* Adjust main content box to account for header */}
         <Box
@@ -167,24 +194,24 @@ const Main = () => {
     bottom: 0,
     left: 0,
     right: 0,
-    height: '50px',
+    height: '40px',
     backgroundColor: '#F5F5F4',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     padding: '0 24px',
     zIndex: 1,
-    borderTop: '1px solid rgba(0, 0, 0, 0.12)'
   }}
 >
-  <Typography 
-    variant="body2" 
-    sx={{ 
+  <Typography
+    variant="body2"
+    sx={{
       color: '#000',
-      fontSize: '0.9rem'
+      fontSize: '0.9rem',
+      fontFamily: 'monospace'
     }}
   >
-    © 2025 Commission on Audit - Regional Office X. All Rights Reserved.
+    {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
   </Typography>
 </Box>
       </Box>
