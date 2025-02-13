@@ -1,15 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
+// Initialize PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const theme = createTheme({
   palette: {
     primary: {
       main: '#1976d2',
+    },
+  },
+  typography: {
+    fontFamily: [
+      'Roboto',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+    h4: {
+      fontWeight: 500,
+    },
+    h6: {
+      fontWeight: 500,
+    },
+    body2: {
+      fontFamily: 'Roboto',
     },
   },
 });
@@ -19,6 +48,10 @@ const Main = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [documentType, setDocumentType] = useState('');
+  const [pdfFile, setPdfFile] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -151,31 +184,36 @@ const Main = () => {
             top: '80px',
             left: 0,
             right: 0,
-            bottom: '40px',
-            overflow: 'auto',
-            padding: 3,
+            bottom: '40px', // Match footer height
+            padding: 2, // Reduced padding
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
           }}
         >
-          <Container maxWidth="lg">
+          <Container 
+            maxWidth="lg" 
+            sx={{ 
+              height: '100%' // Make container take full height
+            }}
+          >
             <Box 
               sx={{ 
                 background: 'rgb(255, 255, 255, 0.4)',
                 backdropFilter: 'blur(3px)',
                 borderRadius: 2,
-                padding: 4,
+                padding: 2, // Reduced padding
                 display: 'flex',
-                flexDirection: 'row', // Changed to row for side-by-side layout
-                alignItems: 'flex-start', // Changed to align items at the top
-                gap: 4,
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                gap: 2, // Reduced gap
                 boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                minHeight: 450,
+                height: '100%', // Take full height of container
+                overflow: 'hidden' // Prevent internal scrolling
               }}
             >
               {/* Left Column - Scanning Controls */}
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                <Typography variant="h4" component="h1" fontWeight="bold">
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+                <Typography variant="h4" component="h3" fontWeight="bold" sx={{ mb: 1 }}>
                   Scan Document
                 </Typography>
 
@@ -244,44 +282,73 @@ const Main = () => {
                   </Select>
                 </FormControl>
 
-                {/* Image Upload Box - Moved down */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 200,
-                    border: '2px dashed rgba(0, 0, 0, 0.2)',
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      borderColor: '#1976d2',
-                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                    }
-                  }}
-                >
-                  <Typography color="textSecondary">Click or drag to add image</Typography>
+                {/* PDF Upload Box */}
+                <Box sx={{ 
+                  flex: 1,
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  gap: 2,
+                  minHeight: 0 // Important for flex container
+                }}>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setPdfFile(URL.createObjectURL(file));
+                        setPageNumber(1);
+                      }
+                    }}
+                    style={{ display: 'none' }}
+                    ref={fileInputRef}
+                  />
+                  
+                  <Box
+                    onClick={() => fileInputRef.current?.click()}
+                    sx={{
+                      width: '100%',
+                      flex: 1, // Take remaining space
+                      border: '2px dashed rgba(0, 0, 0, 0.2)',
+                      borderRadius: 2,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                      '&:hover': {
+                        borderColor: '#1976d2',
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      }
+                    }}
+                  >
+                    {pdfFile ? (
+                      <Document
+                        file={pdfFile}
+                        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                        onLoadError={(error) => console.error('Error loading PDF:', error)}
+                      >
+                        <Page
+                          pageNumber={pageNumber}
+                          width={Math.min(250, window.innerWidth * 0.2)} // Responsive width
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                        />
+                      </Document>
+                    ) : (
+                      <Typography color="textSecondary">
+                        Click or drag to add PDF document
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
-
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={!documentType}
-                  sx={{
-                    borderRadius: '20px',
-                    width: '100%',
-                    textTransform: 'none',
-                  }}
-                >
-                  Start Scanning
-                </Button>
               </Box>
 
               {/* Right Column - Information Fields */}
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <Typography variant="h4" component="h2" fontWeight="bold">
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+                <Typography variant="h4" component="h2" fontWeight="bold" sx={{ mb: 1 }}>
                   Information
                 </Typography>
 
@@ -316,6 +383,19 @@ const Main = () => {
                     />
                   ))}
                 </Box>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    borderRadius: '10px',
+                    width: '30%',
+                    textTransform: 'none',
+                  }}
+                >
+                  Submit
+                </Button>
+
               </Box>
             </Box>
           </Container>
