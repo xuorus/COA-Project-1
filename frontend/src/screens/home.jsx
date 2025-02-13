@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import backgroundImage from '../assets/bldg.jpg';
-import logo from '../assets/logo.png';  // Add this import
+import logo from '../assets/logo.png';
+import Sidebar from '../components/sidebar';
 
 const theme = createTheme({
   palette: {
@@ -16,6 +17,7 @@ const theme = createTheme({
 const Main = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -38,14 +40,23 @@ const Main = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
           overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.4,
+            zIndex: -1,
+          }
         }}
       >
-        {/* Header Box */}
         <Box
           sx={{
             position: 'absolute',
@@ -56,12 +67,12 @@ const Main = () => {
             backgroundColor: '#F5F5F4',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between', // This will push the menu icon to the right
+            justifyContent: 'space-between',
             padding: '0 24px',
             zIndex: 1,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2     }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img 
               src={logo} 
               alt="COA Logo" 
@@ -106,12 +117,15 @@ const Main = () => {
               </Typography>
             </Box>
           </Box>
+
+
           <IconButton
             size="large"
             edge="end"
             color="inherit"
             aria-label="menu"
             disableRipple
+            onClick={() => setSidebarOpen(true)}
             sx={{ 
               color: '#000',
               borderRadius: 0,
@@ -124,14 +138,19 @@ const Main = () => {
           </IconButton>
         </Box>
 
-        {/* Adjust main content box to account for header */}
+        {/* Sidebar Component */}
+        <Sidebar 
+          open={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)} 
+        />
+
         <Box
           sx={{
             position: 'absolute',
-            top: '64px', // Add offset for header
+            top: '64px',
             left: 0,
             right: 0,
-            bottom: '40px', // Add this line to account for footer height
+            bottom: '40px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -164,7 +183,6 @@ const Main = () => {
           </Box>
         </Box>
 
-        {/* Add Footer */}
         <Box
           sx={{
             position: 'absolute',
