@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
+import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput } from '@mui/material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
@@ -33,12 +33,41 @@ const theme = createTheme({
     ].join(','),
     h4: {
       fontWeight: 500,
+      fontFamily: 'Roboto',
     },
     h6: {
       fontWeight: 500,
+      fontFamily: 'Roboto',
     },
     body2: {
       fontFamily: 'Roboto',
+    },
+    // Add these for form components
+    allVariants: {
+      fontFamily: 'Roboto',
+    }
+  },
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Roboto',
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Roboto',
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Roboto',
+        },
+      },
     },
   },
 });
@@ -222,10 +251,11 @@ const Main = () => {
                   sx={{ 
                     width: '100%',
                     '& .MuiOutlinedInput-root': {
-                      borderRadius: '20px',
+                      borderRadius: '15px',
                       backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      fontFamily: 'Roboto',
                       '& fieldset': {
-                        borderColor: 'rgba(0, 0, 0, 0.23)',
+                        borderColor: 'rgba(0, 0, 0, 23)',
                       },
                       '&:hover fieldset': {
                         borderColor: 'rgba(0, 0, 0, 0.5)',
@@ -236,9 +266,13 @@ const Main = () => {
                     },
                     '& .MuiInputLabel-root': {
                       color: 'rgba(0, 0, 0, 0.6)',
+                      fontFamily: 'Roboto',
                       '&.Mui-focused': {
                         color: '#1976d2',
                       }
+                    },
+                    '& .MuiSelect-select': {
+                      fontFamily: 'Roboto',
                     }
                   }}
                 >
@@ -283,66 +317,43 @@ const Main = () => {
                 </FormControl>
 
                 {/* PDF Upload Box */}
-                <Box sx={{ 
-                  flex: 1,
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  gap: 2,
-                  minHeight: 0 // Important for flex container
-                }}>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setPdfFile(URL.createObjectURL(file));
-                        setPageNumber(1);
-                      }
-                    }}
-                    style={{ display: 'none' }}
-                    ref={fileInputRef}
-                  />
-                  
-                  <Box
-                    onClick={() => fileInputRef.current?.click()}
-                    sx={{
-                      width: '100%',
-                      flex: 1, // Take remaining space
-                      border: '2px dashed rgba(0, 0, 0, 0.2)',
-                      borderRadius: 2,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                      '&:hover': {
-                        borderColor: '#1976d2',
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                      }
-                    }}
-                  >
-                    {pdfFile ? (
-                      <Document
-                        file={pdfFile}
-                        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                        onLoadError={(error) => console.error('Error loading PDF:', error)}
-                      >
-                        <Page
-                          pageNumber={pageNumber}
-                          width={Math.min(250, window.innerWidth * 0.2)} // Responsive width
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                        />
-                      </Document>
-                    ) : (
-                      <Typography color="textSecondary">
-                        Click or drag to add PDF document
-                      </Typography>
-                    )}
-                  </Box>
+                <Box
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={{
+                    width: '100%',
+                    flex: 1,
+                    maxWidth: '400px',
+                    aspectRatio: '1 / 1.4142', // A4 paper ratio
+                    margin: '0 auto',
+                    border: '1px solid rgba(0, 0, 0, 0.2)', // Changed from dashed to solid
+                    borderRadius: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(138, 138, 138, 0.9)', // Changed to light gray
+                    cursor: 'pointer',
+                    overflow: 'hidden',
+                    boxShadow: 'inset 0 2px 4px rgba(32, 32, 32, 0.77)'
+                  }}
+                >
+                  {pdfFile ? (
+                    <Document
+                      file={pdfFile}
+                      onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                      onLoadError={(error) => console.error('Error loading PDF:', error)}
+                    >
+                      <Page
+                        pageNumber={pageNumber}
+                        width={400}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={false}
+                      />
+                    </Document>
+                  ) : (
+                    <Typography>
+                    </Typography>
+                  )}
                 </Box>
               </Box>
 
@@ -354,15 +365,14 @@ const Main = () => {
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {['First Name', 'Middle Name', 'Last Name'].map((label) => (
-                    <TextField
+                    <FormControl
                       key={label}
-                      label={label}
                       fullWidth
-                      variant="outlined"
-                      sx={{
+                      sx={{ 
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: '20px',
+                          borderRadius: '10px',
                           backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                          fontFamily: 'Roboto',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.23)',
                           },
@@ -375,12 +385,36 @@ const Main = () => {
                         },
                         '& .MuiInputLabel-root': {
                           color: 'rgba(0, 0, 0, 0.6)',
+                          fontFamily: 'Roboto',
+                          transform: 'translate(14px, -9px) scale(0.75)',
                           '&.Mui-focused': {
                             color: '#1976d2',
                           }
+                        },
+                        '& .MuiInputLabel-shrink': {
+                          transform: 'translate(14px, -9px) scale(0.75)',
+                        },
+                        '& input': {
+                          fontFamily: 'Roboto',
                         }
                       }}
-                    />
+                    >
+                      <InputLabel
+                        sx={{
+                          padding: '0 4px',
+                        }}
+                      >
+                        {label}
+                      </InputLabel>
+                      <OutlinedInput
+                        label={label}
+                        sx={{
+                          '& input': {
+                            padding: '12px 14px',
+                          }
+                        }}
+                      />
+                    </FormControl>
                   ))}
                 </Box>
 
