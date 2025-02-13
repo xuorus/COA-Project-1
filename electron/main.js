@@ -1,29 +1,40 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const isDev = require('electron-is-dev');
 
-let mainWindow;
-
-app.whenReady().then(() => {
-  mainWindow = new BrowserWindow({
+function createWindow() {
+  const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'), // Optional for security
-      nodeIntegration: true, // Allows Node.js modules in renderer
-    },
+      nodeIntegration: true,
+      contextIsolation: false
+    }
   });
 
-  // Load the Vite dev server during development
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:5173');
-  } else {
-    // Load the built React app in production
-    mainWindow.loadFile(path.join(__dirname, '../frontend/dist/index.html'));
+  // Load the React app
+  mainWindow.loadURL(
+    isDev 
+      ? 'http://localhost:5173' // Vite dev server URL
+      : `file://${path.join(__dirname, '../frontend/dist/index.html')}`
+  );
+
+  // Open DevTools in development
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
   }
-});
+}
+
+app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
   }
 });
