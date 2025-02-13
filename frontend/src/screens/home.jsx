@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
@@ -134,7 +134,7 @@ const Main = () => {
               }
             }}
           >
-            <MenuIcon />
+            <MenuRoundedIcon />
           </IconButton>
         </Box>
 
@@ -166,7 +166,7 @@ const Main = () => {
               width: '92%',
               maxWidth: 1500,
               minHeight: 450,
-              background: 'linear-gradient(135deg, rgba(98, 255, 200, 0.4) 0%, rgba(255, 255, 255, 0.2) 100%)',
+              background: 'linear-gradient(179deg, hsla(152, 63.70%, 57.80%, 0.4) 0%, rgb(255, 255, 255, 0.8) 100%)',
               backdropFilter: 'blur(3px)',
               borderRadius: 2,
               padding: 4,
