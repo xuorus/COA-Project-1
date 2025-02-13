@@ -1,8 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Drawer, Box, Button, IconButton } from '@mui/material';
+import { Drawer, Box, Button, IconButton, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import DocumentScannerRoundedIcon from '@mui/icons-material/DocumentScannerRounded';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 
 const Sidebar = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -33,7 +36,7 @@ const Sidebar = ({ open, onClose }) => {
         padding: 2,
         display: 'flex',
         flexDirection: 'column',
-        gap: 2 
+        gap: 2     
       }}>
         <Box sx={{ 
           display: 'flex', 
@@ -59,28 +62,80 @@ const Sidebar = ({ open, onClose }) => {
         
         {/* Rest of your buttons */}
         <Button
-          fullWidth
-          onClick={() => handleNavigation('/')}
-          sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-        >
-          Home
-        </Button>
-        
-        <Button
-          fullWidth
-          onClick={() => handleNavigation('/scan')}
-          sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-        >
-          Scan Documents
-        </Button>
-        
-        <Button
-          fullWidth
-          onClick={() => handleNavigation('/records')}
-          sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-        >
-          View Records
-        </Button>
+  fullWidth
+  onClick={() => handleNavigation('/')}
+  sx={{ 
+    justifyContent: 'flex-start', 
+    textAlign: 'left',
+    pl: 2,
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    color: '#000', 
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'translateX(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    }
+  }}
+>
+  <HomeRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> Home
+</Button>
+
+<Divider 
+  sx={{ 
+    borderColor: 'rgb(154, 145, 145)',
+    borderWidth: '1.5px',
+    width: '100%'
+  }} 
+/>
+
+<Button
+  fullWidth
+  onClick={() => handleNavigation('/scan')}
+  sx={{ 
+    justifyContent: 'flex-start', 
+    textAlign: 'left',
+    pl: 2,
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    color: '#000', 
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'translateX(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    }
+  }}
+>
+<DocumentScannerRoundedIcon sx={{ mr: 1, fontSize: 40 }} />Scan Documents
+</Button>
+
+<Divider 
+  sx={{ 
+    borderColor: 'rgb(154, 145, 145)',
+    borderWidth: '1.5px',
+    width: '100%'
+  }} 
+/>
+
+<Button
+  fullWidth
+  onClick={() => handleNavigation('/records')}
+  sx={{ 
+    justifyContent: 'flex-start', 
+    textAlign: 'left',
+    pl: 2,
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    color: '#000', 
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'translateX(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    }
+  }}
+>
+<AssignmentRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> View Records
+</Button>
       </Box>
     </Drawer>
   );
