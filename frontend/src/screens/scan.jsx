@@ -1,15 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
+import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput } from '@mui/material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
+// Initialize PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const theme = createTheme({
   palette: {
     primary: {
       main: '#1976d2',
+    },
+  },
+  typography: {
+    fontFamily: [
+      'Roboto',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+    h4: {
+      fontWeight: 500,
+      fontFamily: 'Roboto',
+    },
+    h6: {
+      fontWeight: 500,
+      fontFamily: 'Roboto',
+    },
+    body2: {
+      fontFamily: 'Roboto',
+    },
+    // Add these for form components
+    allVariants: {
+      fontFamily: 'Roboto',
+    }
+  },
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Roboto',
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Roboto',
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Roboto',
+        },
+      },
     },
   },
 });
@@ -19,6 +77,10 @@ const Main = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [documentType, setDocumentType] = useState('');
+  const [pdfFile, setPdfFile] = useState(null);
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -152,63 +214,49 @@ const Main = () => {
             top: '80px',
             left: 0,
             right: 0,
-            bottom: '40px',
-            overflow: 'auto',
-            padding: 3,
+            bottom: '40px', // Match footer height
+            padding: 2, // Reduced padding
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
           }}
         >
-          <Container maxWidth="lg">
+          <Container 
+            maxWidth="lg" 
+            sx={{ 
+              height: '100%' // Make container take full height
+            }}
+          >
             <Box 
               sx={{ 
                 background: 'rgb(255, 255, 255, 0.4)',
                 backdropFilter: 'blur(3px)',
                 borderRadius: 2,
-                padding: 4,
+                padding: 2, // Reduced padding
                 display: 'flex',
-                flexDirection: 'row', // Changed to row for side-by-side layout
-                alignItems: 'flex-start', // Changed to align items at the top
-                gap: 4,
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                gap: 2, // Reduced gap
                 boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                minHeight: 450,
+                height: '100%', // Take full height of container
+                overflow: 'hidden' // Prevent internal scrolling
               }}
             >
               {/* Left Column - Scanning Controls */}
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                <Typography variant="h4" component="h1" fontWeight="bold">
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+                <Typography variant="h4" component="h3" fontWeight="bold" sx={{ mb: 1 }}>
                   Scan Document
                 </Typography>
 
-                {/* Image Upload Box */}
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 200,
-                    border: '2px dashed rgba(0, 0, 0, 0.2)',
-                    borderRadius: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      borderColor: '#1976d2',
-                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                    }
-                  }}
-                >
-                  <Typography color="textSecondary">Click or drag to add image</Typography>
-                </Box>
-
+                {/* Document Type Dropdown - Moved up */}
                 <FormControl 
                   sx={{ 
                     width: '100%',
                     '& .MuiOutlinedInput-root': {
-                      borderRadius: '20px',
+                      borderRadius: '15px',
                       backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      fontFamily: 'Roboto',
                       '& fieldset': {
-                        borderColor: 'rgba(0, 0, 0, 0.23)',
+                        borderColor: 'rgba(0, 0, 0, 23)',
                       },
                       '&:hover fieldset': {
                         borderColor: 'rgba(0, 0, 0, 0.5)',
@@ -219,9 +267,13 @@ const Main = () => {
                     },
                     '& .MuiInputLabel-root': {
                       color: 'rgba(0, 0, 0, 0.6)',
+                      fontFamily: 'Roboto',
                       '&.Mui-focused': {
                         color: '#1976d2',
                       }
+                    },
+                    '& .MuiSelect-select': {
+                      fontFamily: 'Roboto',
                     }
                   }}
                 >
@@ -255,8 +307,8 @@ const Main = () => {
                       }
                     }}
                   >
-                    <MenuItem value="PDS">PDS</MenuItem>
-                    <MenuItem value="SALN">SALN</MenuItem>
+                    <MenuItem value="PDS">Personal Data Sheet</MenuItem>
+                    <MenuItem value="SALN">Statement of Assets, Liabilities and Net Worth</MenuItem>
                     {[...Array(13)].map((_, index) => (
                       <MenuItem key={index + 3} value={`DOC${index + 3}`}>
                         DOC{index + 3}
@@ -265,37 +317,63 @@ const Main = () => {
                   </Select>
                 </FormControl>
 
-                <Button
-                  variant="contained"
-                  color="primary"
-                  disabled={!documentType}
+                {/* PDF Upload Box */}
+                <Box
+                  onClick={() => fileInputRef.current?.click()}
                   sx={{
-                    borderRadius: '20px',
                     width: '100%',
-                    textTransform: 'none',
+                    flex: 1,
+                    maxWidth: '300px',
+                    aspectRatio: '1 / 1.4142', // A4 paper ratio
+                    margin: '0 auto',
+                    border: '1px solid rgba(0, 0, 0, 0.2)', // Changed from dashed to solid
+                    borderRadius: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(138, 138, 138, 0.9)', // Changed to light gray
+                    cursor: 'pointer',
+                    overflow: 'hidden',
+                    boxShadow: 'inset 0 2px 4px rgba(32, 32, 32, 0.77)'
                   }}
                 >
-                  Start Scanning
-                </Button>
+                  {pdfFile ? (
+                    <Document
+                      file={pdfFile}
+                      onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                      onLoadError={(error) => console.error('Error loading PDF:', error)}
+                    >
+                      <Page
+                        pageNumber={pageNumber}
+                        width={400}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={false}
+                      />
+                    </Document>
+                  ) : (
+                    <Typography>
+                    </Typography>
+                  )}
+                </Box>
               </Box>
 
               {/* Right Column - Information Fields */}
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <Typography variant="h4" component="h2" fontWeight="bold">
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+                <Typography variant="h4" component="h2" fontWeight="bold" sx={{ mb: 1 }}>
                   Information
                 </Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {['First Name', 'Middle Name', 'Last Name'].map((label) => (
-                    <TextField
+                    <FormControl
                       key={label}
-                      label={label}
                       fullWidth
-                      variant="outlined"
-                      sx={{
+                      sx={{ 
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: '20px',
+                          borderRadius: '15px',
                           backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                          fontFamily: 'Roboto',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.23)',
                           },
@@ -308,14 +386,38 @@ const Main = () => {
                         },
                         '& .MuiInputLabel-root': {
                           color: 'rgba(0, 0, 0, 0.6)',
+                          fontFamily: 'Roboto',
                           '&.Mui-focused': {
                             color: '#1976d2',
                           }
                         }
                       }}
-                    />
+                    >
+                      <InputLabel>{label}</InputLabel>
+                      <OutlinedInput
+                        label={label}
+                        sx={{
+                          '& input': {
+                            padding: '12px 14px',
+                          }
+                        }}
+                      />
+                    </FormControl>
                   ))}
                 </Box>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    borderRadius: '10px',
+                    width: '30%',
+                    textTransform: 'none',
+                  }}
+                >
+                  Submit
+                </Button>
+
               </Box>
             </Box>
           </Container>
