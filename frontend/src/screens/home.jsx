@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Drawer } from '@mui/material';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
