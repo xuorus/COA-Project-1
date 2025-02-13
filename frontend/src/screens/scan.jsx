@@ -1,68 +1,72 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Box,
-  Button,
-  Paper,
-  CircularProgress
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import Scanner from '@mui/icons-material/Scanner';
+import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import backgroundImage from '../assets/bldg.jpg';
 
-const Scan = () => {
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+  },
+});
+
+const Main = () => {
   const navigate = useNavigate();
-  const [isScanning, setIsScanning] = useState(false);
-
-  const handleScan = () => {
-    setIsScanning(true);
-    // Simulate scanning process
-    setTimeout(() => {
-      setIsScanning(false);
-      // Navigate to records after scanning
-      navigate('/records');
-    }, 3000);
-  };
 
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate('/')}
-          sx={{ mb: 3 }}
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          height: '100vh',
+          width: '100vw',
+          margin: 0,
+          padding: 0,
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Header Box */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '72px',
+            backgroundColor: '#F5F5F4',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between', // This will push the menu icon to the right
+            padding: '0 24px',
+            zIndex: 1,
+          }}
         >
-          Back to Home
-        </Button>
-
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Scan Document
+          <Typography variant="h6" sx={{ color: '#000' }}>
+            Commission on Audit
           </Typography>
-
-          <Box sx={{ mt: 4, mb: 4 }}>
-            {isScanning ? (
-              <CircularProgress size={60} />
-            ) : (
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<Scanner />}
-                onClick={handleScan}
-              >
-                Start Scanning
-              </Button>
-            )}
-          </Box>
-
-          <Typography variant="body2" color="text.secondary">
-            Place your document on the scanner and click the button above
-          </Typography>
-        </Paper>
+          <IconButton
+            size="large"
+            edge="end"
+            color="inherit"
+            aria-label="menu"
+            sx={{ color: '#000' }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Box>
       </Box>
-    </Container>
+    </ThemeProvider>
   );
 };
 
-export default Scan;
+export default Main;
