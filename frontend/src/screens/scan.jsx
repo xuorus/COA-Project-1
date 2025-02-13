@@ -370,7 +370,7 @@ const Main = () => {
                       fullWidth
                       sx={{ 
                         '& .MuiOutlinedInput-root': {
-                          borderRadius: '10px',
+                          borderRadius: '15px',
                           backgroundColor: 'rgba(255, 255, 255, 0.7)',
                           fontFamily: 'Roboto',
                           '& fieldset': {
@@ -386,26 +386,13 @@ const Main = () => {
                         '& .MuiInputLabel-root': {
                           color: 'rgba(0, 0, 0, 0.6)',
                           fontFamily: 'Roboto',
-                          transform: 'translate(14px, -9px) scale(0.75)',
                           '&.Mui-focused': {
                             color: '#1976d2',
                           }
-                        },
-                        '& .MuiInputLabel-shrink': {
-                          transform: 'translate(14px, -9px) scale(0.75)',
-                        },
-                        '& input': {
-                          fontFamily: 'Roboto',
                         }
                       }}
                     >
-                      <InputLabel
-                        sx={{
-                          padding: '0 4px',
-                        }}
-                      >
-                        {label}
-                      </InputLabel>
+                      <InputLabel>{label}</InputLabel>
                       <OutlinedInput
                         label={label}
                         sx={{
