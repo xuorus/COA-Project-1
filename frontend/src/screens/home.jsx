@@ -53,7 +53,7 @@ const Main = () => {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             opacity: 0.4,
-            zIndex: -1,
+            zIndex: -1
           }
         }}
       >
@@ -143,7 +143,7 @@ const Main = () => {
           open={sidebarOpen} 
           onClose={() => setSidebarOpen(false)} 
         />
-
+        
         <Box
           sx={{
             position: 'absolute',
@@ -157,7 +157,7 @@ const Main = () => {
             justifyContent: 'center',
             gap: 3,
             padding: 3,
-            backgroundColor: 'rgba(21, 21, 21, 0.7)',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
             color: 'white',
           }}
         >

@@ -157,7 +157,7 @@ const Main = () => {
             justifyContent: 'center',
             gap: 3,
             padding: 3,
-            backgroundColor: 'rgba(21, 21, 21, 0.7)',
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
             color: 'white',
           }}
         >
