@@ -25,6 +25,15 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
+import {
+  // ...existing imports...
+  Modal,
+  Tabs,
+  Tab,
+  Grid,
+  Divider
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 const theme = createTheme({
   palette: {
@@ -38,6 +47,8 @@ const Records = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -100,6 +111,7 @@ const Records = () => {
             justifyContent: 'space-between',
             padding: '0 24px',
             zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -257,16 +269,160 @@ const Records = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {sampleRecords.map((record) => (
-                      <TableRow key={record.id} hover>
-                        <TableCell>{record.name}</TableCell>
-                        <TableCell>{record.type}</TableCell>
-                        <TableCell>{record.date}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+  {sampleRecords.map((record) => (
+    <TableRow 
+      key={record.id} 
+      hover 
+      onClick={() => {
+        setSelectedRecord(record);
+        setActiveTab(1); // Set to Documents tab
+      }}
+      sx={{ cursor: 'pointer' }}
+    >
+      <TableCell>{record.name}</TableCell>
+      <TableCell>{record.type}</TableCell>
+      <TableCell>{record.date}</TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+</Table>
+</TableContainer>
+
+{selectedRecord && (
+  <Modal
+    open={Boolean(selectedRecord)}
+    onClose={() => setSelectedRecord(null)}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 2
+    }}
+  >
+    <Box
+      sx={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+        borderRadius: 2,
+        padding: 4,
+        width: '800px', // Fixed width
+        height: '600px', // Fixed height
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+      }}
+    >
+      {/* Fixed header */}
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h5" component="h2" fontWeight="bold">
+            {selectedRecord.name}&apos;s Details
+          </Typography>
+          <IconButton 
+  onClick={() => setSelectedRecord(null)}
+  size="medium"
+  disableRipple  // Add this to disable the ripple effect
+  sx={{ 
+    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+    '& .MuiSvgIcon-root': {
+      fontSize: '1.5rem'
+    },
+    // Remove focus outline
+    '&:focus': {
+      outline: 'none'
+    },
+    // Remove focus visible outline
+    '&.Mui-focusVisible': {
+      outline: 'none'
+    }
+  }}
+>
+  <CloseIcon />
+</IconButton>
+        </Box>
+        <Divider />
+      </Box>
+
+      {/* Fixed tabs */}
+      <Tabs 
+  value={activeTab} 
+  onChange={(e, newValue) => setActiveTab(newValue)}
+  sx={{ 
+    borderBottom: 1, 
+    borderColor: 'divider', 
+    mb: 2,
+    // Remove focus outline from tabs
+    '& .MuiTab-root': {
+      '&:focus': {
+        outline: 'none'
+      },
+      '&.Mui-selected': {
+        color: '#1976d2',
+      },
+      '&.Mui-focusVisible': {
+        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+      }
+    },
+    // Remove focus outline from tab indicator
+    '& .MuiTabs-indicator': {
+      backgroundColor: '#1976d2',
+    }
+  }}
+>
+  <Tab 
+    label="Personal Details" 
+    sx={{
+      '&.Mui-selected': {
+        color: '#1976d2',
+      }
+    }}
+  />
+  <Tab 
+    label="Documents" 
+    sx={{
+      '&.Mui-selected': {
+        color: '#1976d2',
+      }
+    }}
+  />
+  <Tab 
+    label="History" 
+    sx={{
+      '&.Mui-selected': {
+        color: '#1976d2',
+      }
+    }}
+  />
+</Tabs>
+
+      {/* Scrollable content area */}
+      <Box 
+        sx={{ 
+          flex: 1,
+          overflow: 'auto',
+          // Custom scrollbar styling
+          '&::-webkit-scrollbar': {
+            width: '8px'
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            borderRadius: '4px'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(0, 0, 0, 0.15)',
+            borderRadius: '4px',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.25)'
+            }
+          }
+        }}
+      >
+        {/* ... existing tab content ... */}
+      </Box>
+    </Box>
+  </Modal>
+)}
             </Box>
           </Container>
         </Box>
@@ -285,6 +441,7 @@ const Records = () => {
             justifyContent: 'flex-end',
             padding: '0 24px',
             zIndex: 1,
+            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Typography
