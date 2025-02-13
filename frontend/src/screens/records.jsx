@@ -212,21 +212,6 @@ const Records = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography variant="h4" component="h1" fontWeight="bold">Records</Typography>
-                  <Button 
-                    startIcon={<ArrowBackIcon />} 
-                    onClick={() => navigate('/')} 
-                    variant="outlined"  // Changed to outlined for better visual hierarchy
-                    color="primary"
-                    sx={{
-                      borderRadius: '20px',  // Matching the search box style
-                      textTransform: 'none', // Removes all-caps
-                      '&:hover': {
-                        backgroundColor: 'rgba(25, 118, 210, 0.04)'
-                      }
-                    }}
-                  >
-                    Back to Home
-                  </Button>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
                   <IconButton color="primary">
