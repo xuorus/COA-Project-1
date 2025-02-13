@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';  // Add this import
 
@@ -111,16 +111,16 @@ const Main = () => {
             edge="end"
             color="inherit"
             aria-label="menu"
-            disableRipple  // Add this to remove ripple effect
+            disableRipple
             sx={{ 
               color: '#000',
-              borderRadius: 0,  // Make button square
-              '&:hover': {      // Optional: customize hover state
+              borderRadius: 0,
+              '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
               }
             }}
           >
-            <MenuIcon />
+            <MenuRoundedIcon />
           </IconButton>
         </Box>
 
@@ -147,7 +147,7 @@ const Main = () => {
               width: '92%',
               maxWidth: 1500,
               minHeight: 450,
-              background: 'linear-gradient(135deg, rgba(98, 255, 200, 0.4) 0%, rgba(255, 255, 255, 0.2) 100%)',
+              background: 'linear-gradient(179deg, hsla(152, 63.70%, 57.80%, 0.4) 0%, rgb(255, 255, 255, 0.8) 100%)',
               backdropFilter: 'blur(3px)',
               borderRadius: 2,
               padding: 4,
