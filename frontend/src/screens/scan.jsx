@@ -1,29 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Box,
-  Button,
-  Paper,
-  CircularProgress
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import Scanner from '@mui/icons-material/Scanner';
+import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import backgroundImage from '../assets/bldg.jpg';
+import logo from '../assets/logo.png';  // Add this import
 
-const Scan = () => {
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+  },
+});
+
+const Main = () => {
   const navigate = useNavigate();
-  const [isScanning, setIsScanning] = useState(false);
-
-  const handleScan = () => {
-    setIsScanning(true);
-    // Simulate scanning process
-    setTimeout(() => {
-      setIsScanning(false);
-      // Navigate to records after scanning
-      navigate('/records');
-    }, 3000);
-  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -156,33 +147,49 @@ const Scan = () => {
             Scan New Document
           </Button>
 
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Scan Document
-          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            fullWidth
+            onClick={() => navigate('/records')}
+            sx={{ 
+              maxWidth: '400px'
+            }}
+          >
+            View Recordssss
+          </Button>
+</Box>
 
-          <Box sx={{ mt: 4, mb: 4 }}>
-            {isScanning ? (
-              <CircularProgress size={60} />
-            ) : (
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<Scanner />}
-                onClick={handleScan}
-              >
-                Start Scanning
-              </Button>
-            )}
-          </Box>
-
-          <Typography variant="body2" color="text.secondary">
-            Place your document on the scanner and click the button above
-          </Typography>
-        </Paper>
+{/* Footer Box */}
+<Box
+  sx={{
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '50px',
+    backgroundColor: '#F5F5F4',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0 24px',
+    zIndex: 1,
+    borderTop: '1px solid rgba(0, 0, 0, 0.12)'
+  }}
+>
+  <Typography 
+    variant="body2" 
+    sx={{ 
+      color: '#000',
+      fontSize: '0.9rem'
+    }}
+  >
+    © 2025 Commission on Audit - Regional Office X. All Rights Reserved.
+  </Typography>
+</Box>
       </Box>
-    </Container>
+    </ThemeProvider>
   );
 };
 
-export default Scan;
+export default Main;

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
+import { Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Drawer } from '@mui/material';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
+import Sidebar from '../components/sidebar';
 
 const theme = createTheme({
   palette: {
@@ -18,10 +19,7 @@ const Main = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -60,7 +58,6 @@ const Main = () => {
           }
         }}
       >
-        {/* Header Box */}
         <Box
           sx={{
             position: 'absolute',
@@ -122,6 +119,7 @@ const Main = () => {
             </Box>
           </Box>
 
+
           <IconButton
             size="large"
             edge="end"
@@ -141,55 +139,12 @@ const Main = () => {
           </IconButton>
         </Box>
 
-        {/* Sidebar Drawer */}
-        <Drawer
-    anchor="left"
-    open={sidebarOpen}
-    onClose={() => setSidebarOpen(false)}
-    sx={{
-      '& .MuiDrawer-paper': {
-        width: 472,
-        boxSizing: 'border-box',
-        backgroundColor: '#F5F5F4',
-        borderRight: '1px solid rgba(0, 0, 0, 0.12)'
-      },
-    }}
-  >
-    <Box sx={{ 
-      padding: 2,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 2 
-    }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>Navigation Menu</Typography>
-      
-      <Button
-        fullWidth
-        onClick={() => handleNavigation('/')}
-        sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-      >
-        Home
-      </Button>
-      
-      <Button
-        fullWidth
-        onClick={() => handleNavigation('/scan')}
-        sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-      >
-        Scan Documents
-      </Button>
-      
-      <Button
-        fullWidth
-        onClick={() => handleNavigation('/records')}
-        sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-      >
-        View Records
-      </Button>
-    </Box>
-  </Drawer>
+        {/* Sidebar Component */}
+        <Sidebar 
+          open={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)} 
+        />
 
-        {/* Main Content */}
         <Box
           sx={{
             position: 'absolute',
@@ -229,7 +184,6 @@ const Main = () => {
           </Box>
         </Box>
 
-        {/* Footer */}
         <Box
           sx={{
             position: 'absolute',
