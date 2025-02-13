@@ -249,13 +249,14 @@ const Main = () => {
                 {/* Document Type Dropdown - Moved up */}
                 <FormControl 
                   sx={{ 
-                    width: '100%',
+                    width: '70%',
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '15px',
                       backgroundColor: 'rgba(255, 255, 255, 0.7)',
                       fontFamily: 'Roboto',
+                      height: '45px', // Reduced height
                       '& fieldset': {
-                        borderColor: 'rgba(0, 0, 0, 23)',
+                        borderColor: 'rgba(0, 0, 0, 0.23)',
                       },
                       '&:hover fieldset': {
                         borderColor: 'rgba(0, 0, 0, 0.5)',
@@ -267,12 +268,17 @@ const Main = () => {
                     '& .MuiInputLabel-root': {
                       color: 'rgba(0, 0, 0, 0.6)',
                       fontFamily: 'Roboto',
+                      transform: 'translate(14px, 12px) scale(1)', // Adjusted label position
+                      '&.Mui-focused, &.MuiFormLabel-filled': {
+                        transform: 'translate(14px, -9px) scale(0.75)',
+                      },
                       '&.Mui-focused': {
                         color: '#1976d2',
                       }
                     },
                     '& .MuiSelect-select': {
                       fontFamily: 'Roboto',
+                      padding: '8px 14px', // Reduced padding
                     }
                   }}
                 >
@@ -370,9 +376,11 @@ const Main = () => {
                       fullWidth
                       sx={{ 
                         '& .MuiOutlinedInput-root': {
+                          width: '80%',
                           borderRadius: '15px',
                           backgroundColor: 'rgba(255, 255, 255, 0.7)',
                           fontFamily: 'Roboto',
+                          height: '45px', // Reduced height
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.23)',
                           },
@@ -386,6 +394,10 @@ const Main = () => {
                         '& .MuiInputLabel-root': {
                           color: 'rgba(0, 0, 0, 0.6)',
                           fontFamily: 'Roboto',
+                          transform: 'translate(14px, 12px) scale(1)', // Adjusted label position
+                          '&.Mui-focused, &.MuiFormLabel-filled': {
+                            transform: 'translate(14px, -9px) scale(0.75)',
+                          },
                           '&.Mui-focused': {
                             color: '#1976d2',
                           }
@@ -397,7 +409,7 @@ const Main = () => {
                         label={label}
                         sx={{
                           '& input': {
-                            padding: '12px 14px',
+                            padding: '8px 14px', // Reduced padding
                           }
                         }}
                       />
