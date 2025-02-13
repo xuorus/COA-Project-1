@@ -1,8 +1,9 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const isDev = require('electron-is-dev');
 
-function createWindow() {
+async function createWindow() {
+  const isDev = (await import('electron-is-dev')).default;
+
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -18,11 +19,6 @@ function createWindow() {
       ? 'http://localhost:5173' // Vite dev server URL
       : `file://${path.join(__dirname, '../frontend/dist/index.html')}`
   );
-
-  // Open DevTools in development
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
 }
 
 app.whenReady().then(createWindow);
