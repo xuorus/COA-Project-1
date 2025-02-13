@@ -11,8 +11,16 @@ const Sidebar = ({ open, onClose }) => {
   const navigate = useNavigate();
 
   const handleNavigation = (path) => {
-    navigate(path);
-    onClose();
+    const drawer = document.querySelector('.MuiDrawer-root');
+    if (drawer) {
+      drawer.style.transition = 'opacity 0.4s ease';
+      drawer.style.opacity = '0';
+    }
+    
+    setTimeout(() => {
+      onClose();
+      navigate(path);
+    }, 100);
   };
   Sidebar.propTypes = {
     open: PropTypes.bool.isRequired,
