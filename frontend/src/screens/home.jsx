@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton } from '@mui/material';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import backgroundImage from '../assets/bldg.jpg';
-import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
+import Header from '../components/header';
 
 const theme = createTheme({
   palette: {
@@ -57,99 +56,8 @@ const Main = () => {
           }
         }}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '80px',
-            backgroundColor: '#F5F5F4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 24px',
-            zIndex: 1,
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <img 
-              src={logo} 
-              alt="COA Logo" 
-              style={{
-                height: '70px',
-                width: 'auto',
-                objectFit: 'contain'
-              }}
-            />
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#000',
-                  fontSize: '0.9rem',
-                  lineHeight: 1,
-                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                REPUBLIC OF THE PHILIPPINES
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#000',
-                  lineHeight: 1,
-                  fontWeight: 'bold',
-                  textDecoration: 'overline',
-                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                COMMISSION ON AUDIT
-              </Typography>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#000',
-                  opacity: "0.9",
-                  fontSize: '0.85rem',
-                  lineHeight: 1,
-                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                REGIONAL OFFICE X
-              </Typography>
-            </Box>
-          </Box>
+        <Header onMenuClick={() => setSidebarOpen(true)} />
 
-
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            aria-label="menu"
-            disableRipple
-            onClick={() => setSidebarOpen(true)}
-            sx={{ 
-              color: '#000',
-              borderRadius: 0,
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              },
-              '&:focus': {
-                outline: 'none'
-              },
-              // Remove focus visible outline
-              '&.Mui-focusVisible': {
-                outline: 'none'
-              }
-            }}
-          >
-            <MenuRoundedIcon />
-          </IconButton>
-        </Box>
-
-        {/* Sidebar Component */}
         <Sidebar 
           open={sidebarOpen} 
           onClose={() => setSidebarOpen(false)} 
@@ -158,7 +66,7 @@ const Main = () => {
         <Box
           sx={{
             position: 'absolute',
-            top: '64px',
+            top: '80px',
             left: 0,
             right: 0,
             bottom: '40px',
@@ -208,7 +116,7 @@ const Main = () => {
             justifyContent: 'flex-end',
             padding: '0 24px',
             zIndex: 1,
-           boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
+            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Typography
