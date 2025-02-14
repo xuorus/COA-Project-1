@@ -53,11 +53,18 @@ const Sidebar = ({ open, onClose }) => {
         }}>
          <IconButton
             onClick={onClose}
+            disableRipple
             sx={{ 
               p: 0,
               mt: 1.5,
               '&:hover': {
-                backgroundColor: 'transparent'
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+              '&:focus': {
+                outline: 'none'
+              },
+              '&.Mui-focusVisible': {
+                outline: 'none'
               }
             }}
           >
@@ -72,6 +79,7 @@ const Sidebar = ({ open, onClose }) => {
         <Button
   fullWidth
   onClick={() => handleNavigation('/')}
+  disableRipple
   sx={{ 
     justifyContent: 'flex-start', 
     textAlign: 'left',
@@ -83,6 +91,12 @@ const Sidebar = ({ open, onClose }) => {
     '&:hover': {
       transform: 'translateX(8px)',
       backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
     }
   }}
 >
@@ -99,6 +113,7 @@ const Sidebar = ({ open, onClose }) => {
 
 <Button
   fullWidth
+  disableRipple
   onClick={() => handleNavigation('/scan')}
   sx={{ 
     justifyContent: 'flex-start', 
@@ -111,6 +126,12 @@ const Sidebar = ({ open, onClose }) => {
     '&:hover': {
       transform: 'translateX(8px)',
       backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
     }
   }}
 >
@@ -127,6 +148,7 @@ const Sidebar = ({ open, onClose }) => {
 
 <Button
   fullWidth
+  disableRipple
   onClick={() => handleNavigation('/records')}
   sx={{ 
     justifyContent: 'flex-start', 
@@ -139,6 +161,12 @@ const Sidebar = ({ open, onClose }) => {
     '&:hover': {
       transform: 'translateX(8px)',
       backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
     }
   }}
 >
