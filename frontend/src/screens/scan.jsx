@@ -181,6 +181,7 @@ const Main = () => {
                   color: '#000',
                   fontSize: '0.9rem',
                   lineHeight: 1,
+                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
                 }}
               >
                 REPUBLIC OF THE PHILIPPINES
@@ -191,7 +192,8 @@ const Main = () => {
                   color: '#000',
                   lineHeight: 1,
                   fontWeight: 'bold',
-                  textDecoration: 'overline'
+                  textDecoration: 'overline',
+                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
                 }}
               >
                 COMMISSION ON AUDIT
@@ -202,7 +204,8 @@ const Main = () => {
                   color: '#000',
                   opacity: "0.9",
                   fontSize: '0.85rem',
-                  lineHeight: 1
+                  lineHeight: 1,
+                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
                 }}
               >
                 REGIONAL OFFICE X
@@ -264,15 +267,15 @@ const Main = () => {
                 background: 'rgb(255, 255, 255, 0.7)',
                 backdropFilter: 'blur(3px)',
                 borderRadius: 2,
-                padding: 2, // Reduced padding
+                padding: 2,
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',
-                gap: 2, // Reduced gap
+                gap: 2,
                 boxShadow: '0 4px 30px rgba(0, 0, 0, 0.7)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                height: '100%', // Take full height of container
-                overflow: 'hidden' // Prevent internal scrolling
+                height: '100%',
+                overflow: 'hidden'
               }}
             >
               {/* Left Column - Scanning Controls */}

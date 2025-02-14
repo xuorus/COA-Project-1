@@ -90,6 +90,7 @@ const Main = () => {
                   color: '#000',
                   fontSize: '0.9rem',
                   lineHeight: 1,
+                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
                 }}
               >
                 REPUBLIC OF THE PHILIPPINES
@@ -100,7 +101,8 @@ const Main = () => {
                   color: '#000',
                   lineHeight: 1,
                   fontWeight: 'bold',
-                  textDecoration: 'overline'
+                  textDecoration: 'overline',
+                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
                 }}
               >
                 COMMISSION ON AUDIT
@@ -111,7 +113,8 @@ const Main = () => {
                   color: '#000',
                   opacity: "0.9",
                   fontSize: '0.85rem',
-                  lineHeight: 1
+                  lineHeight: 1,
+                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
                 }}
               >
                 REGIONAL OFFICE X
