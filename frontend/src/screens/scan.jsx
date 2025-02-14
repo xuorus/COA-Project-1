@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput } from '@mui/material';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import backgroundImage from '../assets/bldg.jpg';
-import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import Header from '../components/header';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -147,89 +146,11 @@ const Main = () => {
           }
         }}
       >
-        {/* Header Box */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '80px',
-            backgroundColor: '#F5F5F4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between', // This will push the menu icon to the right
-            padding: '0 24px',
-            zIndex: 1,
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <img 
-              src={logo} 
-              alt="COA Logo" 
-              style={{
-                height: '70px',
-                width: 'auto',
-                objectFit: 'contain'
-              }}
-            />
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#000',
-                  fontSize: '0.9rem',
-                  lineHeight: 1,
-                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                REPUBLIC OF THE PHILIPPINES
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#000',
-                  lineHeight: 1,
-                  fontWeight: 'bold',
-                  textDecoration: 'overline',
-                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                COMMISSION ON AUDIT
-              </Typography>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#000',
-                  opacity: "0.9",
-                  fontSize: '0.85rem',
-                  lineHeight: 1,
-                  textShadow: '1px 1px 2px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                REGIONAL OFFICE X
-              </Typography>
-            </Box>
-          </Box>
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            aria-label="menu"
-            disableRipple  // Add this to remove ripple effect
-            onClick={() => setSidebarOpen(true)}
-            sx={{ 
-              color: '#000',
-              borderRadius: 0,  // Make button square
-              '&:hover': {      // Optional: customize hover state
-                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              }
-            }}
-          >
-            <MenuRoundedIcon />
-          </IconButton>
-        </Box>
+         <Header onMenuClick={() => setSidebarOpen(true)} />
+<Sidebar 
+  open={sidebarOpen} 
+  onClose={() => setSidebarOpen(false)} 
+/>
 
         {/* Add Sidebar Component */}
         <Sidebar 
