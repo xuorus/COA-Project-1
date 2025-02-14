@@ -434,7 +434,7 @@ const Records = () => {
                   }
                 }}
               >
-                <Table stickyHeader> {/* Add stickyHeader prop */}
+                <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                       <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
