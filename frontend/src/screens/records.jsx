@@ -455,25 +455,31 @@ const Records = () => {
                   }}
                 >
                   <Table>
-                    <TableBody>
-                      {sampleRecords
-                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                        .map((record) => (
-                          <TableRow 
-                            key={record.id} 
-                            hover 
-                            onClick={() => {
-                              setSelectedRecord(record);
-                              setActiveTab(1); // Set to Documents tab
-                            }}
-                            sx={{ cursor: 'pointer' }}
-                          >
-                            <TableCell>{record.name}</TableCell>
-                            <TableCell>{record.type}</TableCell>
-                            <TableCell>{record.date}</TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
+                  <TableBody>
+  {records
+    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+    .map((record) => (
+      <TableRow 
+        key={record.id} 
+        hover 
+        onClick={() => {
+          setSelectedRecord(record);
+          setActiveTab(1);
+        }}
+        sx={{ cursor: 'pointer' }}
+      >
+        <TableCell>
+          <HighlightedText text={record.name} highlight={searchQuery} />
+        </TableCell>
+        <TableCell>
+          <HighlightedText text={record.type} highlight={searchQuery} />
+        </TableCell>
+        <TableCell>
+          <HighlightedText text={record.date} highlight={searchQuery} />
+        </TableCell>
+      </TableRow>
+    ))}
+</TableBody>
                   </Table>
                 </TableContainer>
               </TableContainer>
