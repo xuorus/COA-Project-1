@@ -7,6 +7,7 @@ async function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    fullscreen: true, // Start in full screen
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
