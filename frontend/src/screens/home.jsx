@@ -70,6 +70,7 @@ const Main = () => {
             justifyContent: 'space-between',
             padding: '0 24px',
             zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -131,6 +132,13 @@ const Main = () => {
               borderRadius: 0,
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              },
+              '&:focus': {
+                outline: 'none'
+              },
+              // Remove focus visible outline
+              '&.Mui-focusVisible': {
+                outline: 'none'
               }
             }}
           >
@@ -196,6 +204,7 @@ const Main = () => {
             justifyContent: 'flex-end',
             padding: '0 24px',
             zIndex: 1,
+           boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Typography

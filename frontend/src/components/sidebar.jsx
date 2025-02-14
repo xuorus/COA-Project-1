@@ -1,15 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Drawer, Box, Button, IconButton } from '@mui/material';
+import { Drawer, Box, Button, IconButton, Divider } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import DocumentScannerRoundedIcon from '@mui/icons-material/DocumentScannerRounded';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 
 const Sidebar = ({ open, onClose }) => {
   const navigate = useNavigate();
 
   const handleNavigation = (path) => {
-    navigate(path);
-    onClose();
+    const drawer = document.querySelector('.MuiDrawer-root');
+    if (drawer) {
+      drawer.style.transition = 'opacity 0.4s ease';
+      drawer.style.opacity = '0';
+    }
+    
+    setTimeout(() => {
+      onClose();
+      navigate(path);
+    }, 100);
   };
   Sidebar.propTypes = {
     open: PropTypes.bool.isRequired,
@@ -33,7 +44,7 @@ const Sidebar = ({ open, onClose }) => {
         padding: 2,
         display: 'flex',
         flexDirection: 'column',
-        gap: 2 
+        gap: 2     
       }}>
         <Box sx={{ 
           display: 'flex', 
@@ -42,11 +53,18 @@ const Sidebar = ({ open, onClose }) => {
         }}>
          <IconButton
             onClick={onClose}
+            disableRipple
             sx={{ 
               p: 0,
               mt: 1.5,
               '&:hover': {
-                backgroundColor: 'transparent'
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+              '&:focus': {
+                outline: 'none'
+              },
+              '&.Mui-focusVisible': {
+                outline: 'none'
               }
             }}
           >
@@ -59,28 +77,101 @@ const Sidebar = ({ open, onClose }) => {
         
         {/* Rest of your buttons */}
         <Button
-          fullWidth
-          onClick={() => handleNavigation('/')}
-          sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-        >
-          Home
-        </Button>
-        
-        <Button
-          fullWidth
-          onClick={() => handleNavigation('/scan')}
-          sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-        >
-          Scan Documents
-        </Button>
-        
-        <Button
-          fullWidth
-          onClick={() => handleNavigation('/records')}
-          sx={{ justifyContent: 'flex-start', textAlign: 'left' }}
-        >
-          View Records
-        </Button>
+  fullWidth
+  onClick={() => handleNavigation('/')}
+  disableRipple
+  sx={{ 
+    justifyContent: 'flex-start', 
+    textAlign: 'left',
+    pl: 2,
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    color: '#000', 
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'translateX(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
+    }
+  }}
+>
+  <HomeRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> Home
+</Button>
+
+<Divider 
+  sx={{ 
+    borderColor: 'rgb(154, 145, 145)',
+    borderWidth: '1.5px',
+    width: '100%'
+  }} 
+/>
+
+<Button
+  fullWidth
+  disableRipple
+  onClick={() => handleNavigation('/scan')}
+  sx={{ 
+    justifyContent: 'flex-start', 
+    textAlign: 'left',
+    pl: 2,
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    color: '#000', 
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'translateX(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
+    }
+  }}
+>
+<DocumentScannerRoundedIcon sx={{ mr: 1, fontSize: 40 }} />Scan Documents
+</Button>
+
+<Divider 
+  sx={{ 
+    borderColor: 'rgb(154, 145, 145)',
+    borderWidth: '1.5px',
+    width: '100%'
+  }} 
+/>
+
+<Button
+  fullWidth
+  disableRipple
+  onClick={() => handleNavigation('/records')}
+  sx={{ 
+    justifyContent: 'flex-start', 
+    textAlign: 'left',
+    pl: 2,
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    color: '#000', 
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'translateX(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
+    }
+  }}
+>
+<AssignmentRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> View Records
+</Button>
       </Box>
     </Drawer>
   );

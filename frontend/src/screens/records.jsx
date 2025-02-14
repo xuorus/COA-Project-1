@@ -24,6 +24,7 @@ import {
   Divider,
   TablePagination,
 } from '@mui/material';
+
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
@@ -32,6 +33,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
+import CloseIcon from '@mui/icons-material/Close';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 const theme = createTheme({
   palette: {
@@ -41,10 +45,24 @@ const theme = createTheme({
   },
 });
 
+  // Sample data - replace with actual data later
+  const sampleRecords = [
+    { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+    { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+    { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+    { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+    { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+  ];
+  
 const Records = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [records, setRecords] = useState(sampleRecords);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(0);
@@ -91,6 +109,40 @@ const Records = () => {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setSelectedRecord(null);
+    }, 100); // Match this with animation duration
+  };
+
+  const handleSortClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  
+  const handleSortClose = () => {
+    setAnchorEl(null);
+  };
+  
+  const handleSort = (type) => {
+    const sortedRecords = [...records].sort((a, b) => {
+      switch(type) {
+        case 'az':
+          return a.name.localeCompare(b.name);
+        case 'za':
+          return b.name.localeCompare(a.name);
+        case 'newest':
+          return new Date(b.date) - new Date(a.date);
+        case 'oldest':
+          return new Date(a.date) - new Date(b.date);
+        default:
+          return 0;
+      }
+    });
+    setRecords(sortedRecords);
+    handleSortClose();
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -136,6 +188,7 @@ const Records = () => {
             justifyContent: 'space-between',
             padding: '0 24px',
             zIndex: 1,
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -196,6 +249,13 @@ const Records = () => {
               borderRadius: 0,
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              },
+              '&:focus': {
+                outline: 'none'
+              },
+              // Remove focus visible outline
+              '&.Mui-focusVisible': {
+                outline: 'none'
               }
             }}
           >
@@ -242,9 +302,78 @@ const Records = () => {
                   <Typography variant="h4" component="h1" fontWeight="bold">Records</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
-                  <IconButton color="primary">
-                    <FilterListIcon />
-                  </IconButton>
+                <>
+  <IconButton 
+    color="primary"
+    onClick={handleSortClick}
+    disableRipple
+    sx={{ 
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+      '&:focus': { outline: 'none' },
+      '&.Mui-focusVisible': { outline: 'none' }
+    }}
+  >
+    <FilterListIcon />
+  </IconButton>
+
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleSortClose}
+    sx={{
+      '& .MuiPaper-root': {
+        borderRadius: 2,
+        marginTop: 1,
+        minWidth: 180,
+        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+      }
+    }}
+  >
+    <MenuItem 
+      onClick={() => handleSort('az')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowUpwardIcon fontSize="small" /> A to Z
+    </MenuItem>
+    <MenuItem 
+      onClick={() => handleSort('za')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowDownwardIcon fontSize="small" /> Z to A
+    </MenuItem>
+    <Divider sx={{ my: 1 }} />
+    <MenuItem 
+      onClick={() => handleSort('newest')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowUpwardIcon fontSize="small" /> Newest to Oldest
+    </MenuItem>
+    <MenuItem 
+      onClick={() => handleSort('oldest')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowDownwardIcon fontSize="small" /> Oldest to Newest
+    </MenuItem>
+  </Menu>
+</>
                   <TextField 
                     variant="outlined" 
                     size="small" 
@@ -555,6 +684,167 @@ const Records = () => {
                   </Box>
                 </Modal>
               )}
+  {records.map((record) => (
+    <TableRow 
+      key={record.id} 
+      hover 
+      onClick={() => {
+        setSelectedRecord(record);
+        setActiveTab(1);
+      }}
+      sx={{ cursor: 'pointer' }}
+    >
+      <TableCell>{record.name}</TableCell>
+      <TableCell>{record.type}</TableCell>
+      <TableCell>{record.date}</TableCell>
+    </TableRow>
+  ))}
+</TableBody>
+</Table>
+</TableContainer>
+
+{selectedRecord && (
+  <Modal
+  open={Boolean(selectedRecord)}
+  onClose={handleClose}
+  closeAfterTransition
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 2,
+    '& .MuiBackdrop-root': {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'none'
+    }
+  }}
+>
+    <Box
+      sx={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+        borderRadius: 2,
+        padding: 4,
+        width: '800px',
+        height: '600px',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        opacity: isClosing ? 0 : 1,
+        transition: 'opacity 100ms ease-in-out',
+      }}
+    >
+      {/* Fixed header */}
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h5" component="h2" fontWeight="bold">
+            {selectedRecord.name}&apos;s Details
+          </Typography>
+          <IconButton 
+  onClick={handleClose}
+  size="medium"
+  disableRipple
+  sx={{ 
+    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+    '& .MuiSvgIcon-root': {
+      fontSize: '1.5rem'
+    },
+    // Remove focus outline
+    '&:focus': {
+      outline: 'none'
+    },
+    // Remove focus visible outline
+    '&.Mui-focusVisible': {
+      outline: 'none'
+    }
+  }}
+>
+  <CloseIcon />
+</IconButton>
+        </Box>
+        <Divider />
+      </Box>
+
+      {/* Fixed tabs */}
+      <Tabs 
+  value={activeTab} 
+  onChange={(e, newValue) => setActiveTab(newValue)}
+  sx={{ 
+    borderBottom: 1, 
+    borderColor: 'divider', 
+    mb: 2,
+    // Remove focus outline from tabs
+    '& .MuiTab-root': {
+      '&:focus': {
+        outline: 'none'
+      },
+      '&.Mui-selected': {
+        color: '#1976d2',
+      },
+      '&.Mui-focusVisible': {
+        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+      }
+    },
+    // Remove focus outline from tab indicator
+    '& .MuiTabs-indicator': {
+      backgroundColor: '#1976d2',
+    }
+  }}
+>
+  <Tab 
+    label="Personal Details" 
+    sx={{
+      '&.Mui-selected': {
+        color: '#1976d2',
+      }
+    }}
+  />
+  <Tab 
+    label="Documents" 
+    sx={{
+      '&.Mui-selected': {
+        color: '#1976d2',
+      }
+    }}
+  />
+  <Tab 
+    label="History" 
+    sx={{
+      '&.Mui-selected': {
+        color: '#1976d2',
+      }
+    }}
+  />
+</Tabs>
+
+      {/* Scrollable content area */}
+      <Box 
+        sx={{ 
+          flex: 1,
+          overflow: 'auto',
+          // Custom scrollbar styling
+          '&::-webkit-scrollbar': {
+            width: '8px'
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            borderRadius: '4px'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(0, 0, 0, 0.15)',
+            borderRadius: '4px',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.25)'
+            }
+          }
+        }}
+      >
+        {/* ... existing tab content ... */}
+      </Box>
+    </Box>
+  </Modal>
+)}
             </Box>
           </Container>
         </Box>
@@ -573,6 +863,7 @@ const Records = () => {
             justifyContent: 'flex-end',
             padding: '0 24px',
             zIndex: 1,
+            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Typography
