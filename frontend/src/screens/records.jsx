@@ -22,14 +22,14 @@ import {
   Tab,
   Grid,
   Divider,
-  Menu,
-  MenuItem
+  TablePagination,
 } from '@mui/material';
 
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import CloseIcon from '@mui/icons-material/Close';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
@@ -63,6 +63,10 @@ const Records = () => {
   const [isClosing, setIsClosing] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [records, setRecords] = useState(sampleRecords);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage] = useState(20);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -72,6 +76,39 @@ const Records = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // Sample data - replace with actual data later
+  const sampleRecords = [
+    { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+    { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+    { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+    { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+    { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+    { id: 6, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+    { id: 7, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+    { id: 8, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+    { id: 9, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+    { id: 10, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+    { id: 11, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+    { id: 12, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+    { id: 13, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+    { id: 14, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+    { id: 15, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+    { id: 16, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+    { id: 17, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+    { id: 18, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+    { id: 19, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+    { id: 20, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+    { id: 21, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+    { id: 22, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+    { id: 23, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+    { id: 24, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+    { id: 25, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+    { id: 26, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' }
+  ];
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
@@ -253,7 +290,10 @@ const Records = () => {
                 borderRadius: 2,
                 padding: 4,
                 boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                height: 'calc(100vh - 160px)', // Adjust height to account for header and footer
+                display: 'flex',
+                flexDirection: 'column'
               }}
             >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -360,16 +400,245 @@ const Records = () => {
               </Box>
 
               {/* Table */}
-              <TableContainer component={Paper} sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: 3 }}>
-                <Table>
+              <TableContainer 
+                component={Paper} 
+                sx={{ 
+                  borderRadius: 2, 
+                  overflow: 'auto',
+                  boxShadow: 3,
+                  flex: '1 1 auto', // Changed to flex grow and shrink
+                  minHeight: 'calc(100% - 120px)', // Account for header and pagination
+                  '&::-webkit-scrollbar': {
+                    width: '8px',
+                    height: '8px'
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                    borderRadius: '4px'
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.25)'
+                    }
+                  }
+                }}
+              >
+                <Table stickyHeader> {/* Add stickyHeader prop */}
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Name</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Type of Document</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Type of Document</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Date</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
+                    {sampleRecords
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((record) => (
+                        <TableRow 
+                          key={record.id} 
+                          hover 
+                          onClick={() => {
+                            setSelectedRecord(record);
+                            setActiveTab(1); // Set to Documents tab
+                          }}
+                          sx={{ cursor: 'pointer' }}
+                        >
+                          <TableCell>{record.name}</TableCell>
+                          <TableCell>{record.type}</TableCell>
+                          <TableCell>{record.date}</TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Add Pagination */}
+              <Box sx={{ 
+                mt: 2,
+                display: 'flex', 
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 2,
+              }}>
+                <IconButton 
+                  disabled={page === 0}
+                  onClick={(e) => handleChangePage(e, page - 1)}
+                  sx={{
+                    color: '#1976d2',
+                    '&.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.26)'
+                    }
+                  }}
+                >
+                  &lt;
+                </IconButton>
+                <Box
+                  sx={{
+                    backgroundColor: '#f5f5f5',
+                    padding: '4px 16px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                    minWidth: '80px',
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Typography>
+                    {page + 1} of {Math.ceil(sampleRecords.length / rowsPerPage)}
+                  </Typography>
+                </Box>
+                <IconButton 
+                  disabled={page >= Math.ceil(sampleRecords.length / rowsPerPage) - 1}
+                  onClick={(e) => handleChangePage(e, page + 1)}
+                  sx={{
+                    color: '#1976d2',
+                    '&.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.26)'
+                    }
+                  }}
+                >
+                  &gt;
+                </IconButton>
+              </Box>
+
+              {selectedRecord && (
+                <Modal
+                  open={Boolean(selectedRecord)}
+                  onClose={() => setSelectedRecord(null)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 2
+                  }}
+                >
+                  <Box
+                    sx={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(8px)',
+                      borderRadius: 2,
+                      padding: 4,
+                      width: '800px', // Fixed width
+                      height: '600px', // Fixed height
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                    }}
+                  >
+                    {/* Fixed header */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography variant="h5" component="h2" fontWeight="bold">
+                          {selectedRecord.name}&apos;s Details
+                        </Typography>
+                        <IconButton 
+                          onClick={() => setSelectedRecord(null)}
+                          size="medium"
+                          disableRipple  // Add this to disable the ripple effect
+                          sx={{ 
+                            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+                            '& .MuiSvgIcon-root': {
+                              fontSize: '1.5rem'
+                            },
+                            // Remove focus outline
+                            '&:focus': {
+                              outline: 'none'
+                            },
+                            // Remove focus visible outline
+                            '&.Mui-focusVisible': {
+                              outline: 'none'
+                            }
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Box>
+                      <Divider />
+                    </Box>
+
+                    {/* Fixed tabs */}
+                    <Tabs 
+                      value={activeTab} 
+                      onChange={(e, newValue) => setActiveTab(newValue)}
+                      sx={{ 
+                        borderBottom: 1, 
+                        borderColor: 'divider', 
+                        mb: 2,
+                        // Remove focus outline from tabs
+                        '& .MuiTab-root': {
+                          '&:focus': {
+                            outline: 'none'
+                          },
+                          '&.Mui-selected': {
+                            color: '#1976d2',
+                          },
+                          '&.Mui-focusVisible': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          }
+                        },
+                        // Remove focus outline from tab indicator
+                        '& .MuiTabs-indicator': {
+                          backgroundColor: '#1976d2',
+                        }
+                      }}
+                    >
+                      <Tab 
+                        label="Personal Details" 
+                        sx={{
+                          '&.Mui-selected': {
+                            color: '#1976d2',
+                          }
+                        }}
+                      />
+                      <Tab 
+                        label="Documents" 
+                        sx={{
+                          '&.Mui-selected': {
+                            color: '#1976d2',
+                          }
+                        }}
+                      />
+                      <Tab 
+                        label="History" 
+                        sx={{
+                          '&.Mui-selected': {
+                            color: '#1976d2',
+                          }
+                        }}
+                      />
+                    </Tabs>
+
+                    {/* Scrollable content area */}
+                    <Box 
+                      sx={{ 
+                        flex: 1,
+                        overflow: 'auto',
+                        // Custom scrollbar styling
+                        '&::-webkit-scrollbar': {
+                          width: '8px'
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                          borderRadius: '4px'
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                          borderRadius: '4px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.25)'
+                          }
+                        }
+                      }}
+                    >
+                      {/* ... existing tab content ... */}
+                    </Box>
+                  </Box>
+                </Modal>
+              )}
   {records.map((record) => (
     <TableRow 
       key={record.id} 
