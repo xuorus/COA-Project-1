@@ -36,6 +36,7 @@ import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import PropTypes from 'prop-types';
 
 const theme = createTheme({
   palette: {
@@ -75,6 +76,49 @@ const sampleRecords = [
   { id: 26, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' }
 ];
 
+const HighlightedText = ({ text, highlight }) => {
+  // Convert text to string to handle any type
+  const stringText = String(text || '');
+  const stringHighlight = String(highlight || '');
+
+  if (!stringHighlight.trim()) {
+    return <span>{stringText}</span>;
+  }
+  
+  // Escape special characters in the highlight text
+  const escapedHighlight = stringHighlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escapedHighlight})`, 'gi');
+  const parts = stringText.split(regex);
+  
+  return (
+    <span>
+      {parts.map((part, index) => 
+        regex.test(part) ? (
+          <span key={index} style={{ backgroundColor: 'yellow', fontWeight: 'bold' }}>
+            {part}
+          </span>
+        ) : (
+          <span key={index}>{part}</span>
+        )
+      )}
+    </span>
+  );
+};
+
+HighlightedText.propTypes = {
+  text: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number
+  ]).isRequired,
+  highlight: PropTypes.string.isRequired
+};
+
+// Add default props
+HighlightedText.defaultProps = {
+  text: '',
+  highlight: ''
+};
+
 const Records = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -87,6 +131,7 @@ const Records = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortType, setSortType] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -104,7 +149,7 @@ const Records = () => {
     setTimeout(() => {
       setIsClosing(false);
       setSelectedRecord(null);
-    }, 100); // Match this with animation duration
+    }, 100);
   };
 
   const handleSortClick = (event) => {
@@ -116,7 +161,8 @@ const Records = () => {
   };
   
   const handleSort = (type) => {
-    const sortedRecords = [...records].sort((a, b) => {
+    setSortType(type);
+    const sortedRecords = [...sampleRecords].sort((a, b) => {
       switch(type) {
         case 'az':
           return a.name.localeCompare(b.name);
@@ -133,23 +179,42 @@ const Records = () => {
     setRecords(sortedRecords);
     handleSortClose();
   };
-  const handleSearch = (event) => {
-    const query = event.target.value;
-    setSearchQuery(query);
-    
-    if (query === '') {
-      setRecords(sampleRecords);
-      return;   
-    }
+
+const handleSearch = (event) => {
+  const query = event.target.value.toLowerCase();
+  setSearchQuery(query);
   
-    const filteredRecords = sampleRecords.filter(record => 
-      record.name.toLowerCase().includes(query.toLowerCase()) ||
-      record.type.toLowerCase().includes(query.toLowerCase()) ||
-      record.date.toLowerCase().includes(query.toLowerCase())
+  let filteredRecords;
+  if (query === '') {
+    filteredRecords = [...sampleRecords];
+  } else {
+    filteredRecords = sampleRecords.filter(record => 
+      record.name.toLowerCase().includes(query) ||
+      record.type.toLowerCase().includes(query) ||
+      record.date.toLowerCase().includes(query)
     );
-    
-    setRecords(filteredRecords);
-  };
+  }
+
+  // Maintain current sort if one is active
+  if (sortType) {
+    filteredRecords.sort((a, b) => {
+      switch(sortType) {
+        case 'az':
+          return a.name.localeCompare(b.name);
+        case 'za':
+          return b.name.localeCompare(a.name);
+        case 'newest':
+          return new Date(b.date) - new Date(a.date);
+        case 'oldest':
+          return new Date(a.date) - new Date(b.date);
+        default:
+          return 0;
+      }
+    });
+  }
+  
+  setRecords(filteredRecords);
+};
 
   return (
     <ThemeProvider theme={theme}>
@@ -311,7 +376,7 @@ const Records = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
                 <>
   <IconButton 
-    color="primary"
+    color="#000"
     onClick={handleSortClick}
     disableRipple
     sx={{ 
@@ -324,62 +389,62 @@ const Records = () => {
   </IconButton>
 
   <Menu
-    anchorEl={anchorEl}
-    open={Boolean(anchorEl)}
-    onClose={handleSortClose}
-    sx={{
-      '& .MuiPaper-root': {
-        borderRadius: 2,
-        marginTop: 1,
-        minWidth: 180,
-        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(8px)',
-      }
+  anchorEl={anchorEl}
+  open={Boolean(anchorEl)}
+  onClose={handleSortClose}
+  sx={{
+    '& .MuiPaper-root': {
+      borderRadius: 2,
+      marginTop: 1,
+      minWidth: 180,
+      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(8px)',
+    }
+  }}
+>
+  <MenuItem 
+    onClick={() => handleSort('az')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
     }}
   >
-    <MenuItem 
-      onClick={() => handleSort('az')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowUpwardIcon fontSize="small" /> A to Z
-    </MenuItem>
-    <MenuItem 
-      onClick={() => handleSort('za')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowDownwardIcon fontSize="small" /> Z to A
-    </MenuItem>
-    <Divider sx={{ my: 1 }} />
-    <MenuItem 
-      onClick={() => handleSort('newest')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowUpwardIcon fontSize="small" /> Newest to Oldest
-    </MenuItem>
-    <MenuItem 
-      onClick={() => handleSort('oldest')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowDownwardIcon fontSize="small" /> Oldest to Newest
-    </MenuItem>
-  </Menu>
+    <ArrowUpwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> A to Z
+  </MenuItem>
+  <MenuItem 
+    onClick={() => handleSort('za')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+    }}
+  >
+    <ArrowDownwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Z to A
+  </MenuItem>
+  <Divider sx={{ my: 1 }} />
+  <MenuItem 
+    onClick={() => handleSort('newest')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+    }}
+  >
+    <ArrowDownwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Newest to Oldest
+  </MenuItem>
+  <MenuItem 
+    onClick={() => handleSort('oldest')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+    }}
+  >
+    <ArrowUpwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Oldest to Newest
+  </MenuItem>
+</Menu>
 </>
 <TextField 
   variant="outlined" 
@@ -403,11 +468,17 @@ const Records = () => {
   sx={{
     '& .MuiOutlinedInput-root': {
       borderRadius: '20px',
+      '&.Mui-focused fieldset': {
+        borderColor: 'black',
+      },
+      '&:hover fieldset': {
+        borderColor: 'black',
+      }
     }
   }}
 />
-                </Box>
-              </Box>
+  </Box>
+      </Box>
 
               {/* Table */}
               <TableContainer 
@@ -444,24 +515,30 @@ const Records = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {sampleRecords
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                      .map((record) => (
-                        <TableRow 
-                          key={record.id} 
-                          hover 
-                          onClick={() => {
-                            setSelectedRecord(record);
-                            setActiveTab(1); // Set to Documents tab
-                          }}
-                          sx={{ cursor: 'pointer' }}
-                        >
-                          <TableCell>{record.name}</TableCell>
-                          <TableCell>{record.type}</TableCell>
-                          <TableCell>{record.date}</TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
+  {records
+    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+    .map((record) => (
+      <TableRow 
+        key={record.id} 
+        hover 
+        onClick={() => {
+          setSelectedRecord(record);
+          setActiveTab(1);
+        }}
+        sx={{ cursor: 'pointer' }}
+      >
+        <TableCell>
+          <HighlightedText text={record.name} highlight={searchQuery} />
+        </TableCell>
+        <TableCell>
+          <HighlightedText text={record.type} highlight={searchQuery} />
+        </TableCell>
+        <TableCell>
+          <HighlightedText text={record.date} highlight={searchQuery} />
+        </TableCell>
+      </TableRow>
+    ))}
+</TableBody>
                 </Table>
               </TableContainer>
 
@@ -536,8 +613,8 @@ const Records = () => {
                   }}
                 >
                   <IconButton 
-                    disabled={page >= Math.ceil(sampleRecords.length / rowsPerPage) - 1}
-                    onClick={(e) => handleChangePage(e, page + 1)}
+  disabled={page >= Math.ceil(records.length / rowsPerPage) - 1}
+  onClick={(e) => handleChangePage(e, page + 1)}
                     disableRipple
                     sx={{
                       color: '#000',
@@ -569,7 +646,7 @@ const Records = () => {
       padding: 2
     }}
   >
-                <Box
+    <Box
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(8px)',
@@ -583,6 +660,29 @@ const Records = () => {
         border: '1px solid rgba(255, 255, 255, 0.3)',
       }}
     >
+
+<Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 2 
+      }}>
+        <Typography variant="h5" fontWeight="bold">
+          {selectedRecord.name}&apos;s Details
+        </Typography>
+        <IconButton
+          onClick={handleClose}
+          size="small"
+          sx={{
+            color: '#000',
+            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+            '&:focus': { outline: 'none' }
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
+      <Divider sx={{ mb: 2 }} />
 
                     {/* Fixed tabs */}
                     <Tabs 
