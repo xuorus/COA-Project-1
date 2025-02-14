@@ -16,8 +16,16 @@ import {
   TableRow,
   TextField,
   InputAdornment,
-  Button
+  Button,
+  Modal,
+  Tabs,
+  Tab,
+  Grid,
+  Divider,
+  Menu,
+  MenuItem
 } from '@mui/material';
+
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
@@ -25,15 +33,9 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
-import {
-  // ...existing imports...
-  Modal,
-  Tabs,
-  Tab,
-  Grid,
-  Divider
-} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 const theme = createTheme({
   palette: {
@@ -43,12 +45,24 @@ const theme = createTheme({
   },
 });
 
+  // Sample data - replace with actual data later
+  const sampleRecords = [
+    { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+    { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+    { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+    { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+    { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+  ];
+  
 const Records = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [isClosing, setIsClosing] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [records, setRecords] = useState(sampleRecords);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -58,14 +72,40 @@ const Records = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Sample data - replace with actual data later
-  const sampleRecords = [
-    { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-    { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-    { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-    { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-    { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-  ];
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      setSelectedRecord(null);
+    }, 100); // Match this with animation duration
+  };
+
+  const handleSortClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  
+  const handleSortClose = () => {
+    setAnchorEl(null);
+  };
+  
+  const handleSort = (type) => {
+    const sortedRecords = [...records].sort((a, b) => {
+      switch(type) {
+        case 'az':
+          return a.name.localeCompare(b.name);
+        case 'za':
+          return b.name.localeCompare(a.name);
+        case 'newest':
+          return new Date(b.date) - new Date(a.date);
+        case 'oldest':
+          return new Date(a.date) - new Date(b.date);
+        default:
+          return 0;
+      }
+    });
+    setRecords(sortedRecords);
+    handleSortClose();
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -172,6 +212,13 @@ const Records = () => {
               borderRadius: 0,
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              },
+              '&:focus': {
+                outline: 'none'
+              },
+              // Remove focus visible outline
+              '&.Mui-focusVisible': {
+                outline: 'none'
               }
             }}
           >
@@ -214,9 +261,78 @@ const Records = () => {
                   <Typography variant="h4" component="h1" fontWeight="bold">Records</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
-                  <IconButton color="primary">
-                    <FilterListIcon />
-                  </IconButton>
+                <>
+  <IconButton 
+    color="primary"
+    onClick={handleSortClick}
+    disableRipple
+    sx={{ 
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+      '&:focus': { outline: 'none' },
+      '&.Mui-focusVisible': { outline: 'none' }
+    }}
+  >
+    <FilterListIcon />
+  </IconButton>
+
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={handleSortClose}
+    sx={{
+      '& .MuiPaper-root': {
+        borderRadius: 2,
+        marginTop: 1,
+        minWidth: 180,
+        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+      }
+    }}
+  >
+    <MenuItem 
+      onClick={() => handleSort('az')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowUpwardIcon fontSize="small" /> A to Z
+    </MenuItem>
+    <MenuItem 
+      onClick={() => handleSort('za')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowDownwardIcon fontSize="small" /> Z to A
+    </MenuItem>
+    <Divider sx={{ my: 1 }} />
+    <MenuItem 
+      onClick={() => handleSort('newest')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowUpwardIcon fontSize="small" /> Newest to Oldest
+    </MenuItem>
+    <MenuItem 
+      onClick={() => handleSort('oldest')}
+      sx={{ 
+        gap: 1,
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+      }}
+    >
+      <ArrowDownwardIcon fontSize="small" /> Oldest to Newest
+    </MenuItem>
+  </Menu>
+</>
                   <TextField 
                     variant="outlined" 
                     size="small" 
@@ -254,13 +370,13 @@ const Records = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-  {sampleRecords.map((record) => (
+  {records.map((record) => (
     <TableRow 
       key={record.id} 
       hover 
       onClick={() => {
         setSelectedRecord(record);
-        setActiveTab(1); // Set to Documents tab
+        setActiveTab(1);
       }}
       sx={{ cursor: 'pointer' }}
     >
@@ -275,27 +391,34 @@ const Records = () => {
 
 {selectedRecord && (
   <Modal
-    open={Boolean(selectedRecord)}
-    onClose={() => setSelectedRecord(null)}
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 2
-    }}
-  >
+  open={Boolean(selectedRecord)}
+  onClose={handleClose}
+  closeAfterTransition
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 2,
+    '& .MuiBackdrop-root': {
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backdropFilter: 'none'
+    }
+  }}
+>
     <Box
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(8px)',
         borderRadius: 2,
         padding: 4,
-        width: '800px', // Fixed width
-        height: '600px', // Fixed height
+        width: '800px',
+        height: '600px',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
         border: '1px solid rgba(255, 255, 255, 0.3)',
+        opacity: isClosing ? 0 : 1,
+        transition: 'opacity 100ms ease-in-out',
       }}
     >
       {/* Fixed header */}
@@ -305,9 +428,9 @@ const Records = () => {
             {selectedRecord.name}&apos;s Details
           </Typography>
           <IconButton 
-  onClick={() => setSelectedRecord(null)}
+  onClick={handleClose}
   size="medium"
-  disableRipple  // Add this to disable the ripple effect
+  disableRipple
   sx={{ 
     '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
     '& .MuiSvgIcon-root': {

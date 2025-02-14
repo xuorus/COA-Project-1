@@ -132,6 +132,13 @@ const Main = () => {
               borderRadius: 0,
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              },
+              '&:focus': {
+                outline: 'none'
+              },
+              // Remove focus visible outline
+              '&.Mui-focusVisible': {
+                outline: 'none'
               }
             }}
           >

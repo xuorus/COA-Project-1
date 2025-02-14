@@ -187,13 +187,20 @@ const Main = () => {
             edge="end"
             color="inherit"
             aria-label="menu"
-            disableRipple  // Add this to remove ripple effect
+            disableRipple
             onClick={() => setSidebarOpen(true)}
             sx={{ 
               color: '#000',
               borderRadius: 0,  // Make button square
               '&:hover': {      // Optional: customize hover state
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              },
+              '&:focus': {
+                outline: 'none'
+              },
+              // Remove focus visible outline
+              '&.Mui-focusVisible': {
+                outline: 'none'
               }
             }}
           >
