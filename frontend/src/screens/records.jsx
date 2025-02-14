@@ -180,41 +180,42 @@ const Records = () => {
     handleSortClose();
   };
 
-const handleSearch = (event) => {
-  const query = event.target.value.toLowerCase();
-  setSearchQuery(query);
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+    setPage(0); // Reset to first page (internally 0, displayed as 1)
+    
+    let filteredRecords;
+    if (query === '') {
+      filteredRecords = [...sampleRecords];
+    } else {
+      filteredRecords = sampleRecords.filter(record => 
+        record.name.toLowerCase().includes(query) ||
+        record.type.toLowerCase().includes(query) ||
+        record.date.toLowerCase().includes(query)
+      );
+    }
   
-  let filteredRecords;
-  if (query === '') {
-    filteredRecords = [...sampleRecords];
-  } else {
-    filteredRecords = sampleRecords.filter(record => 
-      record.name.toLowerCase().includes(query) ||
-      record.type.toLowerCase().includes(query) ||
-      record.date.toLowerCase().includes(query)
-    );
-  }
-
-  // Maintain current sort if one is active
-  if (sortType) {
-    filteredRecords.sort((a, b) => {
-      switch(sortType) {
-        case 'az':
-          return a.name.localeCompare(b.name);
-        case 'za':
-          return b.name.localeCompare(a.name);
-        case 'newest':
-          return new Date(b.date) - new Date(a.date);
-        case 'oldest':
-          return new Date(a.date) - new Date(b.date);
-        default:
-          return 0;
-      }
-    });
-  }
-  
-  setRecords(filteredRecords);
-};
+    // Maintain current sort if one is active
+    if (sortType) {
+      filteredRecords.sort((a, b) => {
+        switch(sortType) {
+          case 'az':
+            return a.name.localeCompare(b.name);
+          case 'za':
+            return b.name.localeCompare(a.name);
+          case 'newest':
+            return new Date(b.date) - new Date(a.date);
+          case 'oldest':
+            return new Date(a.date) - new Date(b.date);
+          default:
+            return 0;
+        }
+      });
+    }
+    
+    setRecords(filteredRecords);
+  };
 
   return (
     <ThemeProvider theme={theme}>
