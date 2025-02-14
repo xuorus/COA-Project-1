@@ -404,10 +404,9 @@ const Records = () => {
                 component={Paper} 
                 sx={{ 
                   borderRadius: 2, 
-                  overflow: 'auto',
+                  overflow: 'hidden',
                   boxShadow: 3,
                   flex: '1 1 auto', // Changed to flex grow and shrink
-                  minHeight: 'calc(100% - 120px)', // Account for header and pagination
                   '&::-webkit-scrollbar': {
                     width: '8px',
                     height: '8px'
@@ -433,32 +432,50 @@ const Records = () => {
                       <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Date</TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody>
-  {records
-    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-    .map((record) => (
-      <TableRow 
-        key={record.id} 
-        hover 
-        onClick={() => {
-          setSelectedRecord(record);
-          setActiveTab(1);
-        }}
-        sx={{ cursor: 'pointer' }}
-      >
-        <TableCell>
-          <HighlightedText text={record.name} highlight={searchQuery} />
-        </TableCell>
-        <TableCell>
-          <HighlightedText text={record.type} highlight={searchQuery} />
-        </TableCell>
-        <TableCell>
-          <HighlightedText text={record.date} highlight={searchQuery} />
-        </TableCell>
-      </TableRow>
-    ))}
-</TableBody>
                 </Table>
+                <TableContainer 
+                  sx={{ 
+                    maxHeight: 'calc(100vh - 320px)', // Adjust height to account for header and footer
+                    overflow: 'auto',
+                    '&::-webkit-scrollbar': {
+                      width: '8px',
+                      height: '8px'
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      borderRadius: '4px'
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                      borderRadius: '4px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.25)'
+                      }
+                    }
+                  }}
+                >
+                  <Table>
+                    <TableBody>
+                      {sampleRecords
+                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        .map((record) => (
+                          <TableRow 
+                            key={record.id} 
+                            hover 
+                            onClick={() => {
+                              setSelectedRecord(record);
+                              setActiveTab(1); // Set to Documents tab
+                            }}
+                            sx={{ cursor: 'pointer' }}
+                          >
+                            <TableCell>{record.name}</TableCell>
+                            <TableCell>{record.type}</TableCell>
+                            <TableCell>{record.date}</TableCell>
+                          </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </TableContainer>
 
               {/* Add Pagination */}
