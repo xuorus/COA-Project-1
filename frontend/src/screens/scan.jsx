@@ -82,6 +82,33 @@ const Main = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
 
+  const [formValues, setFormValues] = useState({
+    firstName: '',
+    middleName: '',
+    lastName: ''
+  });
+
+  const [formErrors, setFormErrors] = useState({
+    firstName: false,
+    middleName: false,
+    lastName: false
+  });
+
+  const handleInputChange = (field) => (event) => {
+    const value = event.target.value;
+    setFormValues(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    if (field === 'firstName' || field === 'lastName') {
+      setFormErrors(prev => ({
+        ...prev,
+        [field]: value.trim() === ''
+      }));
+    }
+  };
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -234,7 +261,7 @@ const Main = () => {
           >
             <Box 
               sx={{ 
-                background: 'rgb(255, 255, 255, 0.4)',
+                background: 'rgb(255, 255, 255, 0.7)',
                 backdropFilter: 'blur(3px)',
                 borderRadius: 2,
                 padding: 2, // Reduced padding
@@ -242,14 +269,14 @@ const Main = () => {
                 flexDirection: 'row',
                 alignItems: 'flex-start',
                 gap: 2, // Reduced gap
-                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.7)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 height: '100%', // Take full height of container
                 overflow: 'hidden' // Prevent internal scrolling
               }}
             >
               {/* Left Column - Scanning Controls */}
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '90%', mt: 4, ml: 2 }}>
                 <Typography variant="h4" component="h1" fontWeight="bold">
                   Scan Document
                 </Typography>
@@ -257,10 +284,12 @@ const Main = () => {
                 {/* Document Type Dropdown - Moved up */}
                 <FormControl 
                   sx={{ 
-                    width: '70%',
+                    mt: 1,
+                    mb: 1,
+                    width: '60%',
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '15px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
                       fontFamily: 'Roboto',
                       height: '45px', // Reduced height
                       '& fieldset': {
@@ -372,23 +401,30 @@ const Main = () => {
               </Box>
 
               {/* Right Column - Information Fields */}
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', mt: 4}}>
                 <Typography variant="h4" component="h1" fontWeight="bold">
                   Information
                 </Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {['First Name', 'Middle Name', 'Last Name'].map((label) => (
+                  {[
+                    { label: 'First Name', required: true, field: 'firstName' },
+                    { label: 'Middle Name', required: false, field: 'middleName' },
+                    { label: 'Last Name', required: true, field: 'lastName' }
+                  ].map((field) => (
                     <FormControl
-                      key={label}
+                      key={field.label}
                       fullWidth
+                      required={field.required}
+                      error={formErrors[field.field]}
                       sx={{ 
+                        mt: 1,
                         '& .MuiOutlinedInput-root': {
                           width: '80%',
                           borderRadius: '15px',
                           backgroundColor: 'rgba(255, 255, 255, 0.7)',
                           fontFamily: 'Roboto',
-                          height: '45px', // Reduced height
+                          height: '45px',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.23)',
                           },
@@ -397,30 +433,60 @@ const Main = () => {
                           },
                           '&.Mui-focused fieldset': {
                             borderColor: '#1976d2',
+                          },
+                          '&.Mui-error fieldset': {
+                            borderColor: '#d32f2f',
+                          },
+                          '&.Mui-error.Mui-focused fieldset': {
+                            borderColor: '#d32f2f',
                           }
                         },
                         '& .MuiInputLabel-root': {
                           color: 'rgba(0, 0, 0, 0.6)',
                           fontFamily: 'Roboto',
-                          transform: 'translate(14px, 12px) scale(1)', // Adjusted label position
+                          transform: 'translate(14px, 12px) scale(1)',
                           '&.Mui-focused, &.MuiFormLabel-filled': {
                             transform: 'translate(14px, -9px) scale(0.75)',
                           },
                           '&.Mui-focused': {
                             color: '#1976d2',
+                          },
+                          '&.Mui-error': {
+                            color: '#d32f2f',
                           }
                         }
                       }}
                     >
-                      <InputLabel>{label}</InputLabel>
+                      <InputLabel error={formErrors[field.field]}>{field.label}</InputLabel>
                       <OutlinedInput
-                        label={label}
+                        label={field.label}
+                        required={field.required}
+                        value={formValues[field.field]}
+                        onChange={handleInputChange(field.field)}
+                        error={formErrors[field.field]}
+                        onBlur={() => {
+                          if (field.required) {
+                            setFormErrors(prev => ({
+                              ...prev,
+                              [field.field]: formValues[field.field].trim() === ''
+                            }));
+                          }
+                        }}
                         sx={{
                           '& input': {
-                            padding: '8px 14px', // Reduced padding
+                            padding: '8px 14px',
                           }
                         }}
                       />
+                      {formErrors[field.field] && (
+                        <Typography 
+                          variant="caption" 
+                          color="error" 
+                          sx={{ ml: 2, mt: 0.5 }}
+                        >
+                          This field is required
+                        </Typography>
+                      )}
                     </FormControl>
                   ))}
                 </Box>
@@ -429,6 +495,8 @@ const Main = () => {
                   variant="contained"
                   color="primary"
                   sx={{
+                    ml: 17  ,
+                    mt: 2,
                     borderRadius: '10px',
                     width: '30%',
                     textTransform: 'none',

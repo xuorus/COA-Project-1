@@ -277,32 +277,33 @@ const Records = () => {
         />
 
         {/* Main Content */}
-<Box
-  sx={{
-    position: 'absolute',
-    top: '80px',
-    left: 0,
-    right: 0,
-    bottom: '40px',
-    overflow: 'auto',
-    padding: '24px',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  }}
->
-  <Container maxWidth="lg">
-    <Box 
-      sx={{ 
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        backdropFilter: 'blur(3px)',
-        borderRadius: 2,
-        padding: '32px',
-        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        height: 'calc(100vh - 160px)',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '80px',
+            left: 0,
+            right: 0,
+            bottom: '40px',
+            overflow: 'hidden', // Changed from 'auto' to 'hidden'
+            padding: 3,
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box 
+              sx={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(3px)',
+                borderRadius: 2,
+                padding: 4,
+                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                height: 'calc(100vh - 160px)', // Adjust height to account for header and footer
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden' // Add this to prevent container scroll
+              }}
+            >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography variant="h4" component="h1" fontWeight="bold">Records</Typography>
@@ -470,47 +471,91 @@ const Records = () => {
                 display: 'flex', 
                 justifyContent: 'center',
                 alignItems: 'center',
-                gap: 2,
+                gap: 1, // Reduced gap for tighter spacing
               }}>
-                <IconButton 
-                  disabled={page === 0}
-                  onClick={(e) => handleChangePage(e, page - 1)}
+                <Box
                   sx={{
-                    color: '#1976d2',
-                    '&.Mui-disabled': {
-                      color: 'rgba(0, 0, 0, 0.26)'
-                    }
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                    width: '32px', // Fixed width for arrow box
+                    height: '32px', // Fixed height
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                   }}
                 >
-                  &lt;
-                </IconButton>
+                  <IconButton 
+                    disabled={page === 0}
+                    onClick={(e) => handleChangePage(e, page - 1)}
+                    disableRipple
+                    sx={{
+                      color: '#000',
+                      padding: 0,
+                      '&.Mui-disabled': {
+                        color: 'rgba(0, 0, 0, 0.26)'
+                      },
+                      '&:focus': {
+                        outline: 'none'
+                      },
+                      '&.Mui-focusVisible': {
+                        outline: 'none'
+                      }
+                    }}
+                  >
+                    &lt;
+                  </IconButton>
+                </Box>
                 <Box
                   sx={{
                     backgroundColor: '#f5f5f5',
                     padding: '4px 16px',
                     borderRadius: '4px',
                     border: '1px solid rgba(0, 0, 0, 0.12)',
-                    minWidth: '80px',
+                    width: '32px', // Fixed width for number box
+                    height: '32px', // Fixed height
                     display: 'flex',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    alignItems: 'center'
                   }}
                 >
                   <Typography>
-                    {page + 1} of {Math.ceil(sampleRecords.length / rowsPerPage)}
+                    {page + 1}
                   </Typography>
                 </Box>
-                <IconButton 
-                  disabled={page >= Math.ceil(sampleRecords.length / rowsPerPage) - 1}
-                  onClick={(e) => handleChangePage(e, page + 1)}
+                <Box
                   sx={{
-                    color: '#1976d2',
-                    '&.Mui-disabled': {
-                      color: 'rgba(0, 0, 0, 0.26)'
-                    }
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(0, 0, 0, 0.12)',
+                    width: '32px', // Fixed width for arrow box
+                    height: '32px', // Fixed height
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                   }}
                 >
-                  &gt;
-                </IconButton>
+                  <IconButton 
+                    disabled={page >= Math.ceil(sampleRecords.length / rowsPerPage) - 1}
+                    onClick={(e) => handleChangePage(e, page + 1)}
+                    disableRipple
+                    sx={{
+                      color: '#000',
+                      padding: 0,
+                      '&.Mui-disabled': {
+                        color: 'rgba(0, 0, 0, 0.26)'
+                      },
+                      '&:focus': {
+                        outline: 'none'
+                      },
+                      '&.Mui-focusVisible': {
+                        outline: 'none'
+                      }
+                    }}
+                  >
+                    &gt;
+                  </IconButton>
+                </Box>
               </Box>
 
               {selectedRecord && (
