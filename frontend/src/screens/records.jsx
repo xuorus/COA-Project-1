@@ -435,7 +435,7 @@ const Records = () => {
                 </Table>
                 <TableContainer 
                   sx={{ 
-                    maxHeight: 'calc(100vh - 320px)', // Adjust height to account for header and footer
+                    maxHeight: 'calc(100vh - 240px)', // Adjust height to account for header and footer
                     overflow: 'auto',
                     '&::-webkit-scrollbar': {
                       width: '8px',
