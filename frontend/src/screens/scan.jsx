@@ -242,7 +242,7 @@ const Main = () => {
             >
               {/* Left Column - Scanning Controls */}
               <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
-                <Typography variant="h4" component="h3" fontWeight="bold" sx={{ mb: 1 }}>
+                <Typography variant="h4" component="h1" fontWeight="bold">
                   Scan Document
                 </Typography>
 
@@ -365,7 +365,7 @@ const Main = () => {
 
               {/* Right Column - Information Fields */}
               <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%' }}>
-                <Typography variant="h4" component="h2" fontWeight="bold" sx={{ mb: 1 }}>
+                <Typography variant="h4" component="h1" fontWeight="bold">
                   Information
                 </Typography>
 
