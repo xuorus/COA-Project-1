@@ -167,6 +167,7 @@ const Main = () => {
             padding: 3,
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
             color: 'white',
+            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Box
@@ -208,11 +209,25 @@ const Main = () => {
           }}
         >
           <Typography
+            variant="body"
+            sx={{
+              mr: 112,
+              color: '#000',
+              fontSize: '0.7rem',
+              fontFamily: 'roboto',
+              fontWeight: 'bold'
+            }}
+          >
+            All Rights Reserved 2025 © COA Region X
+          </Typography>
+
+          <Typography
             variant="body2"
             sx={{
               color: '#000',
-              fontSize: '0.9rem',
-              fontFamily: 'monospace'
+              fontSize: '0.7rem',
+              fontFamily: 'roboto',
+              fontWeight: 'bold'
             }}
           >
             {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}

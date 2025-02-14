@@ -214,20 +214,13 @@ const Main = () => {
             edge="end"
             color="inherit"
             aria-label="menu"
-            disableRipple
+            disableRipple  // Add this to remove ripple effect
             onClick={() => setSidebarOpen(true)}
             sx={{ 
               color: '#000',
               borderRadius: 0,  // Make button square
               '&:hover': {      // Optional: customize hover state
                 backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              },
-              '&:focus': {
-                outline: 'none'
-              },
-              // Remove focus visible outline
-              '&.Mui-focusVisible': {
-                outline: 'none'
               }
             }}
           >
@@ -524,15 +517,28 @@ const Main = () => {
             justifyContent: 'flex-end',
             padding: '0 24px',
             zIndex: 1,
-            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
+<Typography
+            variant="body"
+            sx={{
+              mr: 112,
+              color: '#000',
+              fontSize: '0.7rem',
+              fontFamily: 'roboto',
+              fontWeight: 'bold'
+            }}
+          >
+            All Rights Reserved 2025 © COA Region X
+          </Typography>
+
           <Typography
             variant="body2"
             sx={{
               color: '#000',
-              fontSize: '0.9rem',
-              fontFamily: 'monospace'
+              fontSize: '0.7rem',
+              fontFamily: 'roboto',
+              fontWeight: 'bold'
             }}
           >
             {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
