@@ -25,6 +25,7 @@ import {
   TablePagination,
 } from '@mui/material';
 
+import { Menu, MenuItem } from '@mui/material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
@@ -33,7 +34,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import backgroundImage from '../assets/bldg.jpg';
 import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
-import CloseIcon from '@mui/icons-material/Close';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
@@ -44,16 +44,37 @@ const theme = createTheme({
     },
   },
 });
-
-  // Sample data - replace with actual data later
-  const sampleRecords = [
-    { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-    { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-    { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-    { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-    { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-  ];
   
+// Sample data - replace with actual data later
+const sampleRecords = [
+  { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+  { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+  { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+  { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+  { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+  { id: 6, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+  { id: 7, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+  { id: 8, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+  { id: 9, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+  { id: 10, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+  { id: 11, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+  { id: 12, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+  { id: 13, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+  { id: 14, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+  { id: 15, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+  { id: 16, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+  { id: 17, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+  { id: 18, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+  { id: 19, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+  { id: 20, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+  { id: 21, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
+  { id: 22, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
+  { id: 23, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
+  { id: 24, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
+  { id: 25, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
+  { id: 26, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' }
+];
+
 const Records = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -63,10 +84,9 @@ const Records = () => {
   const [isClosing, setIsClosing] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [records, setRecords] = useState(sampleRecords);
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [activeTab, setActiveTab] = useState(0);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(20);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -75,36 +95,6 @@ const Records = () => {
 
     return () => clearInterval(timer);
   }, []);
-
-  // Sample data - replace with actual data later
-  const sampleRecords = [
-    { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-    { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-    { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-    { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-    { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-    { id: 6, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-    { id: 7, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-    { id: 8, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-    { id: 9, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-    { id: 10, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-    { id: 11, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-    { id: 12, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-    { id: 13, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-    { id: 14, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-    { id: 15, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-    { id: 16, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-    { id: 17, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-    { id: 18, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-    { id: 19, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-    { id: 20, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-    { id: 21, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-    { id: 22, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-    { id: 23, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-    { id: 24, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-    { id: 25, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-    { id: 26, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' }
-  ];
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -142,6 +132,23 @@ const Records = () => {
     });
     setRecords(sortedRecords);
     handleSortClose();
+  };
+  const handleSearch = (event) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+    
+    if (query === '') {
+      setRecords(sampleRecords);
+      return;   
+    }
+  
+    const filteredRecords = sampleRecords.filter(record => 
+      record.name.toLowerCase().includes(query.toLowerCase()) ||
+      record.type.toLowerCase().includes(query.toLowerCase()) ||
+      record.date.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    setRecords(filteredRecords);
   };
 
   return (
@@ -270,32 +277,32 @@ const Records = () => {
         />
 
         {/* Main Content */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '80px',
-            left: 0,
-            right: 0,
-            bottom: '40px',
-            overflow: 'auto',
-            padding: 3,
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          }}
-        >
-          <Container maxWidth="lg">
-            <Box 
-              sx={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(3px)',
-                borderRadius: 2,
-                padding: 4,
-                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                height: 'calc(100vh - 160px)', // Adjust height to account for header and footer
-                display: 'flex',
-                flexDirection: 'column'
-              }}
-            >
+<Box
+  sx={{
+    position: 'absolute',
+    top: '80px',
+    left: 0,
+    right: 0,
+    bottom: '40px',
+    overflow: 'auto',
+    padding: '24px',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  }}
+>
+  <Container maxWidth="lg">
+    <Box 
+      sx={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(3px)',
+        borderRadius: 2,
+        padding: '32px',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        height: 'calc(100vh - 160px)',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography variant="h4" component="h1" fontWeight="bold">Records</Typography>
@@ -373,29 +380,31 @@ const Records = () => {
     </MenuItem>
   </Menu>
 </>
-                  <TextField 
-                    variant="outlined" 
-                    size="small" 
-                    placeholder="Search" 
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                      sx: {
-                        borderRadius: '12px',
-                        '& fieldset': {
-                          borderRadius: '12px',
-                        },
-                      }
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '20px',
-                      }
-                    }}
-                  />
+<TextField 
+  variant="outlined" 
+  size="small" 
+  placeholder="Search" 
+  value={searchQuery}
+  onChange={handleSearch}
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <SearchIcon />
+      </InputAdornment>
+    ),
+    sx: {
+      borderRadius: '12px',
+      '& fieldset': {
+        borderRadius: '12px',
+      },
+    }
+  }}
+  sx={{
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '20px',
+    }
+  }}
+/>
                 </Box>
               </Box>
 
@@ -425,7 +434,7 @@ const Records = () => {
                   }
                 }}
               >
-                <Table stickyHeader> {/* Add stickyHeader prop */}
+                <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                       <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
@@ -505,60 +514,30 @@ const Records = () => {
               </Box>
 
               {selectedRecord && (
-                <Modal
-                  open={Boolean(selectedRecord)}
-                  onClose={() => setSelectedRecord(null)}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 2
-                  }}
-                >
-                  <Box
-                    sx={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      backdropFilter: 'blur(8px)',
-                      borderRadius: 2,
-                      padding: 4,
-                      width: '800px', // Fixed width
-                      height: '600px', // Fixed height
-                      display: 'flex',
-                      flexDirection: 'column',
-                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                    }}
-                  >
-                    {/* Fixed header */}
-                    <Box sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography variant="h5" component="h2" fontWeight="bold">
-                          {selectedRecord.name}&apos;s Details
-                        </Typography>
-                        <IconButton 
-                          onClick={() => setSelectedRecord(null)}
-                          size="medium"
-                          disableRipple  // Add this to disable the ripple effect
-                          sx={{ 
-                            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-                            '& .MuiSvgIcon-root': {
-                              fontSize: '1.5rem'
-                            },
-                            // Remove focus outline
-                            '&:focus': {
-                              outline: 'none'
-                            },
-                            // Remove focus visible outline
-                            '&.Mui-focusVisible': {
-                              outline: 'none'
-                            }
-                          }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Box>
-                      <Divider />
-                    </Box>
+  <Modal
+    open={Boolean(selectedRecord)}
+    onClose={handleClose}
+    sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 2
+    }}
+  >
+                <Box
+      sx={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+        borderRadius: 2,
+        padding: 4,
+        width: '800px',
+        height: '600px',
+        display: 'flex',
+        flexDirection: 'column',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+      }}
+    >
 
                     {/* Fixed tabs */}
                     <Tabs 
@@ -639,171 +618,11 @@ const Records = () => {
                   </Box>
                 </Modal>
               )}
-  {records.map((record) => (
-    <TableRow 
-      key={record.id} 
-      hover 
-      onClick={() => {
-        setSelectedRecord(record);
-        setActiveTab(1);
-      }}
-      sx={{ cursor: 'pointer' }}
-    >
-      <TableCell>{record.name}</TableCell>
-      <TableCell>{record.type}</TableCell>
-      <TableCell>{record.date}</TableCell>
-    </TableRow>
-  ))}
-</TableBody>
-</Table>
-</TableContainer>
 
-{selectedRecord && (
-  <Modal
-  open={Boolean(selectedRecord)}
-  onClose={handleClose}
-  closeAfterTransition
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 2,
-    '& .MuiBackdrop-root': {
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      backdropFilter: 'none'
-    }
-  }}
->
-    <Box
-      sx={{
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(8px)',
-        borderRadius: 2,
-        padding: 4,
-        width: '800px',
-        height: '600px',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        opacity: isClosing ? 0 : 1,
-        transition: 'opacity 100ms ease-in-out',
-      }}
-    >
-      {/* Fixed header */}
-      <Box sx={{ mb: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" component="h2" fontWeight="bold">
-            {selectedRecord.name}&apos;s Details
-          </Typography>
-          <IconButton 
-  onClick={handleClose}
-  size="medium"
-  disableRipple
-  sx={{ 
-    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-    '& .MuiSvgIcon-root': {
-      fontSize: '1.5rem'
-    },
-    // Remove focus outline
-    '&:focus': {
-      outline: 'none'
-    },
-    // Remove focus visible outline
-    '&.Mui-focusVisible': {
-      outline: 'none'
-    }
-  }}
->
-  <CloseIcon />
-</IconButton>
-        </Box>
-        <Divider />
-      </Box>
-
-      {/* Fixed tabs */}
-      <Tabs 
-  value={activeTab} 
-  onChange={(e, newValue) => setActiveTab(newValue)}
-  sx={{ 
-    borderBottom: 1, 
-    borderColor: 'divider', 
-    mb: 2,
-    // Remove focus outline from tabs
-    '& .MuiTab-root': {
-      '&:focus': {
-        outline: 'none'
-      },
-      '&.Mui-selected': {
-        color: '#1976d2',
-      },
-      '&.Mui-focusVisible': {
-        backgroundColor: 'rgba(0, 0, 0, 0.04)',
-      }
-    },
-    // Remove focus outline from tab indicator
-    '& .MuiTabs-indicator': {
-      backgroundColor: '#1976d2',
-    }
-  }}
->
-  <Tab 
-    label="Personal Details" 
-    sx={{
-      '&.Mui-selected': {
-        color: '#1976d2',
-      }
-    }}
-  />
-  <Tab 
-    label="Documents" 
-    sx={{
-      '&.Mui-selected': {
-        color: '#1976d2',
-      }
-    }}
-  />
-  <Tab 
-    label="History" 
-    sx={{
-      '&.Mui-selected': {
-        color: '#1976d2',
-      }
-    }}
-  />
-</Tabs>
-
-      {/* Scrollable content area */}
-      <Box 
-        sx={{ 
-          flex: 1,
-          overflow: 'auto',
-          // Custom scrollbar styling
-          '&::-webkit-scrollbar': {
-            width: '8px'
-          },
-          '&::-webkit-scrollbar-track': {
-            backgroundColor: 'rgba(0, 0, 0, 0.05)',
-            borderRadius: '4px'
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: 'rgba(0, 0, 0, 0.15)',
-            borderRadius: '4px',
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.25)'
-            }
-          }
-        }}
-      >
-        {/* ... existing tab content ... */}
-      </Box>
-    </Box>
-  </Modal>
-)}
-            </Box>
+</Box>
           </Container>
         </Box>
-
+              
         {/* Footer */}
         <Box
           sx={{
