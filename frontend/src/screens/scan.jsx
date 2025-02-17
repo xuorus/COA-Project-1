@@ -474,92 +474,91 @@ const Main = () => {
                 </Box>
 
                 <Button
-  variant="contained"
-  color="primary"
-  onClick={handleSubmit}
-  disabled={!formValues.firstName || !formValues.lastName || !documentType}
-  disableRipple
-  sx={{
-    ml: 17,
-    mt: 2,
-    borderRadius: '10px',
-    width: '30%',
-    textTransform: 'none',
-    '&:focus': {
-      outline: 'none',
-    },
-    '&.Mui-focusVisible': {
-      outline: 'none',
-    },
-    '&.Mui-disabled': {
-      backgroundColor: 'rgba(0, 0, 0, 0.12)',
-      color: 'rgba(0, 0, 0, 0.26)'
-    }
-  }}
->
-  Submit
-</Button>
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={!formValues.firstName || !formValues.lastName || !documentType}
+                    disableRipple
+                    sx={{
+                      ml: 17,
+                      mt: 2,
+                      borderRadius: '10px',
+                      width: '30%',
+                      textTransform: 'none',
+                      '&:focus': {
+                        outline: 'none',
+                      },
+                      '&.Mui-focusVisible': {
+                        outline: 'none',
+                      },
+                      '&.Mui-disabled': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.26)'
+                      }
+                    }}
+                  >
+                    Submit
+                  </Button>
 
-              </Box>
-            </Box>
-          </Container>
-        </Box>
-
-        {/* Footer Box */}
-        <Footer currentTime={currentTime} />
-        </Box>
-      <Modal
-  open={successModalOpen}
-  onClose={() => setSuccessModalOpen(false)}
-  closeAfterTransition
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }}
->
-  <Fade in={successModalOpen}>
-    <Box
-      sx={{
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(8px)',
-        borderRadius: 2,
-        padding: 4,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 2,
-        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        minWidth: '300px'
-      }}
-    >
-     <CheckCircleOutlineIcon 
-  sx={{ 
-    fontSize: 60, 
-    color: '#4caf50',
-    animation: `${checkmarkAnimation} 0.5s ease-out`,
-    // Optional bounce effect when hovering
-    '&:hover': {
-      transform: 'scale(1.1)',
-      transition: 'transform 0.2s ease-in-out'
-    }
-  }} 
-/>
-      <Typography 
-        variant="h6" 
-        sx={{ 
-          textAlign: 'center',
-          fontWeight: 'bold'
-        }}
-      >
-        File Submitted Successfully!
-      </Typography>
-    </Box>
-  </Fade>
-</Modal>
-    </ThemeProvider>
-  );
-};
+                                </Box>
+                              </Box>
+                            </Container>
+                          </Box>
+                          {/* Footer Box */}
+                          <Footer currentTime={currentTime} />
+                          </Box>
+                        <Modal
+                    open={successModalOpen}
+                    onClose={() => setSuccessModalOpen(false)}
+                    closeAfterTransition
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Fade in={successModalOpen}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          backdropFilter: 'blur(8px)',
+                          borderRadius: 2,
+                          padding: 4,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 2,
+                          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          minWidth: '300px'
+                        }}
+                      >
+                      <CheckCircleOutlineIcon 
+                    sx={{ 
+                      fontSize: 60, 
+                      color: '#4caf50',
+                      animation: `${checkmarkAnimation} 1s ease-out`,
+                      // Optional bounce effect when hovering
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                        transition: 'transform 0.2s ease-in-out'
+                      }
+                    }} 
+                  />
+                        <Typography 
+                          variant="h6" 
+                          sx={{ 
+                            textAlign: 'center',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          File Submitted Successfully!
+                        </Typography>
+                      </Box>
+                    </Fade>
+                  </Modal>
+                      </ThemeProvider>
+                    );
+                  };
 
 export default Main;
