@@ -11,9 +11,27 @@ import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import Header from '../components/header';
+import Footer from '../components/footer';
+import { Modal, Fade } from '@mui/material';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { keyframes } from '@mui/material/styles';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+
+const checkmarkAnimation = keyframes`
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+`;
 
 const theme = createTheme({
   palette: {
@@ -80,6 +98,7 @@ const Main = () => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const [formValues, setFormValues] = useState({
     firstName: '',
@@ -105,6 +124,51 @@ const Main = () => {
         ...prev,
         [field]: value.trim() === ''
       }));
+    }
+  };
+
+  const handleSubmit = () => {
+    // Reset errors
+    const newErrors = {
+      firstName: false,
+      lastName: false
+    };
+    
+    // Validate required fields
+    let hasErrors = false;
+    
+    // Check first name
+    if (!formValues.firstName?.trim()) {
+      newErrors.firstName = true;
+      hasErrors = true;
+    }
+    
+    // Check last name
+    if (!formValues.lastName?.trim()) {
+      newErrors.lastName = true;
+      hasErrors = true;
+    }
+    
+    // Check document type
+    if (!documentType) {
+      hasErrors = true;
+    }
+    
+    setFormErrors(newErrors);
+  
+    // Only proceed if there are no errors
+    if (!hasErrors) {
+      setSuccessModalOpen(true);
+      // Reset form after successful submission
+      setTimeout(() => {
+        setSuccessModalOpen(false);
+        setFormValues({
+          firstName: '',
+          middleName: '',
+          lastName: ''
+        });
+        setDocumentType('');
+      }, 5000);
     }
   };
 
@@ -201,6 +265,7 @@ const Main = () => {
                 {/* Document Type Dropdown - Moved up */}
                 <FormControl 
                   sx={{ 
+                    ml:13.5,
                     mt: 1,
                     mb: 1,
                     width: '60%',
@@ -208,7 +273,7 @@ const Main = () => {
                       borderRadius: '15px',
                       backgroundColor: 'rgba(255, 255, 255, 0.8)',
                       fontFamily: 'Roboto',
-                      height: '45px', // Reduced height
+                      height: '45px',
                       '& fieldset': {
                         borderColor: 'rgba(0, 0, 0, 0.23)',
                       },
@@ -409,18 +474,31 @@ const Main = () => {
                 </Box>
 
                 <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    ml: 17  ,
-                    mt: 2,
-                    borderRadius: '10px',
-                    width: '30%',
-                    textTransform: 'none',
-                  }}
-                >
-                  Submit
-                </Button>
+  variant="contained"
+  color="primary"
+  onClick={handleSubmit}
+  disabled={!formValues.firstName || !formValues.lastName || !documentType}
+  disableRipple
+  sx={{
+    ml: 17,
+    mt: 2,
+    borderRadius: '10px',
+    width: '30%',
+    textTransform: 'none',
+    '&:focus': {
+      outline: 'none',
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none',
+    },
+    '&.Mui-disabled': {
+      backgroundColor: 'rgba(0, 0, 0, 0.12)',
+      color: 'rgba(0, 0, 0, 0.26)'
+    }
+  }}
+>
+  Submit
+</Button>
 
               </Box>
             </Box>
@@ -428,47 +506,58 @@ const Main = () => {
         </Box>
 
         {/* Footer Box */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '40px',
-            backgroundColor: '#F5F5F4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '0 24px',
-            zIndex: 1,
-          }}
-        >
-<Typography
-            variant="body"
-            sx={{
-              mr: 112,
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            All Rights Reserved 2025 © COA Region X
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
-          </Typography>
+        <Footer currentTime={currentTime} />
         </Box>
-      </Box>
+      <Modal
+  open={successModalOpen}
+  onClose={() => setSuccessModalOpen(false)}
+  closeAfterTransition
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }}
+>
+  <Fade in={successModalOpen}>
+    <Box
+      sx={{
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(8px)',
+        borderRadius: 2,
+        padding: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        minWidth: '300px'
+      }}
+    >
+     <CheckCircleOutlineIcon 
+  sx={{ 
+    fontSize: 60, 
+    color: '#4caf50',
+    animation: `${checkmarkAnimation} 0.5s ease-out`,
+    // Optional bounce effect when hovering
+    '&:hover': {
+      transform: 'scale(1.1)',
+      transition: 'transform 0.2s ease-in-out'
+    }
+  }} 
+/>
+      <Typography 
+        variant="h6" 
+        sx={{ 
+          textAlign: 'center',
+          fontWeight: 'bold'
+        }}
+      >
+        File Submitted Successfully!
+      </Typography>
+    </Box>
+  </Fade>
+</Modal>
     </ThemeProvider>
   );
 };

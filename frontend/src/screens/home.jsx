@@ -4,6 +4,7 @@ import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconBut
 import backgroundImage from '../assets/bldg.jpg';
 import Sidebar from '../components/sidebar';
 import Header from '../components/header';
+import Footer from '../components/footer';
 
 const theme = createTheme({
   palette: {
@@ -99,52 +100,11 @@ const Main = () => {
               border: '1px solid rgba(255, 255, 255, 0.1)'
             }}
           >
-            {/* Add your content here */}
           </Box>
         </Box>
-
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '40px',
-            backgroundColor: '#F5F5F4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '0 24px',
-            zIndex: 1,
-            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          <Typography
-            variant="body"
-            sx={{
-              mr: 112,
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            All Rights Reserved 2025 © COA Region X
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
-          </Typography>
-        </Box>
-      </Box>
+            {/* Footer */}
+        <Footer currentTime={currentTime} />
+              </Box>
     </ThemeProvider>
   );
 };
