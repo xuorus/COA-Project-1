@@ -36,6 +36,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PropTypes from 'prop-types';
 import Header from '../components/header';
+import Footer from '../components/footer';
 
 const theme = createTheme({
   palette: {
@@ -455,25 +456,31 @@ const Records = () => {
                   }}
                 >
                   <Table>
-                    <TableBody>
-                      {sampleRecords
-                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                        .map((record) => (
-                          <TableRow 
-                            key={record.id} 
-                            hover 
-                            onClick={() => {
-                              setSelectedRecord(record);
-                              setActiveTab(1); // Set to Documents tab
-                            }}
-                            sx={{ cursor: 'pointer' }}
-                          >
-                            <TableCell>{record.name}</TableCell>
-                            <TableCell>{record.type}</TableCell>
-                            <TableCell>{record.date}</TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
+                  <TableBody>
+  {records
+    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+    .map((record) => (
+      <TableRow 
+        key={record.id} 
+        hover 
+        onClick={() => {
+          setSelectedRecord(record);
+          setActiveTab(1);
+        }}
+        sx={{ cursor: 'pointer' }}
+      >
+        <TableCell>
+          <HighlightedText text={record.name} highlight={searchQuery} />
+        </TableCell>
+        <TableCell>
+          <HighlightedText text={record.type} highlight={searchQuery} />
+        </TableCell>
+        <TableCell>
+          <HighlightedText text={record.date} highlight={searchQuery} />
+        </TableCell>
+      </TableRow>
+    ))}
+</TableBody>
                   </Table>
                 </TableContainer>
               </TableContainer>
@@ -541,8 +548,8 @@ const Records = () => {
                     backgroundColor: '#f5f5f5',
                     borderRadius: '4px',
                     border: '1px solid rgba(0, 0, 0, 0.12)',
-                    width: '32px', // Fixed width for arrow box
-                    height: '32px', // Fixed height
+                    width: '32px',
+                    height: '32px',
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -694,7 +701,6 @@ const Records = () => {
                         }
                       }}
                     >
-                      {/* ... existing tab content ... */}
                     </Box>
                   </Box>
                 </Modal>
@@ -705,47 +711,7 @@ const Records = () => {
         </Box>
               
         {/* Footer */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '40px',
-            backgroundColor: '#F5F5F4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '0 24px',
-            zIndex: 1,
-            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-<Typography
-            variant="body"
-            sx={{
-              mr: 112,
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            All Rights Reserved 2025 © COA Region X
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
-          </Typography>
-        </Box>
+        <Footer currentTime={currentTime} />
       </Box>
     </ThemeProvider>
   );
