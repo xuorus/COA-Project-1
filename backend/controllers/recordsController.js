@@ -90,8 +90,31 @@ const getDocuments = async (req, res) => {
   }
 };
 
+const getPersonHistory = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const [rows] = await pool.query(`
+      SELECT 
+        status AS activity,
+        timestamp AS date
+      FROM logs 
+      WHERE PID = ?
+      ORDER BY timestamp DESC
+    `, [pid]);
+
+    res.json(rows);
+  } catch (error) {
+    logger.error('Error fetching person history:', error);
+    res.status(500).json({ 
+      message: 'Error fetching history', 
+      error: error.message 
+    });
+  }
+};
+
 module.exports = {
   getRecords,
   getPersonDetails,
-  getDocuments
+  getDocuments,
+  getPersonHistory
 };
