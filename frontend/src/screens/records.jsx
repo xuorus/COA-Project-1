@@ -43,6 +43,9 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import axios from 'axios';
 import { Document, Page, pdfjs } from 'react-pdf';
+import PrintIcon from '@mui/icons-material/Print';
+import DownloadIcon from '@mui/icons-material/Download';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -104,6 +107,22 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
     e.stopPropagation();
   }, []);
 
+  const handlePrint = useCallback(() => {
+    const pdfUrl = `data:application/pdf;base64,${document}`;
+    const printWindow = window.open(pdfUrl);
+    printWindow.print();
+  }, [document]);
+
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([Buffer.from(document, 'base64')], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'document.pdf';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }, [document]);
+
   return (
     <Dialog
       open={Boolean(document)}
@@ -113,22 +132,85 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
       onClick={handleStopPropagation}
       PaperProps={{
         sx: {
-          width: '90vw',
-          height: '90vh',
-          maxWidth: '90vw',
-          m: 2,
-          bgcolor: 'background.paper',
-          position: 'relative'
+          width: '74vw',
+          height: '95vh',
+          maxWidth: '95vw',
+          maxHeight: '95vh',
+          m: 0,
+          bgcolor: '#202124',
+          position: 'relative',
+          borderRadius: 0
         }
       }}
     >
-      <AppBar position="relative" color="default" elevation={0}>
-        <Toolbar variant="dense">
-          <Typography sx={{ flex: 1 }} variant="h6">Document Viewer</Typography>
+      <AppBar 
+        position="relative" 
+        color="default" 
+        elevation={0}
+        sx={{
+          bgcolor: '#303134',
+          color: '#fff',
+          height: '48px',
+          minHeight: '48px'
+        }}
+      >
+        <Toolbar 
+          variant="dense"
+          sx={{
+            minHeight: '48px',
+            height: '48px',
+            px: 2,
+            gap: 1
+          }}
+        >
+          <Typography 
+            sx={{ 
+              flex: 1,
+              fontSize: '1rem',
+              color: '#fff'
+            }} 
+          >
+            Document Viewer
+          </Typography>
+          
+          <IconButton
+            onClick={handlePrint}
+            sx={{
+              color: '#fff',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+            }}
+          >
+            <PrintIcon />
+          </IconButton>
+
+          <IconButton
+            onClick={handleDownload}
+            sx={{
+              color: '#fff',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+            }}
+          >
+            <DownloadIcon />
+          </IconButton>
+
+          <IconButton
+            onClick={handleStopPropagation}
+            sx={{
+              color: '#fff',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+            }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+
           <IconButton
             edge="end"
             onClick={onClose}
             aria-label="close"
+            sx={{
+              color: '#fff',
+              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+            }}
           >
             <CloseIcon />
           </IconButton>
@@ -140,12 +222,23 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
           p: 0,
           overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          bgcolor: '#202124'
         }}
       >
         {document && (
-          <Box sx={{ flex: 1, overflow: 'hidden' }}>
-            <StablePDFViewer data={document} isPreview={false} />
+          <Box sx={{ 
+            flex: 1, 
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: 2
+          }}>
+            <StablePDFViewer 
+              data={document} 
+              isPreview={false} 
+            />
           </Box>
         )}
       </DialogContent>
