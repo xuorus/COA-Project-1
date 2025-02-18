@@ -103,7 +103,7 @@ const StablePDFViewer = React.memo(({ data, isPreview }) => {
 }, (prev, next) => prev.data === next.data && prev.isPreview === next.isPreview);
 
 // 2. Create a new DocumentViewerModal component
-const DocumentViewerModal = React.memo(({ document, onClose }) => {
+const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
   const handleStopPropagation = useCallback((e) => {
     e.stopPropagation();
   }, []);
@@ -133,7 +133,7 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
       onClick={handleStopPropagation}
       PaperProps={{
         sx: {
-          width: '74vw',
+          width: '63vw',
           height: '95vh',
           maxWidth: '95vw',
           maxHeight: '95vh',
@@ -168,10 +168,13 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
             sx={{ 
               flex: 1,
               fontSize: '1rem',
-              color: '#fff'
+              color: '#fff',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }} 
           >
-            Document Viewer
+            {name || 'Document Viewer'}
           </Typography>
           
           <IconButton
@@ -245,7 +248,7 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
       </DialogContent>
     </Dialog>
   );
-}, (prev, next) => prev.document === next.document);
+}, (prev, next) => prev.document === next.document && prev.name === next.name);
 
 const Records = () => {
   const navigate = useNavigate();
@@ -925,7 +928,6 @@ const handleDocumentClick = useCallback((documentData) => {
                       )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
-    <Typography variant="h6" gutterBottom>Documents</Typography>
     {!documents ? (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
@@ -1076,6 +1078,7 @@ const handleDocumentClick = useCallback((documentData) => {
         setSelectedDocument(null);
         setIsDocumentExpanded(false);
       }}
+      name={`${selectedRecord?.lName || ''}, ${selectedRecord?.fName || ''} ${selectedRecord?.mName ? selectedRecord?.mName.charAt(0) + '.' : ''}`.trim()}
     />
   </Box>
 )}
