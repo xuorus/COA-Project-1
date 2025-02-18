@@ -1,8 +1,12 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
 import PropTypes from 'prop-types';
 
 const Footer = ({ currentTime }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
   return (
     <Box
       sx={{
@@ -10,23 +14,27 @@ const Footer = ({ currentTime }) => {
         bottom: 0,
         left: 0,
         right: 0,
-        height: '40px',
+        height: { xs: '40px', sm: '40px', md: '40px' },
         backgroundColor: '#F5F5F4',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: '0 24px',
+        justifyContent: 'space-between',
+        padding: { xs: '0 12px', sm: '0 18px', md: '0 24px' },
         zIndex: 1,
+        flexDirection: 'row', // Force single row layout
       }}
     >
       <Typography
-        variant="body"
+        variant="body2"
         sx={{
-          mr: 112,
           color: '#000',
-          fontSize: '0.7rem',
+          fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
           fontFamily: 'roboto',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          whiteSpace: 'nowrap', // Prevent text wrapping
+          overflow: 'hidden',
+          textOverflow: 'ellipsis', // Add ellipsis if text overflows
+          maxWidth: { xs: '60%', sm: '70%', md: 'auto' },
         }}
       >
         All Rights Reserved 2025 © COA Region X
@@ -36,9 +44,10 @@ const Footer = ({ currentTime }) => {
         variant="body2"
         sx={{
           color: '#000',
-          fontSize: '0.7rem',
+          fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
           fontFamily: 'roboto',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          whiteSpace: 'nowrap', // Prevent text wrapping
         }}
       >
         {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
@@ -48,7 +57,7 @@ const Footer = ({ currentTime }) => {
 };
 
 Footer.propTypes = {
-    currentTime: PropTypes.instanceOf(Date).isRequired,
-  };
+  currentTime: PropTypes.instanceOf(Date).isRequired,
+};
 
 export default Footer;
