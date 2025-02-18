@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Typography,
@@ -23,6 +23,7 @@ import {
   Grid,
   Divider,
   TablePagination,
+  CircularProgress,
 } from '@mui/material';
 
 import { Menu, MenuItem } from '@mui/material';
@@ -37,6 +38,11 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import PropTypes from 'prop-types';
 import Header from '../components/header';
 import Footer from '../components/footer';
+import axios from 'axios';
+import { Document, Page, pdfjs } from 'react-pdf';
+
+// Add PDF worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 const theme = createTheme({
   palette: {
@@ -48,32 +54,7 @@ const theme = createTheme({
   
 // Sample data - replace with actual data later
 const sampleRecords = [
-  { id: 1, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-  { id: 2, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-  { id: 3, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-  { id: 4, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-  { id: 5, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-  { id: 6, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-  { id: 7, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-  { id: 8, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-  { id: 9, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-  { id: 10, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-  { id: 11, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-  { id: 12, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-  { id: 13, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-  { id: 14, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-  { id: 15, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-  { id: 16, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-  { id: 17, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-  { id: 18, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-  { id: 19, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-  { id: 20, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-  { id: 21, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' },
-  { id: 22, name: 'Alexander Cruz', type: 'PDS: PDS-2025-001, SALN: SALN-2025-002', date: 'January 15, 2025' },
-  { id: 23, name: 'Maria Gonzales', type: 'PDS: PDS-2025-003', date: 'February 10, 2025' },
-  { id: 24, name: 'Joshua Ramirez', type: 'PDS: PDS-2025-004, SALN: SALN-2025-002', date: 'March 22, 2025' },
-  { id: 25, name: 'Sofia Dela Cruz', type: 'PDS: PDS-2025-003, SALN: SALN-2025-005', date: 'April 5, 2025' },
-  { id: 26, name: 'Daniel Santos', type: 'PDS: PDS-2025-003', date: 'May 18, 2025' }
+  
 ];
 
 const HighlightedText = ({ text, highlight }) => {
@@ -118,6 +99,32 @@ HighlightedText.defaultProps = {
   text: '',
   highlight: ''
 };
+// 1. Update the StablePDFViewer component
+const StablePDFViewer = React.memo(({ data, isPreview }) => {
+  const pdfUrl = useMemo(() => 
+    data ? `data:application/pdf;base64,${data}` : '',
+    [data]
+  );
+
+  if (!data) return null;
+
+  return (
+    <Box sx={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+      <iframe
+        src={pdfUrl}
+        width="100%"
+        height="100%"
+        style={{ 
+          border: 'none',
+          pointerEvents: isPreview ? 'none' : 'auto' 
+        }}
+        title="PDF Preview"
+      />
+    </Box>
+  );
+}, (prev, next) => {
+  return prev.data === next.data && prev.isPreview === next.isPreview;
+});
 
 const Records = () => {
   const navigate = useNavigate();
@@ -132,6 +139,10 @@ const Records = () => {
   const [rowsPerPage] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortType, setSortType] = useState(null);
+  const [personDetails, setPersonDetails] = useState(null);
+  const [documents, setDocuments] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [isDocumentExpanded, setIsDocumentExpanded] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -140,6 +151,53 @@ const Records = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/records');
+        setRecords(response.data);
+      } catch (error) {
+        console.error('Error fetching records:', error);
+      }
+    };
+
+    fetchRecords();
+  }, []);
+
+  useEffect(() => {
+    if (selectedRecord) {
+      axios.get(`http://localhost:5000/api/records/${selectedRecord.PID}`)
+        .then(response => {
+          setPersonDetails(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching person details:', error);
+        });
+    }
+    return () => setPersonDetails(null);
+  }, [selectedRecord]);
+
+  const fetchDocuments = useCallback(async (pid) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/records/${pid}/documents`);
+      setDocuments(response.data);
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (selectedRecord?.PID && activeTab === 1) {
+      fetchDocuments(selectedRecord.PID);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedRecord?.PID, activeTab, fetchDocuments]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -165,13 +223,17 @@ const Records = () => {
     const sortedRecords = [...sampleRecords].sort((a, b) => {
       switch(type) {
         case 'az':
-          return a.name.localeCompare(b.name);
+          return `${a.lname || ''}, ${a.fname || ''}`.localeCompare(
+            `${b.lname || ''}, ${b.fname || ''}`
+          );
         case 'za':
-          return b.name.localeCompare(a.name);
+          return `${b.lname || ''}, ${b.fname || ''}`.localeCompare(
+            `${a.lname || ''}, ${a.fname || ''}`
+          );
         case 'newest':
-          return new Date(b.date) - new Date(a.date);
+          return new Date(b.dateCreated || 0) - new Date(a.dateCreated || 0);
         case 'oldest':
-          return new Date(a.date) - new Date(b.date);
+          return new Date(a.dateCreated || 0) - new Date(b.dateCreated || 0);
         default:
           return 0;
       }
@@ -184,17 +246,6 @@ const Records = () => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
     setPage(0); // Reset to first page (internally 0, displayed as 1)
-    
-    let filteredRecords;
-    if (query === '') {
-      filteredRecords = [...sampleRecords];
-    } else {
-      filteredRecords = sampleRecords.filter(record => 
-        record.name.toLowerCase().includes(query) ||
-        record.type.toLowerCase().includes(query) ||
-        record.date.toLowerCase().includes(query)
-      );
-    }
   
     // Maintain current sort if one is active
     if (sortType) {
@@ -214,8 +265,81 @@ const Records = () => {
       });
     }
     
+  
+    if (query === '') {
+      axios.get('http://localhost:5000/api/records')
+        .then(response => {
+          setRecords(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching records:', error);
+        });
+      return;
+    }
+  
+    const filteredRecords = records.filter(record =>
+      `${record.fname || ''} ${record.mname || ''} ${record.lname || ''}`.toLowerCase().includes(query) ||
+      (record.pdsID || '').toString().toLowerCase().includes(query) ||
+      (record.salnID || '').toString().toLowerCase().includes(query) ||
+      (record.dateCreated ? new Date(record.dateCreated).toLocaleDateString() : '').toLowerCase().includes(query)
+    );
+  
     setRecords(filteredRecords);
   };
+
+// 3. Update the click handler for documents
+const handleDocumentClick = useCallback((documentData) => {
+  if (!documentData) return;
+  setSelectedDocument(prevDoc => prevDoc === documentData ? prevDoc : documentData);
+}, []);
+
+// 2. Update the DocumentViewerModal component
+const DocumentViewerModal = React.memo(({ document, onClose }) => {
+  const handleStopPropagation = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
+
+  return (
+    <Modal
+      open={Boolean(document)}
+      onClose={onClose}
+      keepMounted={false}
+      disableAutoFocus
+      disableEnforceFocus
+      disablePortal
+      onClick={handleStopPropagation}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Box
+        onClick={handleStopPropagation}
+        sx={{
+          backgroundColor: 'white',
+          borderRadius: 1,
+          p: 2,
+          width: '90vw',
+          height: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+          {document && <StablePDFViewer data={document} isPreview={false} />}
+        </Box>
+      </Box>
+    </Modal>
+  );
+}, (prev, next) => prev.document === next.document);
+
+  DocumentViewerModal.displayName = 'DocumentViewerModal';
 
   return (
     <ThemeProvider theme={theme}>
@@ -461,7 +585,7 @@ const Records = () => {
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
     .map((record) => (
       <TableRow 
-        key={record.id} 
+        key={record.PID} 
         hover 
         onClick={() => {
           setSelectedRecord(record);
@@ -470,13 +594,20 @@ const Records = () => {
         sx={{ cursor: 'pointer' }}
       >
         <TableCell>
-          <HighlightedText text={record.name} highlight={searchQuery} />
+          {`${record.lName || ''}, ${record.fName || ''} ${record.mName ? record.mName.charAt(0) + '.' : ''}`.trim() || 'No name'}
         </TableCell>
         <TableCell>
-          <HighlightedText text={record.type} highlight={searchQuery} />
+          {[
+            record.pdsID && `PDS: ${record.pdsID}`,
+            record.salnID && `SALN: ${record.salnID}`
+          ].filter(Boolean).join(' | ') || 'No documents'}
         </TableCell>
         <TableCell>
-          <HighlightedText text={record.date} highlight={searchQuery} />
+          {record.date ? new Date(record.date).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }) : 'No date'}
         </TableCell>
       </TableRow>
     ))}
@@ -701,6 +832,152 @@ const Records = () => {
                         }
                       }}
                     >
+                      {activeTab === 0 && (
+                        <Box sx={{ p: 2 }}>
+                          <Typography variant="h6" gutterBottom>Personal Information</Typography>
+                          {personDetails && (
+                            <Grid container spacing={2}>
+                              <Grid item xs={12}>
+                                <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
+                              </Grid>
+                              <Grid item xs={12}>
+                                <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
+                              </Grid>
+                            </Grid>
+                          )}
+                        </Box>
+                      )}
+                      {activeTab === 1 && (
+  <Box sx={{ p: 2 }}>
+    <Typography variant="h6" gutterBottom>Documents</Typography>
+    {!documents ? (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress />
+      </Box>
+    ) : (
+      <Grid container spacing={2}>
+        {documents?.pds && (
+          <Grid item xs={12} md={6}>
+            <Paper 
+              elevation={3}
+              sx={{ 
+                p: 2,
+                height: '400px',
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.02)'
+                }
+              }}
+              onClick={() => handleDocumentClick(documents.pds.data)}
+            >
+              <Typography variant="subtitle1" gutterBottom>
+                Personal Data Sheet
+              </Typography>
+              <Box 
+                sx={{ 
+                  flex: 1,
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderRadius: 1,
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                {documents.pds.data ? (
+                  <StablePDFViewer 
+                    data={documents.pds.data} 
+                    isPreview={true}
+                  />
+                ) : (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    height: '100%'
+                  }}>
+                    <Typography color="text.secondary">No PDS available</Typography>
+                  </Box>
+                )}
+              </Box>
+            </Paper>
+          </Grid>
+        )}
+        
+        {documents?.saln && (
+          <Grid item xs={12} md={6}>
+            <Paper 
+              elevation={3}
+              sx={{ 
+                p: 2,
+                height: '400px',
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.02)'
+                }
+              }}
+              onClick={() => handleDocumentClick(documents.saln.data)}
+            >
+              <Typography variant="subtitle1" gutterBottom>
+                Statement of Assets, Liabilities and Net Worth
+              </Typography>
+              <Box 
+                sx={{ 
+                  flex: 1,
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderRadius: 1,
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}
+              >
+                {documents.saln.data ? (
+                  <StablePDFViewer 
+                    data={documents.saln.data} 
+                    isPreview={true}
+                  />
+                ) : (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    height: '100%'
+                  }}>
+                    <Typography color="text.secondary">No SALN available</Typography>
+                  </Box>
+                )}
+              </Box>
+            </Paper>
+          </Grid>
+        )}
+
+        {(!documents.pds && !documents.saln) && (
+          <Grid item xs={12}>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              p: 4 
+            }}>
+              <Typography color="text.secondary">No documents available</Typography>
+            </Box>
+          </Grid>
+        )}
+      </Grid>
+    )}
+
+    <DocumentViewerModal
+      document={selectedDocument}
+      onClose={() => {
+        setSelectedDocument(null);
+        setIsDocumentExpanded(false);
+      }}
+    />
+  </Box>
+)}
                     </Box>
                   </Box>
                 </Modal>

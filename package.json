@@ -44,5 +44,8 @@
     "electron-builder": "^25.1.8",
     "electron-is-dev": "^3.0.1",
     "wait-on": "^8.0.2"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.2.1"
   }
 }
