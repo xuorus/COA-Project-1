@@ -394,82 +394,93 @@ const Main = () => {
                     { label: 'Middle Name', required: false, field: 'middleName' },
                     { label: 'Last Name', required: true, field: 'lastName' }
                   ].map((field) => (
-                    <FormControl
+                    <Box 
                       key={field.label}
-                      fullWidth
-                      required={field.required}
-                      error={formErrors[field.field]}
                       sx={{ 
-                        mt: 1,
-                        '& .MuiOutlinedInput-root': {
-                          width: '80%',
-                          borderRadius: '15px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                          fontFamily: 'Roboto',
-                          height: '45px',
-                          '& fieldset': {
-                            borderColor: 'rgba(0, 0, 0, 0.23)',
-                          },
-                          '&:hover fieldset': {
-                            borderColor: 'rgba(0, 0, 0, 0.5)',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#1976d2',
-                          },
-                          '&.Mui-error fieldset': {
-                            borderColor: '#d32f2f',
-                          },
-                          '&.Mui-error.Mui-focused fieldset': {
-                            borderColor: '#d32f2f',
-                          }
-                        },
-                        '& .MuiInputLabel-root': {
-                          color: 'rgba(0, 0, 0, 0.6)',
-                          fontFamily: 'Roboto',
-                          transform: 'translate(14px, 12px) scale(1)',
-                          '&.Mui-focused, &.MuiFormLabel-filled': {
-                            transform: 'translate(14px, -9px) scale(0.75)',
-                          },
-                          '&.Mui-focused': {
-                            color: '#1976d2',
-                          },
-                          '&.Mui-error': {
-                            color: '#d32f2f',
-                          }
-                        }
+                        position: 'relative',  // Add position relative to contain error message
+                        mb: 2  // Add margin bottom for spacing
                       }}
                     >
-                      <InputLabel error={formErrors[field.field]}>{field.label}</InputLabel>
-                      <OutlinedInput
-                        label={field.label}
+                      <FormControl
+                        fullWidth
                         required={field.required}
-                        value={formValues[field.field]}
-                        onChange={handleInputChange(field.field)}
                         error={formErrors[field.field]}
-                        onBlur={() => {
-                          if (field.required) {
-                            setFormErrors(prev => ({
-                              ...prev,
-                              [field.field]: formValues[field.field].trim() === ''
-                            }));
+                        sx={{ 
+                          '& .MuiOutlinedInput-root': {
+                            width: '80%',
+                            borderRadius: '15px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                            fontFamily: 'Roboto',
+                            height: '45px',
+                            '& fieldset': {
+                              borderColor: 'rgba(0, 0, 0, 0.23)',
+                            },
+                            '&:hover fieldset': {
+                              borderColor: 'rgba(0, 0, 0, 0.5)',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#1976d2',
+                            },
+                            '&.Mui-error fieldset': {
+                              borderColor: '#d32f2f',
+                            },
+                            '&.Mui-error.Mui-focused fieldset': {
+                              borderColor: '#d32f2f',
+                            }
+                          },
+                          '& .MuiInputLabel-root': {
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontFamily: 'Roboto',
+                            transform: 'translate(14px, 12px) scale(1)',
+                            '&.Mui-focused, &.MuiFormLabel-filled': {
+                              transform: 'translate(14px, -9px) scale(0.75)',
+                            },
+                            '&.Mui-focused': {
+                              color: '#1976d2',
+                            },
+                            '&.Mui-error': {
+                              color: '#d32f2f',
+                            }
                           }
                         }}
-                        sx={{
-                          '& input': {
-                            padding: '8px 14px',
-                          }
-                        }}
-                      />
-                      {formErrors[field.field] && (
-                        <Typography 
-                          variant="caption" 
-                          color="error" 
-                          sx={{ ml: 2, mt: 0.5 }}
-                        >
-                          This field is required
-                        </Typography>
-                      )}
-                    </FormControl>
+                      >
+                        <InputLabel error={formErrors[field.field]}>{field.label}</InputLabel>
+                        <OutlinedInput
+                          label={field.label}
+                          required={field.required}
+                          value={formValues[field.field]}
+                          onChange={handleInputChange(field.field)}
+                          error={formErrors[field.field]}
+                          onBlur={() => {
+                            if (field.required) {
+                              setFormErrors(prev => ({
+                                ...prev,
+                                [field.field]: formValues[field.field].trim() === ''
+                              }));
+                            }
+                          }}
+                          sx={{
+                            '& input': {
+                              padding: '8px 14px',
+                            }
+                          }}
+                        />
+                        {formErrors[field.field] && (
+                          <Typography 
+                            variant="caption" 
+                            color="error"
+                            sx={{ 
+                              position: 'absolute',  // Position error message absolutely
+                              bottom: -20,          // Position below the input
+                              left: 2,              // Align with input padding
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            This field is required
+                          </Typography>
+                        )}
+                      </FormControl>
+                    </Box>
                   ))}
                 </Box>
 
