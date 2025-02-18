@@ -5,6 +5,7 @@ const requestLogger = require('./middleware/logger');
 const scanRoutes = require('./routes/scanRoutes');
 const logsRouter = require('./routes/logs');
 const recordsRouter = require('./routes/records');
+const uploadRouter = require('./routes/uploadRouter');
 
 const app = express();
 

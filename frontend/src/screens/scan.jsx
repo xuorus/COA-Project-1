@@ -15,6 +15,8 @@ import Footer from '../components/footer';
 import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
+import Dynamsoft from 'dwt';
+import axios from 'axios';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -99,6 +101,7 @@ const Main = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  
 
   const [formValues, setFormValues] = useState({
     firstName: '',
@@ -179,6 +182,46 @@ const Main = () => {
 
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    Dynamsoft.DWT.RegisterEvent('OnWebTwainReady', () => {
+      console.log('Dynamsoft WebTWAIN is ready');
+    });
+    Dynamsoft.DWT.Load();
+  }, []);
+
+  const handleScan = async () => {
+    try {
+      const DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrolContainer');
+      if (DWObject) {
+        DWObject.SelectSource();
+        DWObject.AcquireImage({
+          IfShowUI: false,
+          IfFeederEnabled: true,
+          IfDisableSourceAfterAcquire: true,
+          OnAcquireImageSuccess: async (sImageIndex, sImageCount) => {
+            const scannedImage = DWObject.SaveAsBlob([sImageIndex]);
+            const formData = new FormData();
+            formData.append('file', scannedImage, 'scannedDocument.pdf');
+
+            const response = await axios.post('http://localhost:3001/upload', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+
+            const pdfUrl = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+            setPdfFile(pdfUrl);
+          },
+          OnAcquireImageFailure: (errorCode, errorString) => {
+            console.error('Error acquiring image:', errorString);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error scanning document:', error);
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -342,42 +385,35 @@ const Main = () => {
                 </FormControl>
 
                 {/* PDF Upload Box */}
+                <Button variant="contained" color="primary" onClick={handleScan}>
+                  Scan Document
+                </Button>
                 <Box
-                  onClick={() => fileInputRef.current?.click()}
+                  id="dwtcontrolContainer"
                   sx={{
                     width: '100%',
                     flex: 1,
                     maxWidth: '300px',
-                    aspectRatio: '1 / 1.4142', // A4 paper ratio
+                    aspectRatio: '1 / 1.4142',
                     margin: '0 auto',
-                    border: '1px solid rgba(0, 0, 0, 0.2)', // Changed from dashed to solid
+                    border: '1px solid rgba(0, 0, 0, 0.2)',
                     borderRadius: 2,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'rgba(138, 138, 138, 0.9)', // Changed to light gray
+                    backgroundColor: 'rgba(138, 138, 138, 0.9)',
                     cursor: 'pointer',
                     overflow: 'hidden',
                     boxShadow: 'inset 0 2px 4px rgba(32, 32, 32, 0.77)'
                   }}
                 >
                   {pdfFile ? (
-                    <Document
-                      file={pdfFile}
-                      onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                      onLoadError={(error) => console.error('Error loading PDF:', error)}
-                    >
-                      <Page
-                        pageNumber={pageNumber}
-                        width={400}
-                        renderTextLayer={false}
-                        renderAnnotationLayer={false}
-                      />
+                    <Document file={pdfFile}>
+                      <Page pageNumber={1} width={400} />
                     </Document>
                   ) : (
-                    <Typography>
-                    </Typography>
+                    <Typography>Click to scan a document</Typography>
                   )}
                 </Box>
               </Box>

@@ -653,7 +653,7 @@ const handleDocumentClick = useCallback((documentData) => {
                   }}
                 >
                   <Table>
-                  <TableBody>
+ <TableBody>
   {records
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
     .map((record) => (
@@ -669,7 +669,7 @@ const handleDocumentClick = useCallback((documentData) => {
         <TableCell>
           {`${record.lName || ''}, ${record.fName || ''} ${record.mName ? record.mName.charAt(0) + '.' : ''}`.trim() || 'No name'}
         </TableCell>
-        <TableCell>
+        <TableCell align="left" >
           {[
             record.pdsID && `PDS: ${record.pdsID}`,
             record.salnID && `SALN: ${record.salnID}`
