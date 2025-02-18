@@ -15,6 +15,8 @@ import Footer from '../components/footer';
 import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
+import Dynamsoft from 'dwt';
+import axios from 'axios';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -99,6 +101,7 @@ const Main = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  
 
   const [formValues, setFormValues] = useState({
     firstName: '',
@@ -173,12 +176,83 @@ const Main = () => {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
+    // Initialize Dynamsoft settings
+    Dynamsoft.DWT.ResourcesPath = "/dwt-resources";
+    Dynamsoft.DWT.ProductKey = "YOUR_PRODUCT_KEY"; // Replace with your license key
+    
+    // Load and configure the scanner
+    Dynamsoft.DWT.Load().then(() => {
+      const DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrolContainer');
+      if (DWObject) {
+        // Get all available sources
+        DWObject.GetSourceNames().then(sources => {
+          // Find Canon scanner in the sources list
+          const canonScanner = sources.find(source => 
+            source.toLowerCase().includes('canon') && 
+            source.toLowerCase().includes('dr-m260')
+          );
+          
+          if (canonScanner) {
+            // Set as default source
+            DWObject.SelectSourceByIndex(sources.indexOf(canonScanner));
+            console.log('Canon scanner selected:', canonScanner);
+          }
+        });
+      }
+    });
   }, []);
+  
+  const handleScan = async () => {
+    try {
+      const DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrolContainer');
+      if (DWObject) {
+        // Configure scanner settings
+        DWObject.IfShowUI = false; // Hide scanner interface
+        DWObject.PixelType = Dynamsoft.DWT.EnumDWT_PixelType.TWPT_RGB;
+        DWObject.Resolution = 300;
+        DWObject.IfFeederEnabled = true;
+        DWObject.IfDuplexEnabled = false;
+        
+        // Start scanning directly
+        DWObject.AcquireImage({
+          OnPreTransfer: function(count) {
+            console.log('Scanning page:', count);
+          },
+          OnPostTransfer: function() {
+            console.log('Page scanned successfully');
+          },
+          OnPostAllTransfers: async function() {
+            // Convert scanned image to PDF
+            const scannedImage = await DWObject.ConvertToBlob(
+              [0],
+              Dynamsoft.DWT.EnumDWT_ImageType.IT_PDF
+            );
+            
+            // Create form data and send to server
+            const formData = new FormData();
+            formData.append('file', scannedImage, 'scannedDocument.pdf');
+  
+            const response = await axios.post('http://localhost:3001/upload', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            });
+  
+            // Display the scanned document
+            const pdfUrl = URL.createObjectURL(
+              new Blob([response.data], { type: 'application/pdf' })
+            );
+            setPdfFile(pdfUrl);
+          },
+          OnAcquireImageFailure: function(errorCode, errorString) {
+            console.error('Scanning failed:', errorString);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error scanning document:', error);
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -343,43 +417,36 @@ const Main = () => {
 
                 {/* PDF Upload Box */}
                 <Box
-                  onClick={() => fileInputRef.current?.click()}
+                  id="dwtcontrolContainer"
                   sx={{
                     width: '100%',
                     flex: 1,
                     maxWidth: '300px',
-                    aspectRatio: '1 / 1.4142', // A4 paper ratio
+                    aspectRatio: '1 / 1.4142',
                     margin: '0 auto',
-                    border: '1px solid rgba(0, 0, 0, 0.2)', // Changed from dashed to solid
+                    border: '1px solid rgba(0, 0, 0, 0.2)',
                     borderRadius: 2,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'rgba(138, 138, 138, 0.9)', // Changed to light gray
+                    backgroundColor: 'rgba(138, 138, 138, 0.9)',
                     cursor: 'pointer',
                     overflow: 'hidden',
                     boxShadow: 'inset 0 2px 4px rgba(32, 32, 32, 0.77)'
                   }}
                 >
                   {pdfFile ? (
-                    <Document
-                      file={pdfFile}
-                      onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                      onLoadError={(error) => console.error('Error loading PDF:', error)}
-                    >
-                      <Page
-                        pageNumber={pageNumber}
-                        width={400}
-                        renderTextLayer={false}
-                        renderAnnotationLayer={false}
-                      />
+                    <Document file={pdfFile}>
+                      <Page pageNumber={1} width={400} />
                     </Document>
                   ) : (
-                    <Typography>
-                    </Typography>
+                    <Typography>Click to scan a document</Typography>
                   )}
                 </Box>
+                <Button variant="contained" color="primary" onClick={handleScan}>
+                  Scan Document
+                </Button>
               </Box>
 
               {/* Right Column - Information Fields */}
