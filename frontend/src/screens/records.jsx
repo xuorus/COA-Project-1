@@ -957,7 +957,6 @@ const handleDocumentClick = useCallback((documentData) => {
                       )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
-    <Typography variant="h6" gutterBottom>Documents</Typography>
     {!documents ? (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
