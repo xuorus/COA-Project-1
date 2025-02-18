@@ -176,45 +176,76 @@ const Main = () => {
   };
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    Dynamsoft.DWT.RegisterEvent('OnWebTwainReady', () => {
-      console.log('Dynamsoft WebTWAIN is ready');
+    // Initialize Dynamsoft settings
+    Dynamsoft.DWT.ResourcesPath = "/dwt-resources";
+    Dynamsoft.DWT.ProductKey = "YOUR_PRODUCT_KEY"; // Replace with your license key
+    
+    // Load and configure the scanner
+    Dynamsoft.DWT.Load().then(() => {
+      const DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrolContainer');
+      if (DWObject) {
+        // Get all available sources
+        DWObject.GetSourceNames().then(sources => {
+          // Find Canon scanner in the sources list
+          const canonScanner = sources.find(source => 
+            source.toLowerCase().includes('canon') && 
+            source.toLowerCase().includes('dr-m260')
+          );
+          
+          if (canonScanner) {
+            // Set as default source
+            DWObject.SelectSourceByIndex(sources.indexOf(canonScanner));
+            console.log('Canon scanner selected:', canonScanner);
+          }
+        });
+      }
     });
-    Dynamsoft.DWT.Load();
   }, []);
-
+  
   const handleScan = async () => {
     try {
       const DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrolContainer');
       if (DWObject) {
-        DWObject.SelectSource();
+        // Configure scanner settings
+        DWObject.IfShowUI = false; // Hide scanner interface
+        DWObject.PixelType = Dynamsoft.DWT.EnumDWT_PixelType.TWPT_RGB;
+        DWObject.Resolution = 300;
+        DWObject.IfFeederEnabled = true;
+        DWObject.IfDuplexEnabled = false;
+        
+        // Start scanning directly
         DWObject.AcquireImage({
-          IfShowUI: false,
-          IfFeederEnabled: true,
-          IfDisableSourceAfterAcquire: true,
-          OnAcquireImageSuccess: async (sImageIndex, sImageCount) => {
-            const scannedImage = DWObject.SaveAsBlob([sImageIndex]);
+          OnPreTransfer: function(count) {
+            console.log('Scanning page:', count);
+          },
+          OnPostTransfer: function() {
+            console.log('Page scanned successfully');
+          },
+          OnPostAllTransfers: async function() {
+            // Convert scanned image to PDF
+            const scannedImage = await DWObject.ConvertToBlob(
+              [0],
+              Dynamsoft.DWT.EnumDWT_ImageType.IT_PDF
+            );
+            
+            // Create form data and send to server
             const formData = new FormData();
             formData.append('file', scannedImage, 'scannedDocument.pdf');
-
+  
             const response = await axios.post('http://localhost:3001/upload', formData, {
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
             });
-
-            const pdfUrl = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+  
+            // Display the scanned document
+            const pdfUrl = URL.createObjectURL(
+              new Blob([response.data], { type: 'application/pdf' })
+            );
             setPdfFile(pdfUrl);
           },
-          OnAcquireImageFailure: (errorCode, errorString) => {
-            console.error('Error acquiring image:', errorString);
+          OnAcquireImageFailure: function(errorCode, errorString) {
+            console.error('Scanning failed:', errorString);
           }
         });
       }
@@ -385,9 +416,6 @@ const Main = () => {
                 </FormControl>
 
                 {/* PDF Upload Box */}
-                <Button variant="contained" color="primary" onClick={handleScan}>
-                  Scan Document
-                </Button>
                 <Box
                   id="dwtcontrolContainer"
                   sx={{
@@ -416,6 +444,9 @@ const Main = () => {
                     <Typography>Click to scan a document</Typography>
                   )}
                 </Box>
+                <Button variant="contained" color="primary" onClick={handleScan}>
+                  Scan Document
+                </Button>
               </Box>
 
               {/* Right Column - Information Fields */}

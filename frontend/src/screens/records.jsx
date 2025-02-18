@@ -267,6 +267,7 @@ const Records = () => {
   const [documents, setDocuments] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isDocumentExpanded, setIsDocumentExpanded] = useState(false);
+  const [history, setHistory] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -322,6 +323,18 @@ const Records = () => {
       isMounted = false;
     };
   }, [selectedRecord?.PID, activeTab, fetchDocuments]);
+
+  useEffect(() => {
+    if (selectedRecord?.PID && activeTab === 2) {
+      axios.get(`http://localhost:5000/api/records/${selectedRecord.PID}/history`)
+        .then(response => {
+          setHistory(response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching history:', error);
+        });
+    }
+  }, [selectedRecord?.PID, activeTab]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -867,75 +880,75 @@ const handleDocumentClick = useCallback((documentData) => {
       }}
     >
 
-<Box sx={{ 
-  display: 'flex', 
-  justifyContent: 'space-between', 
-  alignItems: 'center',
-  borderBottom: 1, 
-  borderColor: 'divider', 
-  mb: 2
-}}>
-  <Tabs 
-    value={activeTab} 
-    onChange={(e, newValue) => setActiveTab(newValue)}
-    sx={{ 
-      '& .MuiTab-root': {
-        '&:focus': {
-          outline: 'none'
-        },
-        '&.Mui-selected': {
-          color: '#1976d2',
-        },
-        '&.Mui-focusVisible': {
-          backgroundColor: 'rgba(0, 0, 0, 0.04)',
-        }
-      },
-      '& .MuiTabs-indicator': {
-        backgroundColor: '#1976d2',
-      }
-    }}
-  >
-    <Tab 
-      label="Personal Details" 
-      sx={{
-        '&.Mui-selected': {
-          color: '#1976d2',
-        }
-      }}
-    />
-    <Tab 
-      label="Documents" 
-      sx={{
-        '&.Mui-selected': {
-          color: '#1976d2',
-        }
-      }}
-    />
-    <Tab 
-      label="History" 
-      sx={{
-        '&.Mui-selected': {
-          color: '#1976d2',
-        }
-      }}
-    />
-  </Tabs>
-  <IconButton
-    onClick={handleClose}
-    size="small"
-    sx={{
-      color: '#000',
-      mr: 1,
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-      '&:focus': { outline: 'none' }
-    }}
-  >
-    <CloseIcon />
-  </IconButton>
-</Box>
-
                     {/* Fixed tabs */}
-                    
+                    <Box 
+    sx={{ 
+      display: 'flex',
+      alignItems: 'center',
+      borderBottom: 1,
+      borderColor: 'divider',
+      mb: 2,
+    }}
+  >
+    <Tabs 
+      value={activeTab} 
+      onChange={(e, newValue) => setActiveTab(newValue)}
+      sx={{ 
+        flex: 1,
+        '& .MuiTab-root': {
+          '&:focus': {
+            outline: 'none'
+          },
+          '&.Mui-selected': {
+            color: '#1976d2',
+          },
+          '&.Mui-focusVisible': {
+            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          }
+        },
+        '& .MuiTabs-indicator': {
+          backgroundColor: '#1976d2',
+        }
+      }}
+    >
+      <Tab 
+        label="Personal Details" 
+        sx={{
+          '&.Mui-selected': {
+            color: '#1976d2',
+          }
+        }}
+      />
+      <Tab 
+        label="Documents" 
+        sx={{
+          '&.Mui-selected': {
+            color: '#1976d2',
+          }
+        }}
+      />
+      <Tab 
+        label="History" 
+        sx={{
+          '&.Mui-selected': {
+            color: '#1976d2',
+          }
+        }}
+      />
+    </Tabs>
+    <IconButton
+      edge="end"
+      onClick={handleClose}
+      sx={{
+        ml: 2,
+        '&:hover': { 
+          backgroundColor: 'rgba(0, 0, 0, 0.04)' 
+        }
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </Box>
 
                     {/* Scrollable content area */}
                     <Box 
@@ -961,7 +974,7 @@ const handleDocumentClick = useCallback((documentData) => {
                     >
                       {activeTab === 0 && (
                         <Box sx={{ p: 2 }}>
-                          <Typography variant="h6" gutterBottom>Personal Information</Typography>
+                          <Typography variant="h6" mb={2} gutterBottom>Personal Information</Typography>
                           {personDetails && (
                             <Grid container spacing={2}>
                               <Grid item xs={12}>
@@ -979,6 +992,7 @@ const handleDocumentClick = useCallback((documentData) => {
                       )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
+    <Typography variant="h6" mb={2} gutterBottom>List of Documents</Typography>
     {!documents ? (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
@@ -1131,6 +1145,60 @@ const handleDocumentClick = useCallback((documentData) => {
       }}
       name={`${selectedRecord?.lName || ''}, ${selectedRecord?.fName || ''} ${selectedRecord?.mName ? selectedRecord?.mName.charAt(0) + '.' : ''}`.trim()}
     />
+  </Box>
+)}
+{activeTab === 2 && (
+  <Box sx={{ p: 2 }}>
+    <Typography variant="h6" mb={2} gutterBottom>Activity History</Typography>
+    {!history ? (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress />
+      </Box>
+    ) : history.length === 0 ? (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <Typography color="text.secondary">No history available</Typography>
+      </Box>
+    ) : (
+      <Box
+        sx={{
+          '& > :not(:last-child)': {
+            mb: 2
+          }
+        }}
+      >
+        {history.map((entry, index) => (
+          <Paper
+            key={index}
+            elevation={1}
+            sx={{
+              p: 2,
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: 1
+            }}
+          >
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>
+                  {entry.activity}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                  {new Date(entry.date).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
+        ))}
+      </Box>
+    )}
   </Box>
 )}
                     </Box>
