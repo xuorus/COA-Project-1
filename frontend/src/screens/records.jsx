@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Typography,
@@ -24,6 +24,10 @@ import {
   Divider,
   TablePagination,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  AppBar,
+  Toolbar,
 } from '@mui/material';
 
 import { Menu, MenuItem } from '@mui/material';
@@ -57,74 +61,98 @@ const sampleRecords = [
   
 ];
 
-const HighlightedText = ({ text, highlight }) => {
-  // Convert text to string to handle any type
-  const stringText = String(text || '');
-  const stringHighlight = String(highlight || '');
-
-  if (!stringHighlight.trim()) {
-    return <span>{stringText}</span>;
-  }
-  
-  // Escape special characters in the highlight text
-  const escapedHighlight = stringHighlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${escapedHighlight})`, 'gi');
-  const parts = stringText.split(regex);
-  
-  return (
-    <span>
-      {parts.map((part, index) => 
-        regex.test(part) ? (
-          <span key={index} style={{ backgroundColor: 'yellow', fontWeight: 'bold' }}>
-            {part}
-          </span>
-        ) : (
-          <span key={index}>{part}</span>
-        )
-      )}
-    </span>
-  );
-};
-
-HighlightedText.propTypes = {
-  text: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number
-  ]).isRequired,
-  highlight: PropTypes.string.isRequired
-};
-
-// Add default props
-HighlightedText.defaultProps = {
-  text: '',
-  highlight: ''
-};
-// 1. Update the StablePDFViewer component
+// 1. Update the StablePDFViewer component for preview mode
 const StablePDFViewer = React.memo(({ data, isPreview }) => {
-  const pdfUrl = useMemo(() => 
-    data ? `data:application/pdf;base64,${data}` : '',
-    [data]
-  );
-
-  if (!data) return null;
+  const iframeRef = useRef(null);
+  const pdfUrl = useMemo(() => {
+    if (!data) return '';
+    return `data:application/pdf;base64,${data}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+  }, [data]);
 
   return (
-    <Box sx={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+    <Box 
+      sx={{ 
+        width: '100%', 
+        height: '100%', 
+        position: 'relative',
+        overflow: 'hidden',
+        backgroundColor: isPreview ? 'transparent' : 'grey.100',
+        borderRadius: isPreview ? 1 : 0,
+      }}
+    >
       <iframe
+        ref={iframeRef}
         src={pdfUrl}
         width="100%"
         height="100%"
         style={{ 
           border: 'none',
-          pointerEvents: isPreview ? 'none' : 'auto' 
+          pointerEvents: isPreview ? 'none' : 'auto',
+          transform: isPreview ? 'scale(1.45)' : 'none',
+          transformOrigin: 'center center',
         }}
-        title="PDF Preview"
+        title="PDF Viewer"
+        frameBorder="0"
+        scrolling="no"
       />
     </Box>
   );
-}, (prev, next) => {
-  return prev.data === next.data && prev.isPreview === next.isPreview;
-});
+}, (prev, next) => prev.data === next.data && prev.isPreview === next.isPreview);
+
+// 2. Create a new DocumentViewerModal component
+const DocumentViewerModal = React.memo(({ document, onClose }) => {
+  const handleStopPropagation = useCallback((e) => {
+    e.stopPropagation();
+  }, []);
+
+  return (
+    <Dialog
+      open={Boolean(document)}
+      onClose={onClose}
+      maxWidth={false}
+      fullWidth
+      onClick={handleStopPropagation}
+      PaperProps={{
+        sx: {
+          width: '90vw',
+          height: '90vh',
+          maxWidth: '90vw',
+          m: 2,
+          bgcolor: 'background.paper',
+          position: 'relative'
+        }
+      }}
+    >
+      <AppBar position="relative" color="default" elevation={0}>
+        <Toolbar variant="dense">
+          <Typography sx={{ flex: 1 }} variant="h6">Document Viewer</Typography>
+          <IconButton
+            edge="end"
+            onClick={onClose}
+            aria-label="close"
+          >
+            <CloseIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      
+      <DialogContent 
+        sx={{ 
+          p: 0,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {document && (
+          <Box sx={{ flex: 1, overflow: 'hidden' }}>
+            <StablePDFViewer data={document} isPreview={false} />
+          </Box>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}, (prev, next) => prev.document === next.document);
 
 const Records = () => {
   const navigate = useNavigate();
@@ -287,59 +315,11 @@ const Records = () => {
     setRecords(filteredRecords);
   };
 
-// 3. Update the click handler for documents
+// 3. Update the document click handler
 const handleDocumentClick = useCallback((documentData) => {
   if (!documentData) return;
-  setSelectedDocument(prevDoc => prevDoc === documentData ? prevDoc : documentData);
+  setSelectedDocument(documentData);
 }, []);
-
-// 2. Update the DocumentViewerModal component
-const DocumentViewerModal = React.memo(({ document, onClose }) => {
-  const handleStopPropagation = useCallback((e) => {
-    e.stopPropagation();
-  }, []);
-
-  return (
-    <Modal
-      open={Boolean(document)}
-      onClose={onClose}
-      keepMounted={false}
-      disableAutoFocus
-      disableEnforceFocus
-      disablePortal
-      onClick={handleStopPropagation}
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Box
-        onClick={handleStopPropagation}
-        sx={{
-          backgroundColor: 'white',
-          borderRadius: 1,
-          p: 2,
-          width: '90vw',
-          height: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
-          <IconButton onClick={onClose}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
-          {document && <StablePDFViewer data={document} isPreview={false} />}
-        </Box>
-      </Box>
-    </Modal>
-  );
-}, (prev, next) => prev.document === next.document);
-
-  DocumentViewerModal.displayName = 'DocumentViewerModal';
 
   return (
     <ThemeProvider theme={theme}>
@@ -869,22 +849,36 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 cursor: 'pointer',
+                backgroundColor: 'rgba(27, 27, 27, 0.95)', // Updated to consistent dark color
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.02)'
-                }
+                  backgroundColor: 'rgba(27, 27, 27, 0.85)' // Slightly lighter on hover
+                },
+                position: 'relative',
+                overflow: 'hidden'
               }}
               onClick={() => handleDocumentClick(documents.pds.data)}
             >
-              <Typography variant="subtitle1" gutterBottom>
+              <Typography 
+                variant="subtitle1" 
+                gutterBottom
+                sx={{
+                  color: 'white',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  mb: 2,
+                  fontWeight: 500
+                }}
+              >
                 Personal Data Sheet
               </Typography>
               <Box 
                 sx={{ 
                   flex: 1,
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  borderRadius: 1,
                   overflow: 'hidden',
-                  position: 'relative'
+                  position: 'relative',
+                  backgroundColor: '#fff',
+                  border: '1px solid rgba(255, 255, 255, 0.1)' // Updated border color
                 }}
               >
                 {documents.pds.data ? (
@@ -917,22 +911,36 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 cursor: 'pointer',
+                backgroundColor: 'rgba(27, 27, 27, 0.95)', // Same dark color
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.02)'
-                }
+                  backgroundColor: 'rgba(27, 27, 27, 0.85)' // Same hover effect
+                },
+                position: 'relative',
+                overflow: 'hidden'
               }}
               onClick={() => handleDocumentClick(documents.saln.data)}
             >
-              <Typography variant="subtitle1" gutterBottom>
+              <Typography 
+                variant="subtitle1" 
+                gutterBottom
+                sx={{
+                  color: 'white',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  mb: 2,
+                  fontWeight: 500
+                }}
+              >
                 Statement of Assets, Liabilities and Net Worth
               </Typography>
               <Box 
                 sx={{ 
                   flex: 1,
-                  border: '1px solid rgba(0,0,0,0.1)',
-                  borderRadius: 1,
                   overflow: 'hidden',
-                  position: 'relative'
+                  position: 'relative',
+                  backgroundColor: '#fff',
+                  border: '1px solid rgba(255, 255, 255, 0.1)' // Updated border color
                 }}
               >
                 {documents.saln.data ? (
