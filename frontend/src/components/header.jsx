@@ -1,9 +1,13 @@
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import logo from '../assets/logo.png';
 import PropTypes from 'prop-types';
 
 const Header = ({ onMenuClick }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
   return (
     <Box
       sx={{
@@ -11,34 +15,35 @@ const Header = ({ onMenuClick }) => {
         top: 0,
         left: 0,
         right: 0,
-        height: '80px',
+        height: { xs: '70px', sm: '75px', md: '80px' },
         backgroundColor: '#F5F5F4',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 24px',
+        padding: { xs: '0 12px', sm: '0 18px', md: '0 24px' },
         zIndex: 1,
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5, md: 2 } }}>
         <img 
           src={logo} 
           alt="COA Logo" 
           style={{
-            height: '70px',
+            height: isMobile ? '50px' : isTablet ? '60px' : '70px',
             width: 'auto',
             objectFit: 'contain'
           }}
         />
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 0.2, sm: 0.3, md: 0.5 } }}>
           <Typography 
             variant="body2" 
             sx={{ 
               color: '#000',
-              fontSize: '0.9rem',
+              fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
               lineHeight: 1,
-              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)'
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+              whiteSpace: 'nowrap'
             }}
           >
             REPUBLIC OF THE PHILIPPINES
@@ -50,7 +55,9 @@ const Header = ({ onMenuClick }) => {
               lineHeight: 1,
               fontWeight: 'bold',
               textDecoration: 'overline',
-              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)'
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+              fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
+              whiteSpace: 'nowrap'
             }}
           >
             COMMISSION ON AUDIT
@@ -60,9 +67,10 @@ const Header = ({ onMenuClick }) => {
             sx={{ 
               color: '#000',
               opacity: "0.9",
-              fontSize: '0.85rem',
+              fontSize: { xs: '0.65rem', sm: '0.75rem', md: '0.85rem' },
               lineHeight: 1,
-              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)'
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)',
+              whiteSpace: 'nowrap'
             }}
           >
             REGIONAL OFFICE X
@@ -71,7 +79,7 @@ const Header = ({ onMenuClick }) => {
       </Box>
 
       <IconButton
-        size="large"
+        size={isMobile ? "medium" : "large"}
         edge="end"
         color="inherit"
         aria-label="menu"
@@ -80,6 +88,7 @@ const Header = ({ onMenuClick }) => {
         sx={{ 
           color: '#000',
           borderRadius: 0,
+          padding: { xs: '8px', sm: '12px', md: '16px' },
           '&:hover': {
             backgroundColor: 'rgba(0, 0, 0, 0.04)'
           },
@@ -91,14 +100,14 @@ const Header = ({ onMenuClick }) => {
           }
         }}
       >
-        <MenuRoundedIcon />
+        <MenuRoundedIcon sx={{ fontSize: { xs: 24, sm: 26, md: 28 } }} />
       </IconButton>
     </Box>
   );
 };
 
 Header.propTypes = {
-    onMenuClick: PropTypes.func.isRequired
-  };
-  
+  onMenuClick: PropTypes.func.isRequired
+};
+
 export default Header;
