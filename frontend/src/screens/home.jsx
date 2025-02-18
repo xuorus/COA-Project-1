@@ -43,7 +43,7 @@ const Main = () => {
           overflow: 'hidden',
           '&::before': {
             content: '""',
-            position: 'absolute',
+            position: 'fixed', // Changed to fixed for consistent background
             top: 0,
             left: 0,
             right: 0,
@@ -68,43 +68,42 @@ const Main = () => {
           sx={{
             position: 'absolute',
             top: '80px',
-            left: 0,
-            right: 0,
-            bottom: '40px',
+            left: '50%', // Center horizontally
+            transform: 'translateX(-50%)', // Center horizontally
+            width: '95%', // Consistent width percentage
+            height: 'calc(100vh - 120px)', // Consistent height calculation
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 3,
             padding: 3,
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            color: 'white',
-            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
           }}
         >
           <Box
             sx={{
               width: '92%',
               maxWidth: 1500,
-              minHeight: 450,
+              height: '90%', // Changed to percentage for consistent ratio
               background: 'linear-gradient(179deg, hsla(152, 63.70%, 57.80%, 0.4) 0%, rgb(255, 255, 255, 0.8) 100%)',
               backdropFilter: 'blur(3px)',
               borderRadius: 2,
-              padding: 4,
+              padding: '2%', // Changed to percentage for consistent padding
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 3,
               boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              overflow: 'auto' // Added for content overflow
             }}
           >
+            {/* Content goes here */}
           </Box>
         </Box>
-            {/* Footer */}
         <Footer currentTime={currentTime} />
-              </Box>
+      </Box>
     </ThemeProvider>
   );
 };
