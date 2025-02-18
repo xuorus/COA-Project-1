@@ -103,7 +103,7 @@ const StablePDFViewer = React.memo(({ data, isPreview }) => {
 }, (prev, next) => prev.data === next.data && prev.isPreview === next.isPreview);
 
 // 2. Create a new DocumentViewerModal component
-const DocumentViewerModal = React.memo(({ document, onClose }) => {
+const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
   const handleStopPropagation = useCallback((e) => {
     e.stopPropagation();
   }, []);
@@ -133,7 +133,7 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
       onClick={handleStopPropagation}
       PaperProps={{
         sx: {
-          width: '74vw',
+          width: '63vw',
           height: '95vh',
           maxWidth: '95vw',
           maxHeight: '95vh',
@@ -168,10 +168,13 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
             sx={{ 
               flex: 1,
               fontSize: '1rem',
-              color: '#fff'
+              color: '#fff',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }} 
           >
-            Document Viewer
+            {name || 'Document Viewer'}
           </Typography>
           
           <IconButton
@@ -245,7 +248,7 @@ const DocumentViewerModal = React.memo(({ document, onClose }) => {
       </DialogContent>
     </Dialog>
   );
-}, (prev, next) => prev.document === next.document);
+}, (prev, next) => prev.document === next.document && prev.name === next.name);
 
 const Records = () => {
   const navigate = useNavigate();
@@ -625,9 +628,36 @@ const handleDocumentClick = useCallback((documentData) => {
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Type of Document</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Date</TableCell>
+                      <TableCell 
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5', 
+                          width: '33%', // Equal width for all columns
+                          pl: 2 // Add left padding
+                        }}
+                      >
+                        Name
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '33%', // Equal width for all columns
+                          pl: 2 // Add left padding
+                        }}
+                      >
+                        Type of Document
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5', 
+                          width: '33%', // Equal width for all columns
+                          pl: 2 // Add left padding
+                        }}
+                      >
+                        Date
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                 </Table>
@@ -666,21 +696,50 @@ const handleDocumentClick = useCallback((documentData) => {
         }}
         sx={{ cursor: 'pointer' }}
       >
-        <TableCell>
+        <TableCell 
+          sx={{
+            pl: 2, // Add left padding to match header
+            width: '33%' // Match header width
+          }}
+        >
           {`${record.lName || ''}, ${record.fName || ''} ${record.mName ? record.mName.charAt(0) + '.' : ''}`.trim() || 'No name'}
         </TableCell>
-        <TableCell align="left" >
-          {[
-            record.pdsID && `PDS: ${record.pdsID}`,
-            record.salnID && `SALN: ${record.salnID}`
-          ].filter(Boolean).join(' | ') || 'No documents'}
+        <TableCell 
+          sx={{
+            pl: 2, // Add left padding to match header
+            width: '33%', // Match header width
+            '& > span': {
+              display: 'inline-block',
+              width: '100%', // Full width of cell
+              textAlign: 'left' // Align text to left
+            }
+          }}
+        >
+          <span>
+            {[
+              record.pdsID && `PDS: ${record.pdsID}`,
+              record.salnID && `SALN: ${record.salnID}`
+            ].filter(Boolean).join(' | ') || 'No documents'}
+          </span>
         </TableCell>
-        <TableCell>
-          {record.date ? new Date(record.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }) : 'No date'}
+        <TableCell 
+          sx={{
+            pl: 2, // Add left padding to match header
+            width: '33%', // Match header width
+            '& > span': {
+              display: 'inline-block',
+              width: '100%', // Full width of cell
+              textAlign: 'left' // Align text to left
+            }
+          }}
+        >
+          <span>
+            {record.date ? new Date(record.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) : 'No date'}
+          </span>
         </TableCell>
       </TableRow>
     ))}
@@ -809,79 +868,74 @@ const handleDocumentClick = useCallback((documentData) => {
     >
 
 <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 2 
-      }}>
-        <Typography variant="h5" fontWeight="bold">
-          {selectedRecord.name}&apos;s Details
-        </Typography>
-        <IconButton
-          onClick={handleClose}
-          size="small"
-          sx={{
-            color: '#000',
-            '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-            '&:focus': { outline: 'none' }
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </Box>
-      <Divider sx={{ mb: 2 }} />
+  display: 'flex', 
+  justifyContent: 'space-between', 
+  alignItems: 'center',
+  borderBottom: 1, 
+  borderColor: 'divider', 
+  mb: 2
+}}>
+  <Tabs 
+    value={activeTab} 
+    onChange={(e, newValue) => setActiveTab(newValue)}
+    sx={{ 
+      '& .MuiTab-root': {
+        '&:focus': {
+          outline: 'none'
+        },
+        '&.Mui-selected': {
+          color: '#1976d2',
+        },
+        '&.Mui-focusVisible': {
+          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+        }
+      },
+      '& .MuiTabs-indicator': {
+        backgroundColor: '#1976d2',
+      }
+    }}
+  >
+    <Tab 
+      label="Personal Details" 
+      sx={{
+        '&.Mui-selected': {
+          color: '#1976d2',
+        }
+      }}
+    />
+    <Tab 
+      label="Documents" 
+      sx={{
+        '&.Mui-selected': {
+          color: '#1976d2',
+        }
+      }}
+    />
+    <Tab 
+      label="History" 
+      sx={{
+        '&.Mui-selected': {
+          color: '#1976d2',
+        }
+      }}
+    />
+  </Tabs>
+  <IconButton
+    onClick={handleClose}
+    size="small"
+    sx={{
+      color: '#000',
+      mr: 1,
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+      '&:focus': { outline: 'none' }
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+</Box>
 
                     {/* Fixed tabs */}
-                    <Tabs 
-                      value={activeTab} 
-                      onChange={(e, newValue) => setActiveTab(newValue)}
-                      sx={{ 
-                        borderBottom: 1, 
-                        borderColor: 'divider', 
-                        mb: 2,
-                        // Remove focus outline from tabs
-                        '& .MuiTab-root': {
-                          '&:focus': {
-                            outline: 'none'
-                          },
-                          '&.Mui-selected': {
-                            color: '#1976d2',
-                          },
-                          '&.Mui-focusVisible': {
-                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                          }
-                        },
-                        // Remove focus outline from tab indicator
-                        '& .MuiTabs-indicator': {
-                          backgroundColor: '#1976d2',
-                        }
-                      }}
-                    >
-                      <Tab 
-                        label="Personal Details" 
-                        sx={{
-                          '&.Mui-selected': {
-                            color: '#1976d2',
-                          }
-                        }}
-                      />
-                      <Tab 
-                        label="Documents" 
-                        sx={{
-                          '&.Mui-selected': {
-                            color: '#1976d2',
-                          }
-                        }}
-                      />
-                      <Tab 
-                        label="History" 
-                        sx={{
-                          '&.Mui-selected': {
-                            color: '#1976d2',
-                          }
-                        }}
-                      />
-                    </Tabs>
+                    
 
                     {/* Scrollable content area */}
                     <Box 
@@ -925,7 +979,6 @@ const handleDocumentClick = useCallback((documentData) => {
                       )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
-    <Typography variant="h6" gutterBottom>Documents</Typography>
     {!documents ? (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
@@ -1076,6 +1129,7 @@ const handleDocumentClick = useCallback((documentData) => {
         setSelectedDocument(null);
         setIsDocumentExpanded(false);
       }}
+      name={`${selectedRecord?.lName || ''}, ${selectedRecord?.fName || ''} ${selectedRecord?.mName ? selectedRecord?.mName.charAt(0) + '.' : ''}`.trim()}
     />
   </Box>
 )}
