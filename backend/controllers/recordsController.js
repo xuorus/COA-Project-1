@@ -3,12 +3,43 @@ const logger = require('../utils/logger');
 
 const getRecords = async (req, res) => {
   try {
-    const [rows] = await pool.query(`
-      SELECT * 
-      FROM person AS a  
+    const { query } = req.query;
+
+    let sql = `
+      SELECT 
+        a.PID,
+        a.fName,
+        a.mName,
+        a.lName,
+        b.pdsID,
+        c.salnID,
+        COALESCE(MAX(l.timestamp), '') as date
+      FROM person AS a
       LEFT JOIN pds AS b ON a.pdsID = b.pdsID
       LEFT JOIN saln AS c ON a.salnID = c.salnID
-    `);
+      LEFT JOIN logs AS l ON a.PID = l.PID
+    `;
+
+    if (query) {
+      sql += `
+        WHERE 
+          LOWER(a.fName) LIKE LOWER(?) OR
+          LOWER(a.lName) LIKE LOWER(?) OR
+          LOWER(CONCAT(a.fName, a.mName)) LIKE LOWER(?) OR
+          LOWER(CONCAT(a.fName, a.lName)) LIKE LOWER(?) OR
+          LOWER(CONCAT(a.fName, a.mName, a.lName)) LIKE LOWER(?) OR
+          LOWER(CONCAT(a.fName, ' ', a.mName)) LIKE LOWER(?) OR
+          LOWER(CONCAT(a.fName, ' ', a.lName)) LIKE LOWER(?) OR
+          LOWER(CONCAT(a.fName, ' ', a.mName, ' ', a.lName)) LIKE LOWER(?)
+      `;
+    }
+
+    sql += ` GROUP BY a.PID ORDER BY a.lName, a.fName, a.mName`;
+
+    const searchPattern = query ? `${query}%` : '%';
+    const params = query ? Array(8).fill(searchPattern) : [];
+
+    const [rows] = await pool.query(sql, params);
     res.json(rows);
   } catch (error) {
     logger.error('Error fetching records:', error);
@@ -117,4 +148,4 @@ module.exports = {
   getPersonDetails,
   getDocuments,
   getPersonHistory
-};  
+};

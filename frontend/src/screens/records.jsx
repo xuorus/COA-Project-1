@@ -864,96 +864,97 @@ const handleDocumentClick = useCallback((documentData) => {
 
               {/* Add Pagination */}
               <Box sx={{ 
-                mt: 2,
-                display: 'flex', 
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: 1, // Reduced gap for tighter spacing
-              }}>
-                <Box
-                  sx={{
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(0, 0, 0, 0.12)',
-                    width: '32px', // Fixed width for arrow box
-                    height: '32px', // Fixed height
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <IconButton 
-                    disabled={page === 0}
-                    onClick={(e) => handleChangePage(e, page - 1)}
-                    disableRipple
-                    sx={{
-                      color: '#000',
-                      padding: 0,
-                      '&.Mui-disabled': {
-                        color: 'rgba(0, 0, 0, 0.26)'
-                      },
-                      '&:focus': {
-                        outline: 'none'
-                      },
-                      '&.Mui-focusVisible': {
-                        outline: 'none'
-                      }
-                    }}
-                  >
-                    &lt;
-                  </IconButton>
-                </Box>
-                <Box
-                  sx={{
-                    backgroundColor: '#f5f5f5',
-                    padding: '4px 16px',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(0, 0, 0, 0.12)',
-                    width: '32px', // Fixed width for number box
-                    height: '32px', // Fixed height
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}
-                >
-                  <Typography>
-                    {page + 1}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '4px',
-                    border: '1px solid rgba(0, 0, 0, 0.12)',
-                    width: '32px',
-                    height: '32px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <IconButton 
-  disabled={page >= Math.ceil(records.length / rowsPerPage) - 1}
-  onClick={(e) => handleChangePage(e, page + 1)}
-                    disableRipple
-                    sx={{
-                      color: '#000',
-                      padding: 0,
-                      '&.Mui-disabled': {
-                        color: 'rgba(0, 0, 0, 0.26)'
-                      },
-                      '&:focus': {
-                        outline: 'none'
-                      },
-                      '&.Mui-focusVisible': {
-                        outline: 'none'
-                      }
-                    }}
-                  >
-                    &gt;
-                  </IconButton>
-                </Box>
-              </Box>
+  mt: 2,
+  display: 'flex', 
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 1
+}}>
+  {/* Previous Page Button */}
+  <Box
+    sx={{
+      backgroundColor: '#f5f5f5',
+      borderRadius: '4px',
+      border: '1px solid rgba(0, 0, 0, 0.12)',
+      width: '32px',
+      height: '32px',
+      overflow: 'hidden' // Add this to contain hover effect
+    }}
+  >
+    <IconButton 
+      disabled={page === 0}
+      onClick={() => setPage(prev => Math.max(0, prev - 1))}
+      disableRipple
+      sx={{
+        color: page === 0 ? 'rgba(0, 0, 0, 0.26)' : '#000',
+        padding: 0,
+        width: '100%',
+        height: '100%',
+        borderRadius: 0, // Remove circular shape
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.04)'
+        },
+        '&.Mui-focusVisible': {
+          outline: 'none'
+        }
+      }}
+    >
+      &lt;
+    </IconButton>
+  </Box>
+
+  {/* Page Counter */}
+  <Box
+    sx={{
+      backgroundColor: '#f5f5f5',
+      padding: '4px 16px',
+      borderRadius: '4px',
+      border: '1px solid rgba(0, 0, 0, 0.12)',
+      minWidth: '64px',
+      height: '32px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    }}
+  >
+    <Typography>
+      {`${page + 1} of ${Math.max(1, Math.ceil(records.length / rowsPerPage))}`}
+    </Typography>
+  </Box>
+
+  {/* Next Page Button */}
+  <Box
+    sx={{
+      backgroundColor: '#f5f5f5',
+      borderRadius: '4px',
+      border: '1px solid rgba(0, 0, 0, 0.12)',
+      width: '32px',
+      height: '32px',
+      overflow: 'hidden' // Add this to contain hover effect
+    }}
+  >
+    <IconButton 
+      disabled={page >= Math.ceil(records.length / rowsPerPage) - 1}
+      onClick={() => setPage(prev => Math.min(Math.ceil(records.length / rowsPerPage) - 1, prev + 1))}
+      disableRipple
+      sx={{
+        color: page >= Math.ceil(records.length / rowsPerPage) - 1 ? 'rgba(0, 0, 0, 0.26)' : '#000',
+        padding: 0,
+        width: '100%',
+        height: '100%',
+        borderRadius: 0, // Remove circular shape
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.04)'
+        },
+        '&.Mui-focusVisible': {
+          outline: 'none'
+        }
+      }}
+    >
+      &gt;
+    </IconButton>
+  </Box>
+</Box>
 
               {selectedRecord && (
   <Modal
