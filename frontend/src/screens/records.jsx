@@ -104,25 +104,65 @@ const StablePDFViewer = React.memo(({ data, isPreview }) => {
 
 // 2. Create a new DocumentViewerModal component
 const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
-  const handleStopPropagation = useCallback((e) => {
-    e.stopPropagation();
+  const [anchorEl, setAnchorEl] = useState(null);
+  
+  const handleMenuClick = useCallback((event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  }, []);
+
+  const handleMenuClose = useCallback(() => {
+    setAnchorEl(null);
   }, []);
 
   const handlePrint = useCallback(() => {
-    const pdfUrl = `data:application/pdf;base64,${document}`;
-    const printWindow = window.open(pdfUrl);
-    printWindow.print();
-  }, [document]);
+    try {
+      const pdfWindow = window.open('', '_blank');
+      pdfWindow.document.write(`
+        <html>
+          <head>
+            <title>${name} - Print</title>
+          </head>
+          <body style="margin:0;padding:0;">
+            <embed 
+              width="100%" 
+              height="100%" 
+              src="data:application/pdf;base64,${document}" 
+              type="application/pdf"
+            />
+          </body>
+        </html>
+      `);
+      pdfWindow.document.close();
+      pdfWindow.print();
+    } catch (error) {
+      console.error('Error printing document:', error);
+    }
+  }, [document, name]);
 
   const handleDownload = useCallback(() => {
-    const blob = new Blob([Buffer.from(document, 'base64')], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'document.pdf';
-    link.click();
-    window.URL.revokeObjectURL(url);
-  }, [document]);
+    try {
+      const byteCharacters = atob(document);
+      const byteNumbers = new Array(byteCharacters.length);
+      
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading document:', error);
+    }
+  }, [document, name]);
 
   return (
     <Dialog
@@ -130,42 +170,39 @@ const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
       onClose={onClose}
       maxWidth={false}
       fullWidth
-      onClick={handleStopPropagation}
       PaperProps={{
         sx: {
-          width: '63vw',
-          height: '95vh',
-          maxWidth: '95vw',
-          maxHeight: '95vh',
+          width: '80vw',
+          height: '90vh',
+          maxWidth: '1400px',
+          maxHeight: '90vh',
           m: 0,
           bgcolor: '#202124',
-          position: 'relative',
-          borderRadius: 0
+          borderRadius: 1
         }
       }}
     >
       <AppBar 
         position="relative" 
-        color="default" 
         elevation={0}
         sx={{
           bgcolor: '#303134',
           color: '#fff',
-          height: '48px',
-          minHeight: '48px'
+          height: '56px',
         }}
       >
-        <Toolbar 
-          variant="dense"
-          sx={{
-            minHeight: '48px',
-            height: '48px',
-            px: 2,
-            gap: 1
-          }}
-        >
+        <Toolbar sx={{ height: '56px', gap: 0.5 }}>
+          <IconButton
+            edge="start"
+            onClick={onClose}
+            sx={{ color: '#fff' }}
+          >
+            <CloseIcon />
+          </IconButton>
+          
           <Typography 
             sx={{ 
+              ml: 1,
               flex: 1,
               fontSize: '1rem',
               color: '#fff',
@@ -176,58 +213,75 @@ const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
           >
             {name || 'Document Viewer'}
           </Typography>
-          
+
           <IconButton
             onClick={handlePrint}
-            sx={{
-              color: '#fff',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
-            }}
+            sx={{ color: '#fff' }}
+            title="Print"
           >
             <PrintIcon />
           </IconButton>
 
           <IconButton
             onClick={handleDownload}
-            sx={{
-              color: '#fff',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
-            }}
+            sx={{ color: '#fff' }}
+            title="Download"
           >
             <DownloadIcon />
           </IconButton>
 
           <IconButton
-            onClick={handleStopPropagation}
-            sx={{
-              color: '#fff',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
-            }}
+            onClick={handleMenuClick}
+            sx={{ color: '#fff' }}
           >
             <MoreVertIcon />
           </IconButton>
 
-          <IconButton
-            edge="end"
-            onClick={onClose}
-            aria-label="close"
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
             sx={{
-              color: '#fff',
-              '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' }
+              '& .MuiPaper-root': {
+                bgcolor: '#303134',
+                color: '#fff',
+                boxShadow: '0 1px 2px 0 rgba(0,0,0,0.3)',
+                minWidth: 200,
+              }
             }}
           >
-            <CloseIcon />
-          </IconButton>
+            <MenuItem 
+              onClick={handlePrint}
+              sx={{ 
+                color: '#fff',
+                gap: 2,
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+              }}
+            >
+              <PrintIcon fontSize="small" />
+              Print
+            </MenuItem>
+            <MenuItem 
+              onClick={handleDownload}
+              sx={{ 
+                color: '#fff',
+                gap: 2,
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+              }}
+            >
+              <DownloadIcon fontSize="small" />
+              Download
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
       
       <DialogContent 
         sx={{ 
           p: 0,
-          overflow: 'hidden',
+          bgcolor: '#202124',
           display: 'flex',
           flexDirection: 'column',
-          bgcolor: '#202124'
         }}
       >
         {document && (
@@ -427,7 +481,24 @@ const Records = () => {
 // 3. Update the document click handler
 const handleDocumentClick = useCallback((documentData) => {
   if (!documentData) return;
-  setSelectedDocument(documentData);
+  
+  // Create blob URL from base64 data
+  const byteCharacters = atob(documentData);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: 'application/pdf' });
+  const blobUrl = URL.createObjectURL(blob);
+  
+  // Open PDF in new tab
+  window.open(blobUrl, '_blank');
+  
+  // Clean up blob URL after a short delay
+  setTimeout(() => {
+    URL.revokeObjectURL(blobUrl);
+  }, 100);
 }, []);
 
   return (
@@ -1136,15 +1207,6 @@ const handleDocumentClick = useCallback((documentData) => {
         )}
       </Grid>
     )}
-
-    <DocumentViewerModal
-      document={selectedDocument}
-      onClose={() => {
-        setSelectedDocument(null);
-        setIsDocumentExpanded(false);
-      }}
-      name={`${selectedRecord?.lName || ''}, ${selectedRecord?.fName || ''} ${selectedRecord?.mName ? selectedRecord?.mName.charAt(0) + '.' : ''}`.trim()}
-    />
   </Box>
 )}
 {activeTab === 2 && (
@@ -1218,3 +1280,5 @@ const handleDocumentClick = useCallback((documentData) => {
 };
 
 export default Records;
+
+//partial for commit

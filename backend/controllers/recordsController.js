@@ -117,4 +117,4 @@ module.exports = {
   getPersonDetails,
   getDocuments,
   getPersonHistory
-};
+};  
