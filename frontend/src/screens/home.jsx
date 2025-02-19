@@ -89,7 +89,7 @@ const Main = () => {
               width: '92%',
               maxWidth: 1500,
               height: '90%',
-              background: 'rgba(255, 255, 255, 0.5)',
+              background: 'linear-gradient(179deg, hsla(152, 63.70%, 57.80%, 0.4) 0%, rgb(255, 255, 255, 0.8) 100%)',
               backdropFilter: 'blur(3px)',
               borderRadius: 2,
               padding: '2%',
@@ -97,7 +97,7 @@ const Main = () => {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-around',
-              gap: 0,
+              gap: 0, // Increased gap between elements
               boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               overflow: 'auto',
@@ -188,7 +188,7 @@ const Main = () => {
                   padding: '8px',
                   backgroundColor: 'rgba(255, 255, 255, 0.7)',
                   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
-                },// Add these styles to remove outline
+                },
                 '& .MuiPickersDay-root:focus': {
                   outline: 'none'
                 },
