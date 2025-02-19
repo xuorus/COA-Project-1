@@ -31,16 +31,17 @@ import {
 } from '@mui/material';
 
 import { Menu, MenuItem } from '@mui/material';
-import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 import backgroundImage from '../assets/bldg.jpg';
-import logo from '../assets/logo.png';
 import Sidebar from '../components/sidebar';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import PropTypes from 'prop-types';
+import Header from '../components/header';
+import Footer from '../components/footer';
 import axios from 'axios';
 import { Document, Page, pdfjs } from 'react-pdf';
 import PrintIcon from '@mui/icons-material/Print';
@@ -315,6 +316,7 @@ const Records = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortType, setSortType] = useState(null);
   const [personDetails, setPersonDetails] = useState(null);
   const [documents, setDocuments] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -396,7 +398,7 @@ const Records = () => {
     setTimeout(() => {
       setIsClosing(false);
       setSelectedRecord(null);
-    }, 100); // Match this with animation duration
+    }, 100);
   };
 
   const handleSortClick = (event) => {
@@ -434,6 +436,26 @@ const Records = () => {
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
+    setPage(0); // Reset to first page (internally 0, displayed as 1)
+  
+    // Maintain current sort if one is active
+    if (sortType) {
+      filteredRecords.sort((a, b) => {
+        switch(sortType) {
+          case 'az':
+            return a.name.localeCompare(b.name);
+          case 'za':
+            return b.name.localeCompare(a.name);
+          case 'newest':
+            return new Date(b.date) - new Date(a.date);
+          case 'oldest':
+            return new Date(a.date) - new Date(b.date);
+          default:
+            return 0;
+        }
+      });
+    }
+    
   
     if (query === '') {
       axios.get('http://localhost:5000/api/records')
@@ -539,94 +561,13 @@ const handleDocumentClick = useCallback((documentData) => {
           }
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '80px',
-            backgroundColor: '#F5F5F4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 24px',
-            zIndex: 1,
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <img 
-              src={logo} 
-              alt="COA Logo" 
-              style={{
-                height: '70px',
-                width: 'auto',
-                objectFit: 'contain'
-              }}
-            />
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#000',
-                  fontSize: '0.9rem',
-                  lineHeight: 1,
-                }}
-              >
-                REPUBLIC OF THE PHILIPPINES
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#000',
-                  lineHeight: 1,
-                  fontWeight: 'bold',
-                  textDecoration: 'overline'
-                }}
-              >
-                COMMISSION ON AUDIT
-              </Typography>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: '#000',
-                  opacity: "0.9",
-                  fontSize: '0.85rem',
-                  lineHeight: 1
-                }}
-              >
-                REGIONAL OFFICE X
-              </Typography>
-            </Box>
-          </Box>
 
-          <IconButton
-            size="large"
-            edge="end"
-            color="inherit"
-            aria-label="menu"
-            disableRipple
-            onClick={() => setSidebarOpen(true)}
-            sx={{ 
-              color: '#000',
-              borderRadius: 0,
-              '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              },
-              '&:focus': {
-                outline: 'none'
-              },
-              // Remove focus visible outline
-              '&.Mui-focusVisible': {
-                outline: 'none'
-              }
-            }}
-          >
-            <MenuRoundedIcon />
-          </IconButton>
-        </Box>
+      <Header onMenuClick={() => setSidebarOpen(true)} />
+
+        <Sidebar 
+          open={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)} 
+        />
 
         {/* Sidebar */}
         <Sidebar 
@@ -669,7 +610,7 @@ const handleDocumentClick = useCallback((documentData) => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
                 <>
   <IconButton 
-    color="primary"
+    color="#000"
     onClick={handleSortClick}
     disableRipple
     sx={{ 
@@ -682,62 +623,62 @@ const handleDocumentClick = useCallback((documentData) => {
   </IconButton>
 
   <Menu
-    anchorEl={anchorEl}
-    open={Boolean(anchorEl)}
-    onClose={handleSortClose}
-    sx={{
-      '& .MuiPaper-root': {
-        borderRadius: 2,
-        marginTop: 1,
-        minWidth: 180,
-        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(8px)',
-      }
+  anchorEl={anchorEl}
+  open={Boolean(anchorEl)}
+  onClose={handleSortClose}
+  sx={{
+    '& .MuiPaper-root': {
+      borderRadius: 2,
+      marginTop: 1,
+      minWidth: 180,
+      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(8px)',
+    }
+  }}
+>
+  <MenuItem 
+    onClick={() => handleSort('az')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
     }}
   >
-    <MenuItem 
-      onClick={() => handleSort('az')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowUpwardIcon fontSize="small" /> A to Z
-    </MenuItem>
-    <MenuItem 
-      onClick={() => handleSort('za')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowDownwardIcon fontSize="small" /> Z to A
-    </MenuItem>
-    <Divider sx={{ my: 1 }} />
-    <MenuItem 
-      onClick={() => handleSort('newest')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowUpwardIcon fontSize="small" /> Newest to Oldest
-    </MenuItem>
-    <MenuItem 
-      onClick={() => handleSort('oldest')}
-      sx={{ 
-        gap: 1,
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-      }}
-    >
-      <ArrowDownwardIcon fontSize="small" /> Oldest to Newest
-    </MenuItem>
-  </Menu>
+    <ArrowUpwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> A to Z
+  </MenuItem>
+  <MenuItem 
+    onClick={() => handleSort('za')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+    }}
+  >
+    <ArrowDownwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Z to A
+  </MenuItem>
+  <Divider sx={{ my: 1 }} />
+  <MenuItem 
+    onClick={() => handleSort('newest')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+    }}
+  >
+    <ArrowDownwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Newest to Oldest
+  </MenuItem>
+  <MenuItem 
+    onClick={() => handleSort('oldest')}
+    sx={{ 
+      gap: 1,
+      padding: '8px 16px',
+      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+    }}
+  >
+    <ArrowUpwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Oldest to Newest
+  </MenuItem>
+</Menu>
 </>
 <TextField 
   variant="outlined" 
@@ -761,11 +702,17 @@ const handleDocumentClick = useCallback((documentData) => {
   sx={{
     '& .MuiOutlinedInput-root': {
       borderRadius: '20px',
+      '&.Mui-focused fieldset': {
+        borderColor: 'black',
+      },
+      '&:hover fieldset': {
+        borderColor: 'black',
+      }
     }
   }}
 />
-                </Box>
-              </Box>
+  </Box>
+      </Box>
 
               {/* Table */}
               <TableContainer 
@@ -795,9 +742,36 @@ const handleDocumentClick = useCallback((documentData) => {
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Type of Document</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Date</TableCell>
+                      <TableCell 
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5', 
+                          width: '33%', // Equal width for all columns
+                          pl: 2 // Add left padding
+                        }}
+                      >
+                        Name
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '33%', // Equal width for all columns
+                          pl: 2 // Add left padding
+                        }}
+                      >
+                        Type of Document
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5', 
+                          width: '33%', // Equal width for all columns
+                          pl: 2 // Add left padding
+                        }}
+                      >
+                        Date
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                 </Table>
@@ -823,7 +797,7 @@ const handleDocumentClick = useCallback((documentData) => {
                   }}
                 >
                   <Table>
-                    <TableBody>
+ <TableBody>
   {records
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
     .map((record) => (
@@ -836,21 +810,50 @@ const handleDocumentClick = useCallback((documentData) => {
         }}
         sx={{ cursor: 'pointer' }}
       >
-        <TableCell>
+        <TableCell 
+          sx={{
+            pl: 2, // Add left padding to match header
+            width: '33%' // Match header width
+          }}
+        >
           {`${record.lName || ''}, ${record.fName || ''} ${record.mName ? record.mName.charAt(0) + '.' : ''}`.trim() || 'No name'}
         </TableCell>
-        <TableCell>
-          {[
-            record.pdsID && `PDS: ${record.pdsID}`,
-            record.salnID && `SALN: ${record.salnID}`
-          ].filter(Boolean).join(' | ') || 'No documents'}
+        <TableCell 
+          sx={{
+            pl: 2, // Add left padding to match header
+            width: '33%', // Match header width
+            '& > span': {
+              display: 'inline-block',
+              width: '100%', // Full width of cell
+              textAlign: 'left' // Align text to left
+            }
+          }}
+        >
+          <span>
+            {[
+              record.pdsID && `PDS: ${record.pdsID}`,
+              record.salnID && `SALN: ${record.salnID}`
+            ].filter(Boolean).join(' | ') || 'No documents'}
+          </span>
         </TableCell>
-        <TableCell>
-          {record.date ? new Date(record.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }) : 'No date'}
+        <TableCell 
+          sx={{
+            pl: 2, // Add left padding to match header
+            width: '33%', // Match header width
+            '& > span': {
+              display: 'inline-block',
+              width: '100%', // Full width of cell
+              textAlign: 'left' // Align text to left
+            }
+          }}
+        >
+          <span>
+            {record.date ? new Date(record.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) : 'No date'}
+          </span>
         </TableCell>
       </TableRow>
     ))}
@@ -964,7 +967,7 @@ const handleDocumentClick = useCallback((documentData) => {
       padding: 2
     }}
   >
-                <Box
+    <Box
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(8px)',
@@ -1301,47 +1304,7 @@ const handleDocumentClick = useCallback((documentData) => {
         </Box>
               
         {/* Footer */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '40px',
-            backgroundColor: '#F5F5F4',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: '0 24px',
-            zIndex: 1,
-            boxShadow: '0 -2px 4px rgba(0, 0, 0, 0.5)'
-          }}
-        >
-<Typography
-            variant="body"
-            sx={{
-              mr: 112,
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            All Rights Reserved 2025 © COA Region X
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#000',
-              fontSize: '0.7rem',
-              fontFamily: 'roboto',
-              fontWeight: 'bold'
-            }}
-          >
-            {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
-          </Typography>
-        </Box>
+        <Footer currentTime={currentTime} />
       </Box>
     </ThemeProvider>
   );

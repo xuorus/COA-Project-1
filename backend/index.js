@@ -2,9 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const requestLogger = require('./middleware/logger');
-const scanRoutes = require('./routes/scanRoutes');
 const logsRouter = require('./routes/logs');
 const recordsRouter = require('./routes/records');
+const scanRoutes = require('./routes/scanRoutes');
 
 const app = express();
 
@@ -17,6 +17,7 @@ app.use(requestLogger);
 app.use('/api', scanRoutes);
 app.use('/api/logs', logsRouter);
 app.use('/api/records', recordsRouter);
+app.use('/api/scan', scanRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
