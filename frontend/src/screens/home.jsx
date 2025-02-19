@@ -168,8 +168,8 @@ const Main = () => {
                 src={logo} 
                 alt="Logo" 
                 style={{
-                  height: '400px',
-                  maxWidth: '400px',
+                  height: '450px',
+                  maxWidth: '450px',
                   opacity: 0.15
                 }}
               />
