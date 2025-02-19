@@ -106,13 +106,17 @@ const Main = () => {
   const [formValues, setFormValues] = useState({
     firstName: '',
     middleName: '',
-    lastName: ''
+    lastName: '',
+    profession: '', // Add this
+    hobbies: '' // Add this
   });
 
   const [formErrors, setFormErrors] = useState({
     firstName: false,
     middleName: false,
-    lastName: false
+    lastName: false,
+    profession: false, // Add this if required
+    hobbies: false // Add this if required
   });
 
   const handleInputChange = (field) => (event) => {
@@ -168,7 +172,9 @@ const Main = () => {
         setFormValues({
           firstName: '',
           middleName: '',
-          lastName: ''
+          lastName: '',
+          profession: '', // Add this
+          hobbies: '' // Add this
         });
         setDocumentType('');
       }, 5000);
@@ -450,16 +456,18 @@ const Main = () => {
               </Box>
 
               {/* Right Column - Information Fields */}
-              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2, height: '100%', mt: 4}}>
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1, height: '100%', mt: 4}}>
                 <Typography variant="h4" component="h1" fontWeight="bold">
                   Information
                 </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                   {[
                     { label: 'First Name', required: true, field: 'firstName' },
                     { label: 'Middle Name', required: false, field: 'middleName' },
-                    { label: 'Last Name', required: true, field: 'lastName' }
+                    { label: 'Last Name', required: true, field: 'lastName' },
+                    { label: 'Profession', required: true, field: 'profession' }, // Add this
+                    { label: 'Hobbies', required: true, field: 'hobbies' } // Add this
                   ].map((field) => (
                     <Box 
                       key={field.label}
