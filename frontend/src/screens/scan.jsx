@@ -15,6 +15,7 @@ import Footer from '../components/footer';
 import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
+import ScanButton from '../components/ScanButton';
 import Dynamsoft from 'dwt';
 import axios from 'axios';
 
@@ -172,85 +173,6 @@ const Main = () => {
         });
         setDocumentType('');
       }, 5000);
-    }
-  };
-
-  useEffect(() => {
-    // Initialize Dynamsoft settings
-    Dynamsoft.DWT.ResourcesPath = "/dwt-resources";
-    Dynamsoft.DWT.ProductKey = "YOUR_PRODUCT_KEY"; // Replace with your license key
-    
-    // Load and configure the scanner
-    Dynamsoft.DWT.Load().then(() => {
-      const DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrolContainer');
-      if (DWObject) {
-        // Get all available sources
-        DWObject.GetSourceNames().then(sources => {
-          // Find Canon scanner in the sources list
-          const canonScanner = sources.find(source => 
-            source.toLowerCase().includes('canon') && 
-            source.toLowerCase().includes('dr-m260')
-          );
-          
-          if (canonScanner) {
-            // Set as default source
-            DWObject.SelectSourceByIndex(sources.indexOf(canonScanner));
-            console.log('Canon scanner selected:', canonScanner);
-          }
-        });
-      }
-    });
-  }, []);
-  
-  const handleScan = async () => {
-    try {
-      const DWObject = Dynamsoft.DWT.GetWebTwain('dwtcontrolContainer');
-      if (DWObject) {
-        // Configure scanner settings
-        DWObject.IfShowUI = false; // Hide scanner interface
-        DWObject.PixelType = Dynamsoft.DWT.EnumDWT_PixelType.TWPT_RGB;
-        DWObject.Resolution = 300;
-        DWObject.IfFeederEnabled = true;
-        DWObject.IfDuplexEnabled = false;
-        
-        // Start scanning directly
-        DWObject.AcquireImage({
-          OnPreTransfer: function(count) {
-            console.log('Scanning page:', count);
-          },
-          OnPostTransfer: function() {
-            console.log('Page scanned successfully');
-          },
-          OnPostAllTransfers: async function() {
-            // Convert scanned image to PDF
-            const scannedImage = await DWObject.ConvertToBlob(
-              [0],
-              Dynamsoft.DWT.EnumDWT_ImageType.IT_PDF
-            );
-            
-            // Create form data and send to server
-            const formData = new FormData();
-            formData.append('file', scannedImage, 'scannedDocument.pdf');
-  
-            const response = await axios.post('http://localhost:3001/upload', formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data'
-              }
-            });
-  
-            // Display the scanned document
-            const pdfUrl = URL.createObjectURL(
-              new Blob([response.data], { type: 'application/pdf' })
-            );
-            setPdfFile(pdfUrl);
-          },
-          OnAcquireImageFailure: function(errorCode, errorString) {
-            console.error('Scanning failed:', errorString);
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Error scanning document:', error);
     }
   };
 
@@ -443,10 +365,8 @@ const Main = () => {
                   ) : (
                     <Typography>Click to scan a document</Typography>
                   )}
+                  <ScanButton />
                 </Box>
-                <Button variant="contained" color="primary" onClick={handleScan}>
-                  Scan Document
-                </Button>
               </Box>
 
               {/* Right Column - Information Fields */}
