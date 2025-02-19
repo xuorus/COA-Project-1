@@ -433,7 +433,7 @@ const Records = () => {
     handleSortClose();
   };
 
-  const handleSearch = (event) => {
+  const handleSearch = useCallback(async (event) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
     setPage(0); // Reset to first page (internally 0, displayed as 1)
@@ -457,56 +457,17 @@ const Records = () => {
     }
     
   
-    if (query === '') {
-      axios.get('http://localhost:5000/api/records')
-        .then(response => {
-          setRecords(response.data);
-        })
-        .catch(error => {
-          console.error('Error fetching records:', error);
-        });
-      return;
+    try {
+      // Call backend with search query
+      const response = await axios.get('http://localhost:5000/api/records', {
+        params: { query }
+      });
+      
+      setRecords(response.data);
+    } catch (error) {
+      console.error('Error searching records:', error);
     }
-  
-    const filteredRecords = records.filter(record => {
-      // Get individual name parts and ensure they exist
-      const fName = (record.fName || '').toLowerCase();
-      const mName = (record.mName || '').toLowerCase();
-      const lName = (record.lName || '').toLowerCase();
-  
-      // Progressive string matching
-      const searchStrings = [
-        fName,                              // First name
-        `${fName}${mName}`,                // First + Middle (no space)
-        `${fName}${lName}`,                // First + Last (no space)
-        `${fName}${mName}${lName}`,        // Full name (no space)
-        // With spaces for natural typing
-        `${fName} ${mName}`,               // First + Middle
-        `${fName} ${lName}`,               // First + Last
-        `${fName} ${mName} ${lName}`,      // Full name
-      ];
-  
-      // Progressive character matching
-      return searchStrings.some(str => {
-        let searchIndex = 0;
-        for (let char of query) {
-          searchIndex = str.indexOf(char, searchIndex);
-          if (searchIndex === -1) return false;
-          searchIndex++;
-        }
-        return true;
-      }) ||
-      // Keep existing document ID and date filters
-      (record.pdsID || '').toString().toLowerCase().includes(query) ||
-      (record.salnID || '').toString().toLowerCase().includes(query) ||
-      (record.date ? new Date(record.date)
-        .toLocaleDateString()
-        .toLowerCase()
-        .includes(query) : false);
-    });
-  
-    setRecords(filteredRecords);
-  };
+  }, []);
 
 // 3. Update the document click handler
 const handleDocumentClick = useCallback((documentData) => {
