@@ -409,23 +409,24 @@ const Records = () => {
   
   const handleSort = (type) => {
     const sortedRecords = [...records].sort((a, b) => {
+      // Create full names for comparison
+      const nameA = `${a.lName || ''}, ${a.fName || ''} ${a.mName || ''}`.trim().toLowerCase();
+      const nameB = `${b.lName || ''}, ${b.fName || ''} ${b.mName || ''}`.trim().toLowerCase();
+
       switch(type) {
         case 'az':
-          return `${a.lname || ''}, ${a.fname || ''}`.localeCompare(
-            `${b.lname || ''}, ${b.fname || ''}`
-          );
+          return nameA.localeCompare(nameB);
         case 'za':
-          return `${b.lname || ''}, ${b.fname || ''}`.localeCompare(
-            `${a.lname || ''}, ${a.fname || ''}`
-          );
+          return nameB.localeCompare(nameA);
         case 'newest':
-          return new Date(b.dateCreated || 0) - new Date(a.dateCreated || 0);
+          return new Date(b.date || 0) - new Date(a.date || 0);
         case 'oldest':
-          return new Date(a.dateCreated || 0) - new Date(b.dateCreated || 0);
+          return new Date(a.date || 0) - new Date(b.date || 0);
         default:
           return 0;
       }
     });
+
     setRecords(sortedRecords);
     handleSortClose();
   };
@@ -445,12 +446,42 @@ const Records = () => {
       return;
     }
   
-    const filteredRecords = records.filter(record =>
-      `${record.fname || ''} ${record.mname || ''} ${record.lname || ''}`.toLowerCase().includes(query) ||
+    const filteredRecords = records.filter(record => {
+      // Get individual name parts and ensure they exist
+      const fName = (record.fName || '').toLowerCase();
+      const mName = (record.mName || '').toLowerCase();
+      const lName = (record.lName || '').toLowerCase();
+  
+      // Progressive string matching
+      const searchStrings = [
+        fName,                              // First name
+        `${fName}${mName}`,                // First + Middle (no space)
+        `${fName}${lName}`,                // First + Last (no space)
+        `${fName}${mName}${lName}`,        // Full name (no space)
+        // With spaces for natural typing
+        `${fName} ${mName}`,               // First + Middle
+        `${fName} ${lName}`,               // First + Last
+        `${fName} ${mName} ${lName}`,      // Full name
+      ];
+  
+      // Progressive character matching
+      return searchStrings.some(str => {
+        let searchIndex = 0;
+        for (let char of query) {
+          searchIndex = str.indexOf(char, searchIndex);
+          if (searchIndex === -1) return false;
+          searchIndex++;
+        }
+        return true;
+      }) ||
+      // Keep existing document ID and date filters
       (record.pdsID || '').toString().toLowerCase().includes(query) ||
       (record.salnID || '').toString().toLowerCase().includes(query) ||
-      (record.dateCreated ? new Date(record.dateCreated).toLocaleDateString() : '').toLowerCase().includes(query)
-    );
+      (record.date ? new Date(record.date)
+        .toLocaleDateString()
+        .toLowerCase()
+        .includes(query) : false);
+    });
   
     setRecords(filteredRecords);
   };
