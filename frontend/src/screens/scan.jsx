@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput } from '@mui/material';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
@@ -94,6 +94,8 @@ const theme = createTheme({
 
 const Main = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefillData = location.state?.prefillData;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [documentType, setDocumentType] = useState('');
@@ -105,12 +107,15 @@ const Main = () => {
   
 
   const [formValues, setFormValues] = useState({
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    profession: '', // Add this
-    hobbies: '' // Add this
+    firstName: prefillData?.firstName || '',
+    middleName: prefillData?.middleName || '',
+    lastName: prefillData?.lastName || '',
+    bloodType: prefillData?.bloodType || '',
+    profession: prefillData?.profession || '',
+    hobbies: prefillData?.hobbies || ''
   });
+
+  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   const [formErrors, setFormErrors] = useState({
     firstName: false,
@@ -391,13 +396,20 @@ const Main = () => {
                   Information
                 </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   {[
                     { label: 'First Name', required: true, field: 'firstName' },
                     { label: 'Middle Name', required: false, field: 'middleName' },
                     { label: 'Last Name', required: true, field: 'lastName' },
-                    { label: 'Profession', required: true, field: 'profession' }, // Add this
-                    { label: 'Hobbies', required: true, field: 'hobbies' } // Add this
+                    { 
+                      label: 'Blood Type', 
+                      required: true, 
+                      field: 'bloodType',
+                      type: 'select',
+                      options: bloodTypes
+                    },
+                    { label: 'Profession', required: true, field: 'profession' },
+                    { label: 'Hobbies', required: true, field: 'hobbies' }
                   ].map((field) => (
                     <Box 
                       key={field.label}
@@ -449,27 +461,68 @@ const Main = () => {
                           }
                         }}
                       >
-                        <InputLabel error={formErrors[field.field]}>{field.label}</InputLabel>
-                        <OutlinedInput
-                          label={field.label}
-                          required={field.required}
-                          value={formValues[field.field]}
-                          onChange={handleInputChange(field.field)}
-                          error={formErrors[field.field]}
-                          onBlur={() => {
-                            if (field.required) {
-                              setFormErrors(prev => ({
-                                ...prev,
-                                [field.field]: formValues[field.field].trim() === ''
-                              }));
-                            }
-                          }}
-                          sx={{
-                            '& input': {
-                              padding: '8px 14px',
-                            }
-                          }}
-                        />
+                        {field.type === 'select' ? (
+                          <>
+                            <InputLabel>{field.label}</InputLabel>
+                            <Select
+                              value={formValues[field.field]}
+                              label={field.label}
+                              onChange={handleInputChange(field.field)}
+                              MenuProps={{
+                                PaperProps: {
+                                  sx: {
+                                    maxHeight: 300,
+                                    borderRadius: 2,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                                    '& .MuiMenuItem-root': {
+                                      padding: '8px 16px',
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                                      },
+                                      '&.Mui-selected': {
+                                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                                        '&:hover': {
+                                          backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }}
+                            >
+                              {field.options.map((option) => (
+                                <MenuItem key={option} value={option}>
+                                  {option}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </>
+                        ) : (
+                          <>
+                            <InputLabel error={formErrors[field.field]}>{field.label}</InputLabel>
+                            <OutlinedInput
+                              label={field.label}
+                              required={field.required}
+                              value={formValues[field.field]}
+                              onChange={handleInputChange(field.field)}
+                              error={formErrors[field.field]}
+                              onBlur={() => {
+                                if (field.required) {
+                                  setFormErrors(prev => ({
+                                    ...prev,
+                                    [field.field]: formValues[field.field].trim() === ''
+                                  }));
+                                }
+                              }}
+                              sx={{
+                                '& input': {
+                                  padding: '8px 14px',
+                                }
+                              }}
+                            />
+                          </>
+                        )}
                         {formErrors[field.field] && (
                           <Typography 
                             variant="caption" 
