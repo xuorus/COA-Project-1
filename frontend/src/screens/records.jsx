@@ -1340,97 +1340,97 @@ const handleTabChange = (event, newValue) => {
         </Grid>
         
         {[
-          { 
-            label: 'Blood Type', 
-            field: 'bloodType',
-            type: 'select',
-            options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-          },
-          { label: 'Profession', field: 'profession' },
-          { label: 'Hobbies', field: 'hobbies' }
-        ].map((item) => (
-          <Grid item xs={12} key={item.field}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
-              <Box sx={{ minWidth: '120px' }}>
-                <Typography><strong>{item.label}:</strong></Typography>
-              </Box>
-              {editingField === item.field ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {item.type === 'select' ? (
-                    <Select
-                      value={editedDetails[item.field] || ''}
-                      onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                      size="small"
-                      sx={{ 
-                        width: '200px',
-                        height: '32px',
-                        '& .MuiSelect-select': {
-                          padding: '4px 8px',
-                        },
-                      }}
-                    >
-                      {item.options.map(option => (
-                        <MenuItem key={option} value={option}>{option}</MenuItem>
-                      ))}
-                    </Select>
-                  ) : (
-                    <OutlinedInput
-                      value={editedDetails[item.field] || ''}
-                      onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                      size="small"
-                      sx={{ 
-                        width: '200px',
-                        height: '32px',
-                        '& input': {
-                          padding: '4px 8px',
-                        },
-                      }}
-                    />
-                  )}
-                  <IconButton 
-                    size="small" 
-                    onClick={() => handleFieldSave(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={handleFieldCancel}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
-                  </IconButton>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
-                  <Typography>{personDetails[item.field] || 'N/A'}</Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleFieldEdit(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      color: 'rgba(0, 0, 0, 0.38)',
-                      '&:hover': { color: 'primary.main' },
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Box>
-              )}
-            </Box>
-          </Grid>
-        ))}
+  { 
+    label: 'Blood Type', 
+    field: 'bloodType',
+    type: 'select',
+    options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+  },
+  { label: 'Profession', field: 'profession' },
+  { label: 'Hobbies', field: 'hobbies' }
+].map((item) => (
+  <Grid item xs={12} key={item.field}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
+      <Box sx={{ minWidth: '120px' }}>
+        <Typography><strong>{item.label}:</strong></Typography>
+      </Box>
+      {editingField === item.field ? (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {item.type === 'select' ? (
+            <Select
+              value={editedDetails[item.field] || ''}
+              onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
+              size="small"
+              sx={{ 
+                width: '100px', // Reduced width for blood type dropdown
+                height: '32px',
+                '& .MuiSelect-select': {
+                  padding: '4px 8px',
+                },
+              }}
+            >
+              {item.options.map(option => (
+                <MenuItem key={option} value={option}>{option}</MenuItem>
+              ))}
+            </Select>
+          ) : (
+            <OutlinedInput
+              value={editedDetails[item.field] || ''}
+              onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
+              size="small"
+              sx={{ 
+                width: '200px',
+                height: '32px',
+                '& input': {
+                  padding: '4px 8px',
+                },
+              }}
+            />
+          )}
+          <IconButton 
+            size="small" 
+            onClick={() => handleFieldSave(item.field)}
+            sx={{ 
+              padding: '4px',
+              '&:focus': { outline: 'none' },
+              '&.Mui-focusVisible': { outline: 'none' }
+            }}
+          >
+            <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+          </IconButton>
+          <IconButton 
+            size="small" 
+            onClick={handleFieldCancel}
+            sx={{ 
+              padding: '4px',
+              '&:focus': { outline: 'none' },
+              '&.Mui-focusVisible': { outline: 'none' }
+            }}
+          >
+            <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
+          </IconButton>
+        </Box>
+      ) : (
+        <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
+          <Typography>{personDetails[item.field] || 'N/A'}</Typography>
+          <IconButton
+            size="small"
+            onClick={() => handleFieldEdit(item.field)}
+            sx={{ 
+              padding: '4px',
+              color: 'rgba(0, 0, 0, 0.38)',
+              '&:hover': { color: 'primary.main' },
+              '&:focus': { outline: 'none' },
+              '&.Mui-focusVisible': { outline: 'none' }
+            }}
+          >
+            <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Box>
+      )}
+    </Box>
+  </Grid>
+))}
       </Grid>
     )}
   </Box>
