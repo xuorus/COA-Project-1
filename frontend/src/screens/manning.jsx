@@ -56,7 +56,7 @@ const Manning = () => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.4,
+            opacity: 1,
             zIndex: -1
           }
         }}

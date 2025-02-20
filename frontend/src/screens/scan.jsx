@@ -182,6 +182,16 @@ const Main = () => {
     }
   };
 
+  // Add useEffect to update the time
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    // Cleanup on unmount
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <Box
