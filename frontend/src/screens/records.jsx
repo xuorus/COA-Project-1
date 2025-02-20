@@ -982,7 +982,7 @@ const handleDocumentClick = useCallback((documentData) => {
       padding: '4px 16px',
       borderRadius: '4px',
       border: '1px solid rgba(0, 0, 0, 0.12)',
-      minWidth: '64px',
+      minWidth: '32px',
       height: '32px',
       display: 'flex',
       justifyContent: 'center',
@@ -990,7 +990,7 @@ const handleDocumentClick = useCallback((documentData) => {
     }}
   >
     <Typography>
-      {`${page + 1} of ${Math.max(1, Math.ceil(records.length / rowsPerPage))}`}
+      {`${page + 1}`}
     </Typography>
   </Box>
 
