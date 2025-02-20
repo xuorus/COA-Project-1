@@ -28,9 +28,13 @@ import {
   DialogContent,
   AppBar,
   Toolbar,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  FormControl,
 } from '@mui/material';
 
-import { Menu, MenuItem } from '@mui/material';
+import { Menu } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -49,6 +53,9 @@ import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import AddIcon from '@mui/icons-material/Add';
+import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
+import SaveIcon from '@mui/icons-material/Save';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -329,7 +336,9 @@ const Records = () => {
   const [history, setHistory] = useState(null);
   const [nameSort, setNameSort] = useState('az');
   const [dateSort, setDateSort] = useState('newest');
-
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedDetails, setEditedDetails] = useState(null);
+  const [editingField, setEditingField] = useState(null); // Keep only this one
   const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
   useEffect(() => {
@@ -534,6 +543,99 @@ const handleDocumentClick = useCallback((documentData) => {
   }, 100);
 }, []);
 
+// Add this near your other handlers
+const handleAddDocument = () => {
+  navigate('/scan', { 
+    state: {
+      prefillData: {
+        firstName: personDetails?.firstName || '',
+        middleName: personDetails?.middleName || '',
+        lastName: personDetails?.lastName || '',
+        bloodType: personDetails?.bloodType || '',
+        profession: personDetails?.profession || '',
+        hobbies: personDetails?.hobbies || ''
+      }
+    }
+  });
+};
+
+const handleEditClick = () => {
+  setIsEditing(true);
+  setEditedDetails({ ...personDetails });
+};
+
+const handleInputChange = (field) => (event) => {
+  setEditedDetails({
+    ...editedDetails,
+    [field]: event.target.value
+  });
+};
+
+const handleSave = async () => {
+  try {
+    await axios.put(`http://localhost:5000/api/records/${selectedRecord.PID}`, editedDetails);
+    setPersonDetails(editedDetails);
+    setIsEditing(false);
+    // Add to history
+    const historyEntry = {
+      activity: 'Personal information updated',
+      date: new Date().toISOString()
+    };
+    await axios.post(`http://localhost:5000/api/records/${selectedRecord.PID}/history`, historyEntry);
+  } catch (error) {
+    console.error('Error updating details:', error);
+  }
+};
+
+// Add this handler near your other handlers
+const handleCancel = () => {
+  setIsEditing(false);
+  setEditedDetails(null);
+};
+
+// Add these handlers
+const handleFieldEdit = (field) => {
+  setEditingField(field);
+  setEditedDetails({
+    ...personDetails
+  });
+};
+
+const handleFieldSave = async (field) => {
+  try {
+    const updatedDetails = {
+      ...personDetails,
+      [field]: editedDetails[field]
+    };
+    await axios.put(`http://localhost:5000/api/records/${selectedRecord.PID}`, updatedDetails);
+    setPersonDetails(updatedDetails);
+    setEditingField(null);
+
+    // Add to history
+    const historyEntry = {
+      activity: `Updated ${field}`,
+      date: new Date().toISOString()
+    };
+    await axios.post(`http://localhost:5000/api/records/${selectedRecord.PID}/history`, historyEntry);
+  } catch (error) {
+    console.error('Error updating field:', error);
+  }
+};
+
+const handleFieldCancel = () => {
+  setEditingField(null);
+};
+
+// Update the tab change handler
+const handleTabChange = (event, newValue) => {
+  // If there's an active edit, cancel it
+  if (editingField) {
+    setEditingField(null);
+    setEditedDetails(null);
+  }
+  setActiveTab(newValue);
+};
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -559,7 +661,7 @@ const handleDocumentClick = useCallback((documentData) => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.4,
+            opacity: 1,
             zIndex: -1,
           }
         }}
@@ -1066,7 +1168,7 @@ const handleDocumentClick = useCallback((documentData) => {
   >
     <Tabs 
       value={activeTab} 
-      onChange={(e, newValue) => setActiveTab(newValue)}
+      onChange={handleTabChange}
       sx={{ 
         flex: 1,
         '& .MuiTab-root': {
@@ -1148,44 +1250,187 @@ const handleDocumentClick = useCallback((documentData) => {
                     >
                       {activeTab === 0 && (
   <Box sx={{ p: 2 }}>
-    <Typography variant="h6" mb={2} gutterBottom>Personal Information</Typography>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Typography variant="h6" gutterBottom>Personal Information</Typography>
+    </Box>
     {personDetails && (
       <Grid container spacing={2}>
-        {/* Basic Information */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="primary.main" gutterBottom>
             Basic Information
           </Typography>
         </Grid>
-        <Grid item xs={12}>
-          <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
-        </Grid>
+        {[
+          { label: 'First Name', field: 'firstName' },
+          { label: 'Middle Name', field: 'middleName' },
+          { label: 'Last Name', field: 'lastName' }
+        ].map((item) => (
+          <Grid item xs={12} key={item.field}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
+              <Box sx={{ minWidth: '120px' }}>
+                <Typography><strong>{item.label}:</strong></Typography>
+              </Box>
+              {editingField === item.field ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <OutlinedInput
+                    value={editedDetails[item.field] || ''}
+                    onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
+                    size="small"
+                    sx={{ 
+                      width: '200px',
+                      height: '32px',
+                      '& input': {
+                        padding: '4px 8px',
+                      },
+                    }}
+                  />
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleFieldSave(item.field)}
+                    sx={{ 
+                      padding: '4px',
+                      '&:focus': { outline: 'none' },
+                      '&.Mui-focusVisible': { outline: 'none' }
+                    }}
+                  >
+                    <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                  </IconButton>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleFieldCancel}
+                    sx={{ 
+                      padding: '4px',
+                      '&:focus': { outline: 'none' },
+                      '&.Mui-focusVisible': { outline: 'none' }
+                    }}
+                  >
+                    <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
+                  </IconButton>
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
+                  <Typography>{personDetails[item.field] || 'N/A'}</Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleFieldEdit(item.field)}
+                    sx={{ 
+                      padding: '4px',
+                      color: 'rgba(0, 0, 0, 0.38)',
+                      '&:hover': { color: 'primary.main' },
+                      '&:focus': { outline: 'none' },
+                      '&.Mui-focusVisible': { outline: 'none' }
+                    }}
+                  >
+                    <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Box>
+              )}
+            </Box>
+          </Grid>
+        ))}
         
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
         </Grid>
 
-        {/* Additional Information */}
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="primary.main" gutterBottom>
             Additional Information
           </Typography>
         </Grid>
-        <Grid item xs={12}>
-          <Typography><strong>Blood Type:</strong> {personDetails.bloodType || 'N/A'}</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography><strong>Profession:</strong> {personDetails.profession || 'N/A'}</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography><strong>Hobbies:</strong> {personDetails.hobbies || 'N/A'}</Typography>
-        </Grid>
+        
+        {[
+          { 
+            label: 'Blood Type', 
+            field: 'bloodType',
+            type: 'select',
+            options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+          },
+          { label: 'Profession', field: 'profession' },
+          { label: 'Hobbies', field: 'hobbies' }
+        ].map((item) => (
+          <Grid item xs={12} key={item.field}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
+              <Box sx={{ minWidth: '120px' }}>
+                <Typography><strong>{item.label}:</strong></Typography>
+              </Box>
+              {editingField === item.field ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {item.type === 'select' ? (
+                    <Select
+                      value={editedDetails[item.field] || ''}
+                      onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
+                      size="small"
+                      sx={{ 
+                        width: '200px',
+                        height: '32px',
+                        '& .MuiSelect-select': {
+                          padding: '4px 8px',
+                        },
+                      }}
+                    >
+                      {item.options.map(option => (
+                        <MenuItem key={option} value={option}>{option}</MenuItem>
+                      ))}
+                    </Select>
+                  ) : (
+                    <OutlinedInput
+                      value={editedDetails[item.field] || ''}
+                      onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
+                      size="small"
+                      sx={{ 
+                        width: '200px',
+                        height: '32px',
+                        '& input': {
+                          padding: '4px 8px',
+                        },
+                      }}
+                    />
+                  )}
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleFieldSave(item.field)}
+                    sx={{ 
+                      padding: '4px',
+                      '&:focus': { outline: 'none' },
+                      '&.Mui-focusVisible': { outline: 'none' }
+                    }}
+                  >
+                    <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                  </IconButton>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleFieldCancel}
+                    sx={{ 
+                      padding: '4px',
+                      '&:focus': { outline: 'none' },
+                      '&.Mui-focusVisible': { outline: 'none' }
+                    }}
+                  >
+                    <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
+                  </IconButton>
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
+                  <Typography>{personDetails[item.field] || 'N/A'}</Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleFieldEdit(item.field)}
+                    sx={{ 
+                      padding: '4px',
+                      color: 'rgba(0, 0, 0, 0.38)',
+                      '&:hover': { color: 'primary.main' },
+                      '&:focus': { outline: 'none' },
+                      '&.Mui-focusVisible': { outline: 'none' }
+                    }}
+                  >
+                    <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Box>
+              )}
+            </Box>
+          </Grid>
+        ))}
       </Grid>
     )}
   </Box>
@@ -1323,6 +1568,75 @@ const handleDocumentClick = useCallback((documentData) => {
           </Grid>
         )}
 
+        <Grid item xs={12} md={6}>
+          <Paper 
+            elevation={3}
+            sx={{ 
+              p: 2,
+              height: '400px',
+              display: 'flex',
+              flexDirection: 'column',
+              cursor: 'pointer',
+              '&:hover': {
+                backgroundColor: 'rgb(231, 231, 231)'
+              },
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+            onClick={handleAddDocument}
+          >
+            <Typography 
+              variant="subtitle1" 
+              gutterBottom
+              sx={{
+                color: 'white',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                mb: 2,
+                fontWeight: 500
+              }}
+            >
+            </Typography>
+            <Box 
+              sx={{ 
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#fff',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2
+                }}
+              >
+                <Box
+                  sx={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <AddIcon sx={{ fontSize: 40, color: '#1976d2' }} />
+                </Box>
+                <Typography sx={{ color: 'text.secondary' }}>
+                  Add New Document
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </Grid>
+
         {(!documents.pds && !documents.saln) && (
           <Grid item xs={12}>
             <Box sx={{ 
@@ -1409,5 +1723,3 @@ const handleDocumentClick = useCallback((documentData) => {
 };
 
 export default Records;
-
-//partial for commit
