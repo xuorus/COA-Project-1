@@ -47,6 +47,8 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import PrintIcon from '@mui/icons-material/Print';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -312,6 +314,8 @@ const Records = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isClosing, setIsClosing] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [bloodTypeAnchorEl, setBloodTypeAnchorEl] = useState(null);
+  const [selectedBloodType, setSelectedBloodType] = useState('all');
   const [records, setRecords] = useState(sampleRecords);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(20);
@@ -322,6 +326,10 @@ const Records = () => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isDocumentExpanded, setIsDocumentExpanded] = useState(false);
   const [history, setHistory] = useState(null);
+  const [nameSort, setNameSort] = useState('az');
+  const [dateSort, setDateSort] = useState('newest');
+
+  const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -436,29 +444,14 @@ const Records = () => {
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
-    setPage(0); // Reset to first page (internally 0, displayed as 1)
-  
-    // Maintain current sort if one is active
-    if (sortType) {
-      filteredRecords.sort((a, b) => {
-        switch(sortType) {
-          case 'az':
-            return a.name.localeCompare(b.name);
-          case 'za':
-            return b.name.localeCompare(a.name);
-          case 'newest':
-            return new Date(b.date) - new Date(a.date);
-          case 'oldest':
-            return new Date(a.date) - new Date(b.date);
-          default:
-            return 0;
-        }
-      });
-    }
+    setPage(0);
     
-  
     if (query === '') {
-      axios.get('http://localhost:5000/api/records')
+      axios.get('http://localhost:5000/api/records', {
+        params: {
+          bloodType: selectedBloodType !== 'all' ? selectedBloodType : undefined
+        }
+      })
         .then(response => {
           setRecords(response.data);
         })
@@ -469,43 +462,65 @@ const Records = () => {
     }
   
     const filteredRecords = records.filter(record => {
-      // Get individual name parts and ensure they exist
+      // Get individual fields and ensure they exist
       const fName = (record.fName || '').toLowerCase();
       const mName = (record.mName || '').toLowerCase();
       const lName = (record.lName || '').toLowerCase();
+      const profession = (record.profession || '').toLowerCase();
+      const hobbies = (record.hobbies || '').toLowerCase();
   
-      // Progressive string matching
-      const searchStrings = [
-        fName,                              // First name
-        `${fName}${mName}`,                // First + Middle (no space)
-        `${fName}${lName}`,                // First + Last (no space)
-        `${fName}${mName}${lName}`,        // Full name (no space)
-        // With spaces for natural typing
-        `${fName} ${mName}`,               // First + Middle
-        `${fName} ${lName}`,               // First + Last
-        `${fName} ${mName} ${lName}`,      // Full name
+      // Progressive string matching for names
+      const nameSearchStrings = [
+        fName,
+        `${fName}${mName}`,
+        `${fName}${lName}`,
+        `${fName}${mName}${lName}`,
+        `${fName} ${mName}`,
+        `${fName} ${lName}`,
+        `${fName} ${mName} ${lName}`,
       ];
   
-      // Progressive character matching
-      return searchStrings.some(str => {
-        let searchIndex = 0;
-        for (let char of query) {
-          searchIndex = str.indexOf(char, searchIndex);
-          if (searchIndex === -1) return false;
-          searchIndex++;
-        }
-        return true;
-      }) ||
-      // Keep existing document ID and date filters
-      (record.pdsID || '').toString().toLowerCase().includes(query) ||
-      (record.salnID || '').toString().toLowerCase().includes(query) ||
-      (record.date ? new Date(record.date)
-        .toLocaleDateString()
-        .toLowerCase()
-        .includes(query) : false);
+      // Check all fields
+      const nameMatch = nameSearchStrings.some(str => str.includes(query));
+      const professionMatch = profession.includes(query);
+      const hobbiesMatch = hobbies.includes(query);
+      const documentMatch = (
+        (record.pdsID || '').toString().toLowerCase().includes(query) ||
+        (record.salnID || '').toString().toLowerCase().includes(query)
+      );
+      const dateMatch = record.date ? 
+        new Date(record.date).toLocaleDateString().toLowerCase().includes(query) : 
+        false;
+  
+      // Apply blood type filter if selected
+      const bloodTypeMatch = selectedBloodType === 'all' || record.bloodType === selectedBloodType;
+  
+      return (nameMatch || professionMatch || hobbiesMatch || documentMatch || dateMatch) && bloodTypeMatch;
     });
   
     setRecords(filteredRecords);
+  };
+
+  const handleBloodTypeSelect = async (type) => {
+    setSelectedBloodType(type);
+    setBloodTypeAnchorEl(null);
+    
+    try {
+      const response = await axios.get(`http://localhost:5000/api/records`, {
+        params: {
+          bloodType: type
+        }
+      });
+      
+      if (response.status === 200) {
+        setRecords(response.data);
+        setPage(0); // Reset to first page
+      } else {
+        throw new Error('Filter failed');
+      }
+    } catch (error) {
+      console.error('Blood type filter error:', error);
+    }
   };
 
 // 3. Update the document click handler
@@ -638,46 +653,115 @@ const handleDocumentClick = useCallback((documentData) => {
   }}
 >
   <MenuItem 
-    onClick={() => handleSort('az')}
+    onClick={() => {
+      const newSort = nameSort === 'az' ? 'za' : 'az';
+      setNameSort(newSort);
+      handleSort(newSort);
+    }}
     sx={{ 
       gap: 1,
       padding: '8px 16px',
       '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
     }}
   >
-    <ArrowUpwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> A to Z
-  </MenuItem>
-  <MenuItem 
-    onClick={() => handleSort('za')}
-    sx={{ 
-      gap: 1,
-      padding: '8px 16px',
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-    }}
-  >
-    <ArrowDownwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Z to A
+    {nameSort === 'az' ? (
+      <>
+        <ArrowUpwardIcon fontSize="small" /> A to Z
+      </>
+    ) : (
+      <>
+        <ArrowDownwardIcon fontSize="small" /> Z to A
+      </>
+    )}
   </MenuItem>
   <Divider sx={{ my: 1 }} />
   <MenuItem 
-    onClick={() => handleSort('newest')}
+    onClick={() => {
+      const newSort = dateSort === 'newest' ? 'oldest' : 'newest';
+      setDateSort(newSort);
+      handleSort(newSort);
+    }}
     sx={{ 
       gap: 1,
       padding: '8px 16px',
       '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
     }}
   >
-    <ArrowDownwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Newest to Oldest
+    {dateSort === 'newest' ? (
+      <>
+        <ArrowDownwardIcon fontSize="small" /> Newest to Oldest
+      </>
+    ) : (
+      <>
+        <ArrowUpwardIcon fontSize="small" /> Oldest to Newest
+      </>
+    )}
   </MenuItem>
-  <MenuItem 
-    onClick={() => handleSort('oldest')}
+  <Divider sx={{ my: 1 }} />
+  <MenuItem
+    onClick={(e) => {
+      e.stopPropagation();
+      setBloodTypeAnchorEl(e.currentTarget);
+    }}
     sx={{ 
       gap: 1,
       padding: '8px 16px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
     }}
   >
-    <ArrowUpwardIcon fontSize="small" sx={{ transform: 'rotate(0deg)' }} /> Oldest to Newest
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <LocalHospitalIcon fontSize="small" />
+      Blood Type
+    </Box>
+    <ArrowRightIcon fontSize="small" />
   </MenuItem>
+</Menu>
+
+<Menu
+  anchorEl={bloodTypeAnchorEl}
+  open={Boolean(bloodTypeAnchorEl)}
+  onClose={() => setBloodTypeAnchorEl(null)}
+  sx={{
+    '& .MuiPaper-root': {
+      borderRadius: 2,
+      marginTop: 1,
+      minWidth: 120,
+      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(8px)',
+    }
+  }}
+  anchorOrigin={{
+    vertical: 'top',
+    horizontal: 'right',
+  }}
+  transformOrigin={{
+    vertical: 'top',
+    horizontal: 'left',
+  }}
+>
+  {bloodTypes.map((type) => (
+    <MenuItem
+      key={type}
+      onClick={() => handleBloodTypeSelect(type)}
+      selected={selectedBloodType === type}
+      sx={{ 
+        padding: '8px 16px',
+        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+        '&.Mui-selected': {
+          backgroundColor: 'rgba(25, 118, 210, 0.08)',
+          '&:hover': {
+            backgroundColor: 'rgba(25, 118, 210, 0.12)',
+          }
+        }
+      }}
+    >
+      {type === 'all' ? 'All Blood Types' : type}
+    </MenuItem>
+  ))}
 </Menu>
 </>
 <TextField 
@@ -831,8 +915,8 @@ const handleDocumentClick = useCallback((documentData) => {
         >
           <span>
             {[
-              record.pdsID && `PDS: ${record.pdsID}`,
-              record.salnID && `SALN: ${record.salnID}`
+              record.pdsID && `PDS`,
+              record.salnID && `SALN`
             ].filter(Boolean).join(' | ') || 'No documents'}
           </span>
         </TableCell>
@@ -1075,23 +1159,49 @@ const handleDocumentClick = useCallback((documentData) => {
                       }}
                     >
                       {activeTab === 0 && (
-                        <Box sx={{ p: 2 }}>
-                          <Typography variant="h6" mb={2} gutterBottom>Personal Information</Typography>
-                          {personDetails && (
-                            <Grid container spacing={2}>
-                              <Grid item xs={12}>
-                                <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
-                              </Grid>
-                              <Grid item xs={12}>
-                                <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
-                              </Grid>
-                            </Grid>
-                          )}
-                        </Box>
-                      )}
+  <Box sx={{ p: 2 }}>
+    <Typography variant="h6" mb={2} gutterBottom>Personal Information</Typography>
+    {personDetails && (
+      <Grid container spacing={2}>
+        {/* Basic Information */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" color="primary.main" gutterBottom>
+            Basic Information
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
+        </Grid>
+        
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+        </Grid>
+
+        {/* Additional Information */}
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" color="primary.main" gutterBottom>
+            Additional Information
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography><strong>Blood Type:</strong> {personDetails.bloodType || 'N/A'}</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography><strong>Profession:</strong> {personDetails.profession || 'N/A'}</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography><strong>Hobbies:</strong> {personDetails.hobbies || 'N/A'}</Typography>
+        </Grid>
+      </Grid>
+    )}
+  </Box>
+)}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
     <Typography variant="h6" mb={2} gutterBottom>List of Documents</Typography>
