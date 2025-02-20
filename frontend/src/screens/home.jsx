@@ -56,7 +56,7 @@ const Main = () => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.4,
+            opacity: 1,
             zIndex: -1
           }
         }}
@@ -97,7 +97,7 @@ const Main = () => {
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-around',
-              gap: 0, // Increased gap between elements
+              gap: 0,
               boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               overflow: 'auto',

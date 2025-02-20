@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Drawer, Box, Button, IconButton, Divider } from '@mui/material';
+import { Drawer, Box, Button, IconButton} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
@@ -75,8 +75,6 @@ const Sidebar = ({ open, onClose }) => {
             }} />
           </IconButton>
         </Box>
-        
-        {/* Rest of your buttons */}
         <Button
   fullWidth
   onClick={() => handleNavigation('/')}
