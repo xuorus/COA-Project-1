@@ -317,6 +317,7 @@ const Records = () => {
   const [bloodTypeAnchorEl, setBloodTypeAnchorEl] = useState(null);
   const [selectedBloodType, setSelectedBloodType] = useState('all');
   const [records, setRecords] = useState(sampleRecords);
+  const [originalRecords, setOriginalRecords] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
@@ -344,6 +345,7 @@ const Records = () => {
       try {
         const response = await axios.get('http://localhost:5000/api/records');
         setRecords(response.data);
+        setOriginalRecords(response.data); // Store original records
       } catch (error) {
         console.error('Error fetching records:', error);
       }
@@ -441,65 +443,51 @@ const Records = () => {
     handleSortClose();
   };
 
-  const handleSearch = (event) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-    setPage(0);
-    
-    if (query === '') {
-      axios.get('http://localhost:5000/api/records', {
-        params: {
-          bloodType: selectedBloodType !== 'all' ? selectedBloodType : undefined
-        }
-      })
-        .then(response => {
-          setRecords(response.data);
-        })
-        .catch(error => {
-          console.error('Error fetching records:', error);
-        });
-      return;
-    }
+const handleSearch = (value) => {
+  const query = value.toLowerCase();
+  setSearchQuery(value);
+  setPage(0);
   
-    const filteredRecords = records.filter(record => {
-      // Get individual fields and ensure they exist
-      const fName = (record.fName || '').toLowerCase();
-      const mName = (record.mName || '').toLowerCase();
-      const lName = (record.lName || '').toLowerCase();
-      const profession = (record.profession || '').toLowerCase();
-      const hobbies = (record.hobbies || '').toLowerCase();
-  
-      // Progressive string matching for names
-      const nameSearchStrings = [
-        fName,
-        `${fName}${mName}`,
-        `${fName}${lName}`,
-        `${fName}${mName}${lName}`,
-        `${fName} ${mName}`,
-        `${fName} ${lName}`,
-        `${fName} ${mName} ${lName}`,
-      ];
-  
-      // Check all fields
-      const nameMatch = nameSearchStrings.some(str => str.includes(query));
-      const professionMatch = profession.includes(query);
-      const hobbiesMatch = hobbies.includes(query);
-      const documentMatch = (
-        (record.pdsID || '').toString().toLowerCase().includes(query) ||
-        (record.salnID || '').toString().toLowerCase().includes(query)
-      );
-      const dateMatch = record.date ? 
-        new Date(record.date).toLocaleDateString().toLowerCase().includes(query) : 
-        false;
-  
-      // Apply blood type filter if selected
-      const bloodTypeMatch = selectedBloodType === 'all' || record.bloodType === selectedBloodType;
-  
-      return (nameMatch || professionMatch || hobbiesMatch || documentMatch || dateMatch) && bloodTypeMatch;
-    });
-  
-    setRecords(filteredRecords);
-  };
+  if (query === '') {
+    setRecords(originalRecords);
+    return;
+  }
+
+  const filteredRecords = originalRecords.filter(record => {
+    const fName = (record.fName || '').toLowerCase();
+    const mName = (record.mName || '').toLowerCase();
+    const lName = (record.lName || '').toLowerCase();
+    const profession = (record.profession || '').toLowerCase();
+    const hobbies = (record.hobbies || '').toLowerCase();
+
+    const nameSearchStrings = [
+      fName,
+      `${fName}${mName}`,
+      `${fName}${lName}`,
+      `${fName}${mName}${lName}`,
+      `${fName} ${mName}`,
+      `${fName} ${lName}`,
+      `${fName} ${mName} ${lName}`,
+    ];
+
+    const nameMatch = nameSearchStrings.some(str => str.includes(query));
+    const professionMatch = profession.includes(query);
+    const hobbiesMatch = hobbies.includes(query);
+    const documentMatch = (
+      (record.pdsID || '').toString().toLowerCase().includes(query) ||
+      (record.salnID || '').toString().toLowerCase().includes(query)
+    );
+    const dateMatch = record.date ? 
+      new Date(record.date).toLocaleDateString().toLowerCase().includes(query) : 
+      false;
+
+    const bloodTypeMatch = selectedBloodType === 'all' || record.bloodType === selectedBloodType;
+
+    return (nameMatch || professionMatch || hobbiesMatch || documentMatch || dateMatch) && bloodTypeMatch;
+  });
+
+  setRecords(filteredRecords);
+};
 
   const handleBloodTypeSelect = async (type) => {
     setSelectedBloodType(type);
@@ -769,7 +757,7 @@ const handleDocumentClick = useCallback((documentData) => {
   size="small" 
   placeholder="Search" 
   value={searchQuery}
-  onChange={handleSearch}
+  onChange={(e) => handleSearch(e.target.value)}
   InputProps={{
     endAdornment: (
       <InputAdornment position="end">
