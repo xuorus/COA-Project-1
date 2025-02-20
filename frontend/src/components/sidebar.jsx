@@ -6,6 +6,7 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import DocumentScannerRoundedIcon from '@mui/icons-material/DocumentScannerRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded'; // Add this import
 
 const Sidebar = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -171,6 +172,41 @@ const Sidebar = ({ open, onClose }) => {
   }}
 >
 <AssignmentRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> View Records
+</Button>
+
+<Divider 
+  sx={{ 
+    borderColor: 'rgb(154, 145, 145)',
+    borderWidth: '1.5px',
+    width: '100%'
+  }} 
+/>
+
+<Button
+  fullWidth
+  disableRipple
+  onClick={() => handleNavigation('/manning')}
+  sx={{ 
+    justifyContent: 'flex-start', 
+    textAlign: 'left',
+    pl: 2,
+    fontWeight: 'bold',
+    transition: 'all 0.3s ease',
+    color: '#000', 
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'translateX(8px)',
+      backgroundColor: 'rgba(0, 0, 0, 0.04)'
+    },
+    '&:focus': {
+      outline: 'none'
+    },
+    '&.Mui-focusVisible': {
+      outline: 'none'
+    }
+  }}
+>
+  <PersonRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> Manning
 </Button>
       </Box>
     </Drawer>
