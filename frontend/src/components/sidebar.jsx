@@ -34,7 +34,7 @@ const Sidebar = ({ open, onClose }) => {
       onClose={onClose}
       sx={{
         '& .MuiDrawer-paper': {
-          width: 300,
+          width: 250,
           boxSizing: 'border-box',
           backgroundColor: '#F5F5F4',
           borderLeft: '1px solid rgba(0, 0, 0, 0.12)'
@@ -50,7 +50,7 @@ const Sidebar = ({ open, onClose }) => {
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
-          mb: 2 
+          mb: 4 
         }}>
          <IconButton
             onClick={onClose}
@@ -87,8 +87,8 @@ const Sidebar = ({ open, onClose }) => {
     pl: 2,
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
-    color: '#000', 
-    fontSize: '1rem',
+    color: '#4B4B4B', 
+    fontSize: '0.95rem',
     '&:hover': {
       transform: 'translateX(8px)',
       backgroundColor: 'rgba(0, 0, 0, 0.04)'
@@ -101,16 +101,8 @@ const Sidebar = ({ open, onClose }) => {
     }
   }}
 >
-  <HomeRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> Home
+  <HomeRoundedIcon sx={{ mr: 1, fontSize: 35 }} /> Home
 </Button>
-
-<Divider 
-  sx={{ 
-    borderColor: 'rgb(154, 145, 145)',
-    borderWidth: '1.5px',
-    width: '100%'
-  }} 
-/>
 
 <Button
   fullWidth
@@ -122,8 +114,8 @@ const Sidebar = ({ open, onClose }) => {
     pl: 2,
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
-    color: '#000', 
-    fontSize: '1rem',
+    color: '#4B4B4B', 
+    fontSize: '0.95em',
     '&:hover': {
       transform: 'translateX(8px)',
       backgroundColor: 'rgba(0, 0, 0, 0.04)'
@@ -136,16 +128,8 @@ const Sidebar = ({ open, onClose }) => {
     }
   }}
 >
-<DocumentScannerRoundedIcon sx={{ mr: 1, fontSize: 40 }} />Scan Documents
+<DocumentScannerRoundedIcon sx={{ mr: 1, fontSize: 35 }} />Scan Documents
 </Button>
-
-<Divider 
-  sx={{ 
-    borderColor: 'rgb(154, 145, 145)',
-    borderWidth: '1.5px',
-    width: '100%'
-  }} 
-/>
 
 <Button
   fullWidth
@@ -157,8 +141,8 @@ const Sidebar = ({ open, onClose }) => {
     pl: 2,
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
-    color: '#000', 
-    fontSize: '1rem',
+    color: '#4B4B4B', 
+    fontSize: '0.95rem',
     '&:hover': {
       transform: 'translateX(8px)',
       backgroundColor: 'rgba(0, 0, 0, 0.04)'
@@ -171,16 +155,8 @@ const Sidebar = ({ open, onClose }) => {
     }
   }}
 >
-<AssignmentRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> View Records
+<AssignmentRoundedIcon sx={{ mr: 1, fontSize: 35 }} /> View Records
 </Button>
-
-<Divider 
-  sx={{ 
-    borderColor: 'rgb(154, 145, 145)',
-    borderWidth: '1.5px',
-    width: '100%'
-  }} 
-/>
 
 <Button
   fullWidth
@@ -192,8 +168,8 @@ const Sidebar = ({ open, onClose }) => {
     pl: 2,
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
-    color: '#000', 
-    fontSize: '1rem',
+    color: '#4B4B4B', 
+    fontSize: '0.95rem',
     '&:hover': {
       transform: 'translateX(8px)',
       backgroundColor: 'rgba(0, 0, 0, 0.04)'
@@ -206,7 +182,7 @@ const Sidebar = ({ open, onClose }) => {
     }
   }}
 >
-  <PersonRoundedIcon sx={{ mr: 1, fontSize: 40 }} /> Manning
+  <PersonRoundedIcon sx={{ mr: 1, fontSize: 35 }} /> Manning
 </Button>
       </Box>
     </Drawer>
