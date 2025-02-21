@@ -177,9 +177,83 @@ const getPersonHistory = async (req, res) => {
   }
 };
 
+const updatePersonDetails = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const updates = req.body;
+
+    // Get current values first
+    const [currentPerson] = await pool.query(
+      'SELECT fName, mName, lName, bloodType, profession, hobbies FROM person WHERE PID = ?',
+      [pid]
+    );
+
+    if (!currentPerson[0]) {
+      return res.status(404).json({ message: 'Person not found' });
+    }
+
+    // Build dynamic query based on changed fields
+    const updateFields = [];
+    const updateValues = [];
+    const changedFields = [];
+
+    // Compare and add only changed fields
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value !== undefined && value !== currentPerson[0][key]) {
+        updateFields.push(`${key} = ?`);
+        updateValues.push(value);
+        changedFields.push(key);
+      }
+    });
+
+    // If no changes, return early
+    if (updateFields.length === 0) {
+      return res.json({ message: 'No changes detected' });
+    }
+
+    // Add PID to values array
+    updateValues.push(pid);
+
+    // Construct and execute update query
+    const query = `
+      UPDATE person 
+      SET ${updateFields.join(', ')}
+      WHERE PID = ?
+    `;
+
+    const [result] = await pool.query(query, updateValues);
+
+    if (result.affectedRows > 0) {
+      // Create detailed log message
+      const logMessage = `Updated: ${changedFields.join(', ')}`;
+      
+      // Add to logs
+      await pool.query(
+        'INSERT INTO logs (PID, activity, date) VALUES (?, ?, NOW())',
+        [pid, logMessage]
+      );
+
+      res.json({ 
+        message: 'Person details updated successfully',
+        updatedFields: changedFields
+      });
+    } else {
+      res.status(400).json({ message: 'Update failed' });
+    }
+
+  } catch (error) {
+    logger.error('Error updating person details:', error);
+    res.status(500).json({ 
+      message: 'Error updating person details', 
+      error: error.message 
+    });
+  }
+};
+
 module.exports = {
   getRecords,
   getPersonDetails,
   getDocuments,
-  getPersonHistory
+  getPersonHistory,
+  updatePersonDetails
 };

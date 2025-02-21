@@ -56,6 +56,8 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import AddIcon from '@mui/icons-material/Add';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
 import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Close';
 import RecordFilters from '../components/records/RecordFilters';
 import PersonalDetails from '../components/records/modal/PersonalDetails';
 import Pagination from '../components/records/Pagination';
@@ -342,6 +344,7 @@ const Records = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState(null);
   const [editingField, setEditingField] = useState(null); // Keep only this one
+  const [editMode, setEditMode] = useState(false);
   const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
   useEffect(() => {
@@ -564,8 +567,15 @@ const handleAddDocument = () => {
 };
 
 const handleEditClick = () => {
-  setIsEditing(true);
-  setEditedDetails({ ...personDetails });
+   setEditMode(true);
+  setEditedDetails({
+    fName: personDetails.firstName || '',
+    mName: personDetails.middleName || '',
+    lName: personDetails.lastName || '',
+    bloodType: personDetails.bloodType || '',
+    profession: personDetails.profession || '',
+    hobbies: personDetails.hobbies || ''
+  });
 };
 
 const handleInputChange = (field) => (event) => {
@@ -577,15 +587,26 @@ const handleInputChange = (field) => (event) => {
 
 const handleSave = async () => {
   try {
-    await axios.put(`http://localhost:5000/api/records/${selectedRecord.PID}`, editedDetails);
-    setPersonDetails(editedDetails);
-    setIsEditing(false);
-    // Add to history
-    const historyEntry = {
-      activity: 'Personal information updated',
-      date: new Date().toISOString()
-    };
-    await axios.post(`http://localhost:5000/api/records/${selectedRecord.PID}/history`, historyEntry);
+    const response = await axios.put(`http://localhost:5000/api/records/${selectedRecord.PID}`, editedDetails);
+    
+    if (response.status === 200) {
+      // Update local state
+      setPersonDetails({
+        firstName: editedDetails.fName,
+        middleName: editedDetails.mName,
+        lastName: editedDetails.lName,
+        bloodType: editedDetails.bloodType,
+        profession: editedDetails.profession,
+        hobbies: editedDetails.hobbies
+      });
+      
+      // Refresh records list
+      const updatedRecords = await axios.get('http://localhost:5000/api/records');
+      setRecords(updatedRecords.data);
+      setOriginalRecords(updatedRecords.data);
+      
+      setEditMode(false);
+    }
   } catch (error) {
     console.error('Error updating details:', error);
   }
@@ -1011,15 +1032,131 @@ const handleTabChange = (event, newValue) => {
                       }}
                     >
                       {activeTab === 0 && (
-  <PersonalDetails
-    personDetails={personDetails}
-    editingField={editingField}
-    editedDetails={editedDetails}
-    handleFieldEdit={handleFieldEdit}
-    handleFieldSave={handleFieldSave}
-    handleFieldCancel={handleFieldCancel}
-    setEditedDetails={setEditedDetails}
-  />
+  <Box sx={{ p: 2 }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Typography variant="h6">Personal Information</Typography>
+      {!editMode ? (
+        <IconButton onClick={handleEditClick} size="small">
+          <EditIcon />
+        </IconButton>
+      ) : (
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton onClick={handleSave} size="small" color="primary">
+            <SaveIcon />
+          </IconButton>
+          <IconButton onClick={() => setEditMode(false)} size="small" color="error">
+            <CancelIcon />
+          </IconButton>
+        </Box>
+      )}
+    </Box>
+    {personDetails && (
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" color="primary.main" gutterBottom>
+            Basic Information
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="First Name"
+              value={editedDetails.fName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Middle Name"
+              value={editedDetails.mName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Last Name"
+              value={editedDetails.lName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
+          )}
+        </Grid>
+        
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" color="primary.main" gutterBottom>
+            Additional Information
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              select
+              label="Blood Type"
+              value={editedDetails.bloodType}
+              onChange={(e) => setEditedDetails(prev => ({...prev, bloodType: e.target.value}))}
+              size="small"
+            >
+              {bloodTypes.filter(type => type !== 'all').map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+          ) : (
+            <Typography><strong>Blood Type:</strong> {personDetails.bloodType || 'N/A'}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Profession"
+              value={editedDetails.profession}
+              onChange={(e) => setEditedDetails(prev => ({...prev, profession: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Profession:</strong> {personDetails.profession || 'N/A'}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Hobbies"
+              value={editedDetails.hobbies}
+              onChange={(e) => setEditedDetails(prev => ({...prev, hobbies: e.target.value}))}
+              size="small"
+              multiline
+              rows={2}
+            />
+          ) : (
+            <Typography><strong>Hobbies:</strong> {personDetails.hobbies || 'N/A'}</Typography>
+          )}
+        </Grid>
+      </Grid>
+    )}
+  </Box>
 )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
