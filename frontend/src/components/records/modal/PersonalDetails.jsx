@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   Typography,
@@ -209,6 +210,16 @@ const PersonalDetails = ({
       )}
     </Box>
   );
+};
+
+PersonalDetails.propTypes = {
+  personDetails: PropTypes.object,
+  editingField: PropTypes.string,
+  editedDetails: PropTypes.object,
+  handleFieldEdit: PropTypes.func.isRequired,
+  handleFieldSave: PropTypes.func.isRequired,
+  handleFieldCancel: PropTypes.func.isRequired,
+  setEditedDetails: PropTypes.func.isRequired
 };
 
 export default PersonalDetails;
