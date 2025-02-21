@@ -11,10 +11,10 @@ import {
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SearchIcon from '@mui/icons-material/Search';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { FaSortAlphaUp, FaSortAlphaDownAlt } from "react-icons/fa";
+import { RiSortAsc, RiSortDesc  } from "react-icons/ri";
 
 const RecordFilters = ({
   nameSort,
@@ -82,11 +82,11 @@ const RecordFilters = ({
         >
           {nameSort === 'az' ? (
             <>
-              <ArrowUpwardIcon fontSize="small" /> A to Z
+              <FaSortAlphaUp size={16} fontSize="small" /> A to Z
             </>
           ) : (
             <>
-              <ArrowDownwardIcon fontSize="small" /> Z to A
+              <FaSortAlphaDownAlt size={16} fontSize="small" /> Z to A
             </>
           )}
         </MenuItem>
@@ -107,11 +107,11 @@ const RecordFilters = ({
         >
           {dateSort === 'newest' ? (
             <>
-              <ArrowDownwardIcon fontSize="small" /> Newest to Oldest
+              <RiSortDesc size={20} fontSize="small" /> Newest to Oldest
             </>
           ) : (
             <>
-              <ArrowUpwardIcon fontSize="small" /> Oldest to Newest
+              <RiSortAsc size={20} fontSize="small" /> Oldest to Newest
             </>
           )}
         </MenuItem>
@@ -172,7 +172,7 @@ const RecordFilters = ({
             }}
             selected={selectedBloodType === type}
             sx={{
-              padding: '8px 16px',
+              padding: '8px 12px',
               '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
               '&.Mui-selected': {
                 backgroundColor: 'rgba(25, 118, 210, 0.08)',
