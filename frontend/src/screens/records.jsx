@@ -565,7 +565,7 @@ const handleAddDocument = () => {
 };
 
 const handleEditClick = () => {
-  setEditMode(true);
+   setEditMode(true);
   setEditedDetails({
     fName: personDetails.firstName || '',
     mName: personDetails.middleName || '',
