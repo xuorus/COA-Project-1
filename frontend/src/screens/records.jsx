@@ -56,6 +56,8 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import AddIcon from '@mui/icons-material/Add';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
 import SaveIcon from '@mui/icons-material/Save';
+import RecordFilters from '../components/records/RecordFilters';
+import PersonalDetails from '../components/records/modal/PersonalDetails';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -713,178 +715,23 @@ const handleTabChange = (event, newValue) => {
                   <Typography variant="h4" component="h1" fontWeight="bold">Records</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
-                <>
-  <IconButton 
-    color="#000"
-    onClick={handleSortClick}
-    disableRipple
-    sx={{ 
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-      '&:focus': { outline: 'none' },
-      '&.Mui-focusVisible': { outline: 'none' }
-    }}
-  >
-    <FilterListIcon />
-  </IconButton>
-
-  <Menu
-  anchorEl={anchorEl}
-  open={Boolean(anchorEl)}
-  onClose={handleSortClose}
-  sx={{
-    '& .MuiPaper-root': {
-      borderRadius: 2,
-      marginTop: 1,
-      minWidth: 180,
-      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(8px)',
-    }
-  }}
->
-  <MenuItem 
-    onClick={() => {
-      const newSort = nameSort === 'az' ? 'za' : 'az';
-      setNameSort(newSort);
-      handleSort(newSort);
-    }}
-    sx={{ 
-      gap: 1,
-      padding: '8px 16px',
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-    }}
-  >
-    {nameSort === 'az' ? (
-      <>
-        <ArrowUpwardIcon fontSize="small" /> A to Z
-      </>
-    ) : (
-      <>
-        <ArrowDownwardIcon fontSize="small" /> Z to A
-      </>
-    )}
-  </MenuItem>
-  <Divider sx={{ my: 1 }} />
-  <MenuItem 
-    onClick={() => {
-      const newSort = dateSort === 'newest' ? 'oldest' : 'newest';
-      setDateSort(newSort);
-      handleSort(newSort);
-    }}
-    sx={{ 
-      gap: 1,
-      padding: '8px 16px',
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-    }}
-  >
-    {dateSort === 'newest' ? (
-      <>
-        <ArrowDownwardIcon fontSize="small" /> Newest to Oldest
-      </>
-    ) : (
-      <>
-        <ArrowUpwardIcon fontSize="small" /> Oldest to Newest
-      </>
-    )}
-  </MenuItem>
-  <Divider sx={{ my: 1 }} />
-  <MenuItem
-    onClick={(e) => {
-      e.stopPropagation();
-      setBloodTypeAnchorEl(e.currentTarget);
-    }}
-    sx={{ 
-      gap: 1,
-      padding: '8px 16px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-    }}
-  >
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <LocalHospitalIcon fontSize="small" />
-      Blood Type
-    </Box>
-    <ArrowRightIcon fontSize="small" />
-  </MenuItem>
-</Menu>
-
-<Menu
-  anchorEl={bloodTypeAnchorEl}
-  open={Boolean(bloodTypeAnchorEl)}
-  onClose={() => setBloodTypeAnchorEl(null)}
-  sx={{
-    '& .MuiPaper-root': {
-      borderRadius: 2,
-      marginTop: 1,
-      minWidth: 120,
-      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(8px)',
-    }
-  }}
-  anchorOrigin={{
-    vertical: 'top',
-    horizontal: 'right',
-  }}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'left',
-  }}
->
-  {bloodTypes.map((type) => (
-    <MenuItem
-      key={type}
-      onClick={() => handleBloodTypeSelect(type)}
-      selected={selectedBloodType === type}
-      sx={{ 
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-        '&.Mui-selected': {
-          backgroundColor: 'rgba(25, 118, 210, 0.08)',
-          '&:hover': {
-            backgroundColor: 'rgba(25, 118, 210, 0.12)',
-          }
-        }
-      }}
-    >
-      {type === 'all' ? 'All Blood Types' : type}
-    </MenuItem>
-  ))}
-</Menu>
-</>
-<TextField 
-  variant="outlined" 
-  size="small" 
-  placeholder="Search" 
-  value={searchQuery}
-  onChange={(e) => handleSearch(e.target.value)}
-  InputProps={{
-    endAdornment: (
-      <InputAdornment position="end">
-        <SearchIcon />
-      </InputAdornment>
-    ),
-    sx: {
-      borderRadius: '12px',
-      '& fieldset': {
-        borderRadius: '12px',
-      },
-    }
-  }}
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '20px',
-      '&.Mui-focused fieldset': {
-        borderColor: 'black',
-      },
-      '&:hover fieldset': {
-        borderColor: 'black',
-      }
-    }
-  }}
-/>
+                <RecordFilters
+        nameSort={nameSort}
+        dateSort={dateSort}
+        selectedBloodType={selectedBloodType}
+        searchQuery={searchQuery}
+        onNameSortChange={(newSort) => {
+          setNameSort(newSort);
+          handleSort(newSort);
+        }}
+        onDateSortChange={(newSort) => {
+          setDateSort(newSort);
+          handleSort(newSort);
+        }}
+        onBloodTypeSelect={handleBloodTypeSelect}
+        onSearchChange={handleSearch}
+        bloodTypes={bloodTypes}
+      />
   </Box>
       </Box>
 
@@ -1249,191 +1096,15 @@ const handleTabChange = (event, newValue) => {
                       }}
                     >
                       {activeTab === 0 && (
-  <Box sx={{ p: 2 }}>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-      <Typography variant="h6" gutterBottom>Personal Information</Typography>
-    </Box>
-    {personDetails && (
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="primary.main" gutterBottom>
-            Basic Information
-          </Typography>
-        </Grid>
-        {[
-          { label: 'First Name', field: 'firstName' },
-          { label: 'Middle Name', field: 'middleName' },
-          { label: 'Last Name', field: 'lastName' }
-        ].map((item) => (
-          <Grid item xs={12} key={item.field}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
-              <Box sx={{ minWidth: '120px' }}>
-                <Typography><strong>{item.label}:</strong></Typography>
-              </Box>
-              {editingField === item.field ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <OutlinedInput
-                    value={editedDetails[item.field] || ''}
-                    onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                    size="small"
-                    sx={{ 
-                      width: '200px',
-                      height: '32px',
-                      '& input': {
-                        padding: '4px 8px',
-                      },
-                    }}
-                  />
-                  <IconButton 
-                    size="small" 
-                    onClick={() => handleFieldSave(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={handleFieldCancel}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
-                  </IconButton>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
-                  <Typography>{personDetails[item.field] || 'N/A'}</Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleFieldEdit(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      color: 'rgba(0, 0, 0, 0.38)',
-                      '&:hover': { color: 'primary.main' },
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Box>
-              )}
-            </Box>
-          </Grid>
-        ))}
-        
-        <Grid item xs={12}>
-          <Divider sx={{ my: 2 }} />
-        </Grid>
-
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="primary.main" gutterBottom>
-            Additional Information
-          </Typography>
-        </Grid>
-        
-        {[
-  { 
-    label: 'Blood Type', 
-    field: 'bloodType',
-    type: 'select',
-    options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-  },
-  { label: 'Profession', field: 'profession' },
-  { label: 'Hobbies', field: 'hobbies' }
-].map((item) => (
-  <Grid item xs={12} key={item.field}>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
-      <Box sx={{ minWidth: '120px' }}>
-        <Typography><strong>{item.label}:</strong></Typography>
-      </Box>
-      {editingField === item.field ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {item.type === 'select' ? (
-            <Select
-              value={editedDetails[item.field] || ''}
-              onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-              size="small"
-              sx={{ 
-                width: '100px', // Reduced width for blood type dropdown
-                height: '32px',
-                '& .MuiSelect-select': {
-                  padding: '4px 8px',
-                },
-              }}
-            >
-              {item.options.map(option => (
-                <MenuItem key={option} value={option}>{option}</MenuItem>
-              ))}
-            </Select>
-          ) : (
-            <OutlinedInput
-              value={editedDetails[item.field] || ''}
-              onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-              size="small"
-              sx={{ 
-                width: '200px',
-                height: '32px',
-                '& input': {
-                  padding: '4px 8px',
-                },
-              }}
-            />
-          )}
-          <IconButton 
-            size="small" 
-            onClick={() => handleFieldSave(item.field)}
-            sx={{ 
-              padding: '4px',
-              '&:focus': { outline: 'none' },
-              '&.Mui-focusVisible': { outline: 'none' }
-            }}
-          >
-            <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-          </IconButton>
-          <IconButton 
-            size="small" 
-            onClick={handleFieldCancel}
-            sx={{ 
-              padding: '4px',
-              '&:focus': { outline: 'none' },
-              '&.Mui-focusVisible': { outline: 'none' }
-            }}
-          >
-            <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
-          </IconButton>
-        </Box>
-      ) : (
-        <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
-          <Typography>{personDetails[item.field] || 'N/A'}</Typography>
-          <IconButton
-            size="small"
-            onClick={() => handleFieldEdit(item.field)}
-            sx={{ 
-              padding: '4px',
-              color: 'rgba(0, 0, 0, 0.38)',
-              '&:hover': { color: 'primary.main' },
-              '&:focus': { outline: 'none' },
-              '&.Mui-focusVisible': { outline: 'none' }
-            }}
-          >
-            <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-        </Box>
-      )}
-    </Box>
-  </Grid>
-))}
-      </Grid>
-    )}
-  </Box>
+  <PersonalDetails
+    personDetails={personDetails}
+    editingField={editingField}
+    editedDetails={editedDetails}
+    handleFieldEdit={handleFieldEdit}
+    handleFieldSave={handleFieldSave}
+    handleFieldCancel={handleFieldCancel}
+    setEditedDetails={setEditedDetails}
+  />
 )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
