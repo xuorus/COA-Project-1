@@ -95,7 +95,7 @@ const Manning = () => {
               }}
             >
               <Typography variant="h4" component="h1" fontWeight="bold" mb={3}>
-                Manning
+                Manning Complement
               </Typography>
               {/* Add your manning content here */}
             </Box>
