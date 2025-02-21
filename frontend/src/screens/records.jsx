@@ -58,7 +58,9 @@ import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Close';
->>>>>>>>> Temporary merge branch 2
+import RecordFilters from '../components/records/RecordFilters';
+import PersonalDetails from '../components/records/modal/PersonalDetails';
+import Pagination from '../components/records/Pagination';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -659,19 +661,6 @@ const handleTabChange = (event, newValue) => {
   setActiveTab(newValue);
 };
 
-// Add this useEffect hook for escape key handling
-useEffect(() => {
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape' && editMode) {
-      setEditMode(false);
-      setEditedDetails(null);
-    }
-  };
-  
-  window.addEventListener('keydown', handleKeyDown);
-  return () => window.removeEventListener('keydown', handleKeyDown);
-}, [editMode]);
-
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -749,178 +738,23 @@ useEffect(() => {
                   <Typography variant="h4" component="h1" fontWeight="bold">Records</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
-                <>
-  <IconButton 
-    color="#000"
-    onClick={handleSortClick}
-    disableRipple
-    sx={{ 
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-      '&:focus': { outline: 'none' },
-      '&.Mui-focusVisible': { outline: 'none' }
-    }}
-  >
-    <FilterListIcon />
-  </IconButton>
-
-  <Menu
-  anchorEl={anchorEl}
-  open={Boolean(anchorEl)}
-  onClose={handleSortClose}
-  sx={{
-    '& .MuiPaper-root': {
-      borderRadius: 2,
-      marginTop: 1,
-      minWidth: 180,
-      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(8px)',
-    }
-  }}
->
-  <MenuItem 
-    onClick={() => {
-      const newSort = nameSort === 'az' ? 'za' : 'az';
-      setNameSort(newSort);
-      handleSort(newSort);
-    }}
-    sx={{ 
-      gap: 1,
-      padding: '8px 16px',
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-    }}
-  >
-    {nameSort === 'az' ? (
-      <>
-        <ArrowUpwardIcon fontSize="small" /> A to Z
-      </>
-    ) : (
-      <>
-        <ArrowDownwardIcon fontSize="small" /> Z to A
-      </>
-    )}
-  </MenuItem>
-  <Divider sx={{ my: 1 }} />
-  <MenuItem 
-    onClick={() => {
-      const newSort = dateSort === 'newest' ? 'oldest' : 'newest';
-      setDateSort(newSort);
-      handleSort(newSort);
-    }}
-    sx={{ 
-      gap: 1,
-      padding: '8px 16px',
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-    }}
-  >
-    {dateSort === 'newest' ? (
-      <>
-        <ArrowDownwardIcon fontSize="small" /> Newest to Oldest
-      </>
-    ) : (
-      <>
-        <ArrowUpwardIcon fontSize="small" /> Oldest to Newest
-      </>
-    )}
-  </MenuItem>
-  <Divider sx={{ my: 1 }} />
-  <MenuItem
-    onClick={(e) => {
-      e.stopPropagation();
-      setBloodTypeAnchorEl(e.currentTarget);
-    }}
-    sx={{ 
-      gap: 1,
-      padding: '8px 16px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
-    }}
-  >
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <LocalHospitalIcon fontSize="small" />
-      Blood Type
-    </Box>
-    <ArrowRightIcon fontSize="small" />
-  </MenuItem>
-</Menu>
-
-<Menu
-  anchorEl={bloodTypeAnchorEl}
-  open={Boolean(bloodTypeAnchorEl)}
-  onClose={() => setBloodTypeAnchorEl(null)}
-  sx={{
-    '& .MuiPaper-root': {
-      borderRadius: 2,
-      marginTop: 1,
-      minWidth: 120,
-      boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(8px)',
-    }
-  }}
-  anchorOrigin={{
-    vertical: 'top',
-    horizontal: 'right',
-  }}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'left',
-  }}
->
-  {bloodTypes.map((type) => (
-    <MenuItem
-      key={type}
-      onClick={() => handleBloodTypeSelect(type)}
-      selected={selectedBloodType === type}
-      sx={{ 
-        padding: '8px 16px',
-        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
-        '&.Mui-selected': {
-          backgroundColor: 'rgba(25, 118, 210, 0.08)',
-          '&:hover': {
-            backgroundColor: 'rgba(25, 118, 210, 0.12)',
-          }
-        }
-      }}
-    >
-      {type === 'all' ? 'All Blood Types' : type}
-    </MenuItem>
-  ))}
-</Menu>
-</>
-<TextField 
-  variant="outlined" 
-  size="small" 
-  placeholder="Search" 
-  value={searchQuery}
-  onChange={(e) => handleSearch(e.target.value)}
-  InputProps={{
-    endAdornment: (
-      <InputAdornment position="end">
-        <SearchIcon />
-      </InputAdornment>
-    ),
-    sx: {
-      borderRadius: '12px',
-      '& fieldset': {
-        borderRadius: '12px',
-      },
-    }
-  }}
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '20px',
-      '&.Mui-focused fieldset': {
-        borderColor: 'black',
-      },
-      '&:hover fieldset': {
-        borderColor: 'black',
-      }
-    }
-  }}
-/>
+                <RecordFilters
+        nameSort={nameSort}
+        dateSort={dateSort}
+        selectedBloodType={selectedBloodType}
+        searchQuery={searchQuery}
+        onNameSortChange={(newSort) => {
+          setNameSort(newSort);
+          handleSort(newSort);
+        }}
+        onDateSortChange={(newSort) => {
+          setDateSort(newSort);
+          handleSort(newSort);
+        }}
+        onBloodTypeSelect={handleBloodTypeSelect}
+        onSearchChange={handleSearch}
+        bloodTypes={bloodTypes}
+      />
   </Box>
       </Box>
 
@@ -1198,17 +1032,6 @@ useEffect(() => {
                       }}
                     >
                       {activeTab === 0 && (
-<<<<<<<<< Temporary merge branch 1
-  <PersonalDetails
-    personDetails={personDetails}
-    editingField={editingField}
-    editedDetails={editedDetails}
-    handleFieldEdit={handleFieldEdit}
-    handleFieldSave={handleFieldSave}
-    handleFieldCancel={handleFieldCancel}
-    setEditedDetails={setEditedDetails}
-  />
-=========
   <Box sx={{ p: 2 }}>
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
       <Typography variant="h6">Personal Information</Typography>
@@ -1227,91 +1050,71 @@ useEffect(() => {
         </Box>
       )}
     </Box>
-    
-    <Box sx={{ 
-      flex: 1, 
-      overflow: 'auto',
-      p: 2,
-      '&::-webkit-scrollbar': {
-        width: '8px'
-      },
-      '&::-webkit-scrollbar-track': {
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-        borderRadius: '4px'
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: 'rgba(0, 0, 0, 0.15)',
-        borderRadius: '4px',
-        '&:hover': {
-          backgroundColor: 'rgba(0, 0, 0, 0.25)'
-        }
-      }
-    }}>
-      {personDetails && (
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="primary.main" gutterBottom>
-              Basic Information
-            </Typography>
-          </Grid>
-          <Grid item xs={12}>
-            {editMode ? (
-              <TextField
-                fullWidth
-                label="First Name"
-                value={editedDetails.fName}
-                onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSave();
-                  }
-                }}
-                size="small"
-              />
-            ) : (
-              <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            {editMode ? (
-              <TextField
-                fullWidth
-                label="Middle Name"
-                value={editedDetails.mName}
-                onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSave();
-                  }
-                }}
-                size="small"
-              />
-            ) : (
-              <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            {editMode ? (
-              <TextField
-                fullWidth
-                label="Last Name"
-                value={editedDetails.lName}
-                onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSave();
-                  }
-                }}
-                size="small"
-              />
-            ) : (
-              <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
-            )}
-          </Grid>
-          
-          <Grid item xs={12}>
-            <Divider sx={{ my: 2 }} />
-          </Grid>
+    {personDetails && (
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" color="primary.main" gutterBottom>
+            Basic Information
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="First Name"
+              value={editedDetails.fName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Middle Name"
+              value={editedDetails.mName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Last Name"
+              value={editedDetails.lName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
+          )}
+        </Grid>
+        
+        <Grid item xs={12}>
+          <Divider sx={{ my: 2 }} />
+        </Grid>
 
         <Grid item xs={12}>
           <Typography variant="subtitle2" color="primary.main" gutterBottom>
@@ -1385,7 +1188,6 @@ useEffect(() => {
       </Grid>
     )}
   </Box>
->>>>>>>>> Temporary merge branch 2
 )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
