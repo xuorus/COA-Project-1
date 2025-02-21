@@ -557,7 +557,8 @@ const handleAddDocument = () => {
         bloodType: personDetails?.bloodType || '',
         profession: personDetails?.profession || '',
         hobbies: personDetails?.hobbies || ''
-      }
+      },
+      isPrefilledDisabled: true
     }
   });
 };
