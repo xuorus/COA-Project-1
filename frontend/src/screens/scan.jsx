@@ -96,6 +96,7 @@ const Main = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const prefillData = location.state?.prefillData;
+  const isPrefilledDisabled = location.state?.isPrefilledDisabled;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [documentType, setDocumentType] = useState('');
@@ -468,6 +469,7 @@ const Main = () => {
                               value={formValues[field.field]}
                               label={field.label}
                               onChange={handleInputChange(field.field)}
+                              disabled={isPrefilledDisabled}
                               MenuProps={{
                                 PaperProps: {
                                   sx: {
@@ -520,6 +522,7 @@ const Main = () => {
                                   padding: '8px 14px',
                                 }
                               }}
+                              disabled={isPrefilledDisabled}
                             />
                           </>
                         )}
