@@ -1064,6 +1064,11 @@ const handleTabChange = (event, newValue) => {
               label="First Name"
               value={editedDetails.fName}
               onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
               size="small"
             />
           ) : (
@@ -1077,6 +1082,11 @@ const handleTabChange = (event, newValue) => {
               label="Middle Name"
               value={editedDetails.mName}
               onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
               size="small"
             />
           ) : (
@@ -1090,6 +1100,11 @@ const handleTabChange = (event, newValue) => {
               label="Last Name"
               value={editedDetails.lName}
               onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
               size="small"
             />
           ) : (
@@ -1114,6 +1129,11 @@ const handleTabChange = (event, newValue) => {
               label="Blood Type"
               value={editedDetails.bloodType}
               onChange={(e) => setEditedDetails(prev => ({...prev, bloodType: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
               size="small"
             >
               {bloodTypes.filter(type => type !== 'all').map((type) => (
@@ -1133,6 +1153,11 @@ const handleTabChange = (event, newValue) => {
               label="Profession"
               value={editedDetails.profession}
               onChange={(e) => setEditedDetails(prev => ({...prev, profession: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSave();
+                }
+              }}
               size="small"
             />
           ) : (
@@ -1146,6 +1171,12 @@ const handleTabChange = (event, newValue) => {
               label="Hobbies"
               value={editedDetails.hobbies}
               onChange={(e) => setEditedDetails(prev => ({...prev, hobbies: e.target.value}))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault(); // Prevent new line in multiline field
+                  handleSave();
+                }
+              }}
               size="small"
               multiline
               rows={2}
