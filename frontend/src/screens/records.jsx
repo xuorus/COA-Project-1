@@ -56,6 +56,8 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import AddIcon from '@mui/icons-material/Add';
 import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
 import SaveIcon from '@mui/icons-material/Save';
+import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Close';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -339,6 +341,7 @@ const Records = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDetails, setEditedDetails] = useState(null);
   const [editingField, setEditingField] = useState(null); // Keep only this one
+  const [editMode, setEditMode] = useState(false);
   const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
   useEffect(() => {
@@ -560,8 +563,15 @@ const handleAddDocument = () => {
 };
 
 const handleEditClick = () => {
-  setIsEditing(true);
-  setEditedDetails({ ...personDetails });
+  setEditMode(true);
+  setEditedDetails({
+    fName: personDetails.firstName || '',
+    mName: personDetails.middleName || '',
+    lName: personDetails.lastName || '',
+    bloodType: personDetails.bloodType || '',
+    profession: personDetails.profession || '',
+    hobbies: personDetails.hobbies || ''
+  });
 };
 
 const handleInputChange = (field) => (event) => {
@@ -573,15 +583,26 @@ const handleInputChange = (field) => (event) => {
 
 const handleSave = async () => {
   try {
-    await axios.put(`http://localhost:5000/api/records/${selectedRecord.PID}`, editedDetails);
-    setPersonDetails(editedDetails);
-    setIsEditing(false);
-    // Add to history
-    const historyEntry = {
-      activity: 'Personal information updated',
-      date: new Date().toISOString()
-    };
-    await axios.post(`http://localhost:5000/api/records/${selectedRecord.PID}/history`, historyEntry);
+    const response = await axios.put(`http://localhost:5000/api/records/${selectedRecord.PID}`, editedDetails);
+    
+    if (response.status === 200) {
+      // Update local state
+      setPersonDetails({
+        firstName: editedDetails.fName,
+        middleName: editedDetails.mName,
+        lastName: editedDetails.lName,
+        bloodType: editedDetails.bloodType,
+        profession: editedDetails.profession,
+        hobbies: editedDetails.hobbies
+      });
+      
+      // Refresh records list
+      const updatedRecords = await axios.get('http://localhost:5000/api/records');
+      setRecords(updatedRecords.data);
+      setOriginalRecords(updatedRecords.data);
+      
+      setEditMode(false);
+    }
   } catch (error) {
     console.error('Error updating details:', error);
   }
@@ -1251,7 +1272,21 @@ const handleTabChange = (event, newValue) => {
                       {activeTab === 0 && (
   <Box sx={{ p: 2 }}>
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-      <Typography variant="h6" gutterBottom>Personal Information</Typography>
+      <Typography variant="h6">Personal Information</Typography>
+      {!editMode ? (
+        <IconButton onClick={handleEditClick} size="small">
+          <EditIcon />
+        </IconButton>
+      ) : (
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton onClick={handleSave} size="small" color="primary">
+            <SaveIcon />
+          </IconButton>
+          <IconButton onClick={() => setEditMode(false)} size="small" color="error">
+            <CancelIcon />
+          </IconButton>
+        </Box>
+      )}
     </Box>
     {personDetails && (
       <Grid container spacing={2}>
@@ -1260,74 +1295,45 @@ const handleTabChange = (event, newValue) => {
             Basic Information
           </Typography>
         </Grid>
-        {[
-          { label: 'First Name', field: 'firstName' },
-          { label: 'Middle Name', field: 'middleName' },
-          { label: 'Last Name', field: 'lastName' }
-        ].map((item) => (
-          <Grid item xs={12} key={item.field}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
-              <Box sx={{ minWidth: '120px' }}>
-                <Typography><strong>{item.label}:</strong></Typography>
-              </Box>
-              {editingField === item.field ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <OutlinedInput
-                    value={editedDetails[item.field] || ''}
-                    onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                    size="small"
-                    sx={{ 
-                      width: '200px',
-                      height: '32px',
-                      '& input': {
-                        padding: '4px 8px',
-                      },
-                    }}
-                  />
-                  <IconButton 
-                    size="small" 
-                    onClick={() => handleFieldSave(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={handleFieldCancel}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
-                  </IconButton>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
-                  <Typography>{personDetails[item.field] || 'N/A'}</Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleFieldEdit(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      color: 'rgba(0, 0, 0, 0.38)',
-                      '&:hover': { color: 'primary.main' },
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Box>
-              )}
-            </Box>
-          </Grid>
-        ))}
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="First Name"
+              value={editedDetails.fName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Middle Name"
+              value={editedDetails.mName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Last Name"
+              value={editedDetails.lName}
+              onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
+          )}
+        </Grid>
         
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
@@ -1338,99 +1344,54 @@ const handleTabChange = (event, newValue) => {
             Additional Information
           </Typography>
         </Grid>
-        
-        {[
-          { 
-            label: 'Blood Type', 
-            field: 'bloodType',
-            type: 'select',
-            options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-          },
-          { label: 'Profession', field: 'profession' },
-          { label: 'Hobbies', field: 'hobbies' }
-        ].map((item) => (
-          <Grid item xs={12} key={item.field}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
-              <Box sx={{ minWidth: '120px' }}>
-                <Typography><strong>{item.label}:</strong></Typography>
-              </Box>
-              {editingField === item.field ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {item.type === 'select' ? (
-                    <Select
-                      value={editedDetails[item.field] || ''}
-                      onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                      size="small"
-                      sx={{ 
-                        width: '200px',
-                        height: '32px',
-                        '& .MuiSelect-select': {
-                          padding: '4px 8px',
-                        },
-                      }}
-                    >
-                      {item.options.map(option => (
-                        <MenuItem key={option} value={option}>{option}</MenuItem>
-                      ))}
-                    </Select>
-                  ) : (
-                    <OutlinedInput
-                      value={editedDetails[item.field] || ''}
-                      onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                      size="small"
-                      sx={{ 
-                        width: '200px',
-                        height: '32px',
-                        '& input': {
-                          padding: '4px 8px',
-                        },
-                      }}
-                    />
-                  )}
-                  <IconButton 
-                    size="small" 
-                    onClick={() => handleFieldSave(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                  </IconButton>
-                  <IconButton 
-                    size="small" 
-                    onClick={handleFieldCancel}
-                    sx={{ 
-                      padding: '4px',
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
-                  </IconButton>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
-                  <Typography>{personDetails[item.field] || 'N/A'}</Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleFieldEdit(item.field)}
-                    sx={{ 
-                      padding: '4px',
-                      color: 'rgba(0, 0, 0, 0.38)',
-                      '&:hover': { color: 'primary.main' },
-                      '&:focus': { outline: 'none' },
-                      '&.Mui-focusVisible': { outline: 'none' }
-                    }}
-                  >
-                    <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
-                  </IconButton>
-                </Box>
-              )}
-            </Box>
-          </Grid>
-        ))}
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              select
+              label="Blood Type"
+              value={editedDetails.bloodType}
+              onChange={(e) => setEditedDetails(prev => ({...prev, bloodType: e.target.value}))}
+              size="small"
+            >
+              {bloodTypes.filter(type => type !== 'all').map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </TextField>
+          ) : (
+            <Typography><strong>Blood Type:</strong> {personDetails.bloodType || 'N/A'}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Profession"
+              value={editedDetails.profession}
+              onChange={(e) => setEditedDetails(prev => ({...prev, profession: e.target.value}))}
+              size="small"
+            />
+          ) : (
+            <Typography><strong>Profession:</strong> {personDetails.profession || 'N/A'}</Typography>
+          )}
+        </Grid>
+        <Grid item xs={12}>
+          {editMode ? (
+            <TextField
+              fullWidth
+              label="Hobbies"
+              value={editedDetails.hobbies}
+              onChange={(e) => setEditedDetails(prev => ({...prev, hobbies: e.target.value}))}
+              size="small"
+              multiline
+              rows={2}
+            />
+          ) : (
+            <Typography><strong>Hobbies:</strong> {personDetails.hobbies || 'N/A'}</Typography>
+          )}
+        </Grid>
       </Grid>
     )}
   </Box>
