@@ -657,6 +657,19 @@ const handleTabChange = (event, newValue) => {
   setActiveTab(newValue);
 };
 
+// Add this useEffect hook for escape key handling
+useEffect(() => {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && editMode) {
+      setEditMode(false);
+      setEditedDetails(null);
+    }
+  };
+  
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [editMode]);
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -1270,8 +1283,18 @@ const handleTabChange = (event, newValue) => {
                       }}
                     >
                       {activeTab === 0 && (
-  <Box sx={{ p: 2 }}>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+  <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      justifyContent: 'space-between', 
+      alignItems: 'center', 
+      p: 2,
+      borderBottom: 1,
+      borderColor: 'divider',
+      position: 'sticky',
+      top: 0,
+      zIndex: 1
+    }}>
       <Typography variant="h6">Personal Information</Typography>
       {!editMode ? (
         <IconButton onClick={handleEditClick} size="small">
@@ -1288,143 +1311,164 @@ const handleTabChange = (event, newValue) => {
         </Box>
       )}
     </Box>
-    {personDetails && (
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="primary.main" gutterBottom>
-            Basic Information
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="First Name"
-              value={editedDetails.fName}
-              onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Middle Name"
-              value={editedDetails.mName}
-              onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Last Name"
-              value={editedDetails.lName}
-              onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
-          )}
-        </Grid>
-        
-        <Grid item xs={12}>
-          <Divider sx={{ my: 2 }} />
-        </Grid>
+    
+    <Box sx={{ 
+      flex: 1, 
+      overflow: 'auto',
+      p: 2,
+      '&::-webkit-scrollbar': {
+        width: '8px'
+      },
+      '&::-webkit-scrollbar-track': {
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+        borderRadius: '4px'
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: 'rgba(0, 0, 0, 0.15)',
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.25)'
+        }
+      }
+    }}>
+      {personDetails && (
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="primary.main" gutterBottom>
+              Basic Information
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                label="First Name"
+                value={editedDetails.fName}
+                onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSave();
+                  }
+                }}
+                size="small"
+              />
+            ) : (
+              <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                label="Middle Name"
+                value={editedDetails.mName}
+                onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSave();
+                  }
+                }}
+                size="small"
+              />
+            ) : (
+              <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                label="Last Name"
+                value={editedDetails.lName}
+                onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSave();
+                  }
+                }}
+                size="small"
+              />
+            ) : (
+              <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
+            )}
+          </Grid>
+          
+          <Grid item xs={12}>
+            <Divider sx={{ my: 2 }} />
+          </Grid>
 
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="primary.main" gutterBottom>
-            Additional Information
-          </Typography>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="primary.main" gutterBottom>
+              Additional Information
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                select
+                label="Blood Type"
+                value={editedDetails.bloodType}
+                onChange={(e) => setEditedDetails(prev => ({...prev, bloodType: e.target.value}))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSave();
+                  }
+                }}
+                size="small"
+              >
+                {bloodTypes.filter(type => type !== 'all').map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </TextField>
+            ) : (
+              <Typography><strong>Blood Type:</strong> {personDetails.bloodType || 'N/A'}</Typography>
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                label="Profession"
+                value={editedDetails.profession}
+                onChange={(e) => setEditedDetails(prev => ({...prev, profession: e.target.value}))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSave();
+                  }
+                }}
+                size="small"
+              />
+            ) : (
+              <Typography><strong>Profession:</strong> {personDetails.profession || 'N/A'}</Typography>
+            )}
+          </Grid>
+          <Grid item xs={12}>
+            {editMode ? (
+              <TextField
+                fullWidth
+                label="Hobbies"
+                value={editedDetails.hobbies}
+                onChange={(e) => setEditedDetails(prev => ({...prev, hobbies: e.target.value}))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // Prevent new line in multiline field
+                    handleSave();
+                  }
+                }}
+                size="small"
+                multiline
+                rows={2}
+              />
+            ) : (
+              <Typography><strong>Hobbies:</strong> {personDetails.hobbies || 'N/A'}</Typography>
+            )}
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              select
-              label="Blood Type"
-              value={editedDetails.bloodType}
-              onChange={(e) => setEditedDetails(prev => ({...prev, bloodType: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            >
-              {bloodTypes.filter(type => type !== 'all').map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </TextField>
-          ) : (
-            <Typography><strong>Blood Type:</strong> {personDetails.bloodType || 'N/A'}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Profession"
-              value={editedDetails.profession}
-              onChange={(e) => setEditedDetails(prev => ({...prev, profession: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>Profession:</strong> {personDetails.profession || 'N/A'}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Hobbies"
-              value={editedDetails.hobbies}
-              onChange={(e) => setEditedDetails(prev => ({...prev, hobbies: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault(); // Prevent new line in multiline field
-                  handleSave();
-                }
-              }}
-              size="small"
-              multiline
-              rows={2}
-            />
-          ) : (
-            <Typography><strong>Hobbies:</strong> {personDetails.hobbies || 'N/A'}</Typography>
-          )}
-        </Grid>
-      </Grid>
-    )}
+      )}
+    </Box>
   </Box>
 )}
                       {activeTab === 1 && (
