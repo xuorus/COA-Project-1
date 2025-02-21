@@ -180,7 +180,7 @@ const Sidebar = ({ open, onClose }) => {
     }
   }}
 >
-  <PersonRoundedIcon sx={{ mr: 1, fontSize: 35 }} /> Manning
+  <PersonRoundedIcon sx={{ mr: 1, fontSize: 35 }} /> Manning Complement
 </Button>
       </Box>
     </Drawer>
