@@ -35,15 +35,10 @@ import {
 } from '@mui/material';
 
 import { Menu } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
+
 import CloseIcon from '@mui/icons-material/Close';
 import backgroundImage from '../assets/bldg.jpg';
 import Sidebar from '../components/sidebar';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import PropTypes from 'prop-types';
 import Header from '../components/header';
 import Footer from '../components/footer';
 import axios from 'axios';
@@ -51,15 +46,11 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import PrintIcon from '@mui/icons-material/Print';
 import DownloadIcon from '@mui/icons-material/Download';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import AddIcon from '@mui/icons-material/Add';
-import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
 import SaveIcon from '@mui/icons-material/Save';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Close';
 import RecordFilters from '../components/records/RecordFilters';
-import PersonalDetails from '../components/records/modal/PersonalDetails';
 import Pagination from '../components/records/Pagination';
 
 // Add PDF worker
