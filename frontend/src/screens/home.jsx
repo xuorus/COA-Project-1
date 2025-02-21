@@ -94,10 +94,10 @@ const Main = () => {
               borderRadius: 2,
               padding: '2%',
               display: 'flex',
-              flexDirection: 'row',
+              flexDirection: { xs: 'column', lg: 'row' }, // Change flex direction breakpoint from md to lg for more space
               alignItems: 'center',
               justifyContent: 'space-around',
-              gap: 0,
+              gap: { xs: 4, lg: 0 }, // Add gap for mobile
               boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               overflow: 'auto',
@@ -106,21 +106,28 @@ const Main = () => {
           >
             <Box
               sx={{
-                position: 'absolute',
-                left: '50px',
+                position: { xs: 'relative', lg: 'absolute' }, // Relative on mobile, absolute on desktop
+                left: { xs: 'auto', lg: '50px' },
                 zIndex: 2,
-                maxWidth: '50%',
-                mb: 30,
+                maxWidth: { xs: '100%', sm: '80%', md: '70%', lg: '50%' },
+                mb: { xs: 0, lg: 30 },
+                textAlign: { xs: 'center', lg: 'left' }, // Center text on mobile
+                px: { xs: 2, lg: 0 } // Add padding on mobile
               }}
             >
               <Typography
                 sx={{
-                  fontSize: '40px',
+                  fontSize: { 
+                    xs: '24px', // Even smaller on mobile
+                    sm: '28px', // Small tablets
+                    md: '32px', // Tablets
+                    lg: '40px'  // Desktop
+                  }, // Responsive font sizes
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   lineHeight: 1.2,
                   color: 'rgba(255, 255, 255, 0.87)',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: { xs: 'normal', lg: 'nowrap' }, // Allow wrapping on mobile
                   textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
                 }}
               >
@@ -128,13 +135,18 @@ const Main = () => {
               </Typography>
               <Typography
                 sx={{
-                  fontSize: '40px',
+                  fontSize: { 
+                    xs: '24px',
+                    sm: '28px',
+                    md: '32px',
+                    lg: '40px'
+                  },
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   lineHeight: 1.2,
                   color: 'rgba(255, 255, 255, 0.87)',
                   marginBottom: '8px',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: { xs: 'normal', lg: 'nowrap' },
                   textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
                 }}
               >
@@ -142,11 +154,16 @@ const Main = () => {
               </Typography>
               <Typography
                 sx={{
-                  fontSize: '25px',
+                  fontSize: { 
+                    xs: '16px',
+                    sm: '18px',
+                    md: '20px',
+                    lg: '25px'
+                  },
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   color: 'rgba(255, 255, 255, 0.87)',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: { xs: 'normal', lg: 'nowrap' },
                   textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
                 }}
               >
@@ -156,10 +173,10 @@ const Main = () => {
             <Box
               sx={{
                 flex: '0 0 auto',
-                height: '100%',
+                height: { xs: '300px', md: '100%' }, // Smaller height on mobile
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-start',
+                justifyContent: 'center', // Center on all screens
                 padding: '20px',
                 zIndex: 1
               }}
@@ -169,7 +186,9 @@ const Main = () => {
                 alt="Logo" 
                 style={{
                   height: '450px',
-                  maxWidth: '450px',
+                  maxHeight: '450px',
+                  width: '450px',
+                  maxWidth: '100%',
                   opacity: 0.15
                 }}
               />
@@ -177,17 +196,18 @@ const Main = () => {
             <Box
               sx={{
                 flex: '0 0 auto',
-                height: '100%',
+                height: 'auto',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
+                justifyContent: 'center', // Center on all screens
                 padding: '20px',
                 '& .MuiDateCalendar-root': {
                   border: '1px solid rgba(0, 0, 0, 0.2)',
                   borderRadius: '8px',
                   padding: '8px',
                   backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                  maxWidth: '100%' // Ensure calendar doesn't overflow
                 },
                 '& .MuiPickersDay-root:focus': {
                   outline: 'none'

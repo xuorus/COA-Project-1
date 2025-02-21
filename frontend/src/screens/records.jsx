@@ -1293,6 +1293,7 @@ useEffect(() => {
       borderColor: 'divider',
       position: 'sticky',
       top: 0,
+
       zIndex: 1
     }}>
       <Typography variant="h6">Personal Information</Typography>
