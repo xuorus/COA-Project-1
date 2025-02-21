@@ -50,6 +50,7 @@
     "@emotion/styled": "^11.14.0",
     "@mui/x-date-pickers": "^7.27.0",
     "@react-pdf/renderer": "^4.2.1",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "prop-types": "^15.8.1"
   }
 }

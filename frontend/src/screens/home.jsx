@@ -185,9 +185,9 @@ const Main = () => {
                 src={logo} 
                 alt="Logo" 
                 style={{
-                  height: 'auto',
+                  height: '450px',
                   maxHeight: '450px',
-                  width: 'auto',
+                  width: '450px',
                   maxWidth: '100%',
                   opacity: 0.15
                 }}
