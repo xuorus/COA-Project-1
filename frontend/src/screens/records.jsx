@@ -53,6 +53,7 @@ import CancelIcon from '@mui/icons-material/Close';
 import RecordFilters from '../components/records/RecordFilters';
 import Pagination from '../components/records/Pagination';
 import { recordsApi } from '../services/api';
+import PersonalDetails from '../components/records/modal/PersonalDetails';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -353,12 +354,20 @@ const Records = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Create sort parameter based on current sort states
+      let sortBy;
+      if (nameSort === 'az') sortBy = 'name_asc';
+      else if (nameSort === 'za') sortBy = 'name_desc';
+      else if (dateSort === 'newest') sortBy = 'date_desc';
+      else if (dateSort === 'oldest') sortBy = 'date_asc';
+      
       const data = await recordsApi.getRecords({
         search: searchQuery,
-        sortBy: nameSort || dateSort,
+        sortBy,
         bloodType: selectedBloodType
       });
-      console.log('Fetched data:', data); // Debug log
+      
       setRecords(data);
     } catch (err) {
       console.error('Error fetching records:', err);
@@ -374,16 +383,53 @@ const Records = () => {
 
   useEffect(() => {
     if (selectedRecord) {
-      axios.get(`http://localhost:5000/api/records/${selectedRecord.PID}`)
-        .then(response => {
-          setPersonDetails(response.data);
-        })
-        .catch(error => {
+      const fetchPersonDetails = async () => {
+        try {
+          console.log('Fetching details for PID:', selectedRecord.PID); // Debug log
+          const response = await axios.get(`http://localhost:5000/api/records/${selectedRecord.PID}`);
+          console.log('Fetched person details:', response.data); // Debug log
+          setPersonDetails({
+            fName: response.data.fName || 'N/A',
+            mName: response.data.mName || 'N/A',
+            lName: response.data.lName || 'N/A',
+            bloodType: response.data.bloodType || 'N/A',
+            profession: response.data.profession || 'N/A',
+            hobbies: response.data.hobbies || 'N/A'
+          });
+        } catch (error) {
           console.error('Error fetching person details:', error);
-        });
+          setPersonDetails({
+            fName: 'N/A',
+            mName: 'N/A',
+            lName: 'N/A',
+            bloodType: 'N/A',
+            profession: 'N/A',
+            hobbies: 'N/A'
+          });
+        }
+      };
+
+      fetchPersonDetails();
     }
-    return () => setPersonDetails(null);
   }, [selectedRecord]);
+
+  useEffect(() => {
+  if (selectedRecord?.PID && activeTab === 0) {
+    const fetchPersonDetails = async () => {
+      try {
+        console.log('Fetching details for PID:', selectedRecord.PID);
+        const response = await axios.get(`http://localhost:5000/api/records/${selectedRecord.PID}`);
+        console.log('Fetched person details:', response.data);
+        setPersonDetails(response.data);
+      } catch (error) {
+        console.error('Error fetching person details:', error);
+        setPersonDetails(null);
+      }
+    };
+
+    fetchPersonDetails();
+  }
+}, [selectedRecord?.PID, activeTab]);
 
   const fetchDocuments = useCallback(async (pid) => {
     try {
@@ -664,6 +710,46 @@ const handleTabChange = (event, newValue) => {
   setActiveTab(newValue);
 };
 
+const handleUpdatePerson = async (updatedDetails) => {
+  try {
+    console.log('Sending update request:', updatedDetails); // Debug log
+
+    const response = await axios.put(
+      `http://localhost:5000/api/records/${selectedRecord.PID}`,
+      updatedDetails,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    console.log('Update response:', response.data); // Debug log
+
+    if (response.data.success) {
+      setPersonDetails(response.data.data);
+      fetchRecords(); // Refresh the list
+      return true;
+    }
+    
+    console.error('Update failed:', response.data.message);
+    return false;
+  } catch (error) {
+    console.error('Error updating person:', error);
+    return false;
+  }
+};
+
+const handleNameSort = useCallback((newSort) => {
+  setNameSort(newSort);
+  setDateSort(null); // Reset date sort when sorting by name
+}, []);
+
+const handleDateSort = useCallback((newSort) => {
+  setDateSort(newSort);
+  setNameSort(null); // Reset name sort when sorting by date
+}, []);
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -746,14 +832,8 @@ const handleTabChange = (event, newValue) => {
         dateSort={dateSort}
         selectedBloodType={selectedBloodType}
         searchQuery={searchQuery}
-        onNameSortChange={(newSort) => {
-          setNameSort(newSort);
-          handleSort(newSort);
-        }}
-        onDateSortChange={(newSort) => {
-          setDateSort(newSort);
-          handleSort(newSort);
-        }}
+        onNameSortChange={handleNameSort}
+        onDateSortChange={handleDateSort}
         onBloodTypeSelect={handleBloodTypeSelect}
         onSearchChange={handleSearch}
         bloodTypes={bloodTypes}
@@ -1035,162 +1115,10 @@ const handleTabChange = (event, newValue) => {
                       }}
                     >
                       {activeTab === 0 && (
-  <Box sx={{ p: 2 }}>
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-      <Typography variant="h6">Personal Information</Typography>
-      {!editMode ? (
-        <IconButton onClick={handleEditClick} size="small">
-          <EditIcon />
-        </IconButton>
-      ) : (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton onClick={handleSave} size="small" color="primary">
-            <SaveIcon />
-          </IconButton>
-          <IconButton onClick={() => setEditMode(false)} size="small" color="error">
-            <CancelIcon />
-          </IconButton>
-        </Box>
-      )}
-    </Box>
-    {personDetails && (
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="primary.main" gutterBottom>
-            Basic Information
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="First Name"
-              value={editedDetails.fName}
-              onChange={(e) => setEditedDetails(prev => ({...prev, fName: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>First Name:</strong> {personDetails.firstName}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Middle Name"
-              value={editedDetails.mName}
-              onChange={(e) => setEditedDetails(prev => ({...prev, mName: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>Middle Name:</strong> {personDetails.middleName || 'N/A'}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Last Name"
-              value={editedDetails.lName}
-              onChange={(e) => setEditedDetails(prev => ({...prev, lName: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>Last Name:</strong> {personDetails.lastName}</Typography>
-          )}
-        </Grid>
-        
-        <Grid item xs={12}>
-          <Divider sx={{ my: 2 }} />
-        </Grid>
-
-        <Grid item xs={12}>
-          <Typography variant="subtitle2" color="primary.main" gutterBottom>
-            Additional Information
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              select
-              label="Blood Type"
-              value={editedDetails.bloodType}
-              onChange={(e) => setEditedDetails(prev => ({...prev, bloodType: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            >
-              {bloodTypes.filter(type => type !== 'all').map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </TextField>
-          ) : (
-            <Typography><strong>Blood Type:</strong> {personDetails.bloodType || 'N/A'}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Profession"
-              value={editedDetails.profession}
-              onChange={(e) => setEditedDetails(prev => ({...prev, profession: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleSave();
-                }
-              }}
-              size="small"
-            />
-          ) : (
-            <Typography><strong>Profession:</strong> {personDetails.profession || 'N/A'}</Typography>
-          )}
-        </Grid>
-        <Grid item xs={12}>
-          {editMode ? (
-            <TextField
-              fullWidth
-              label="Hobbies"
-              value={editedDetails.hobbies}
-              onChange={(e) => setEditedDetails(prev => ({...prev, hobbies: e.target.value}))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault(); // Prevent new line in multiline field
-                  handleSave();
-                }
-              }}
-              size="small"
-              multiline
-              rows={2}
-            />
-          ) : (
-            <Typography><strong>Hobbies:</strong> {personDetails.hobbies || 'N/A'}</Typography>
-          )}
-        </Grid>
-      </Grid>
-    )}
-  </Box>
+  <PersonalDetails
+    personDetails={personDetails}
+    onUpdate={handleUpdatePerson}
+  />
 )}
                       {activeTab === 1 && (
   <Box sx={{ p: 2 }}>
