@@ -1,68 +1,47 @@
 const pool = require('../config/db');
 
 class RecordModel {
-  static async getRecords({ search, sortBy, sortOrder = 'asc', bloodType }) {
-    let query = `
-      SELECT 
-        a.PID,
-        a.fName,
-        a.mName,
-        a.lName,
-        a.profession,
-        a.hobbies,
-        a.bloodType,
-        b.pdsID,
-        c.salnID,
-        (
-          SELECT MAX(timestamp)
-          FROM logs
-          WHERE PID = a.PID
-        ) as date
-      FROM person AS a
-      LEFT JOIN pds AS b ON a.pdsID = b.pdsID
-      LEFT JOIN saln AS c ON a.salnID = c.salnID
-      WHERE 1=1
-    `;
-
-    const params = [];
-
-    if (bloodType && bloodType !== 'all') {
-      query += ` AND a.bloodType = ?`;
-      params.push(bloodType);
-    }
-
-    if (search) {
-      query += `
-        AND (
-          LOWER(CONCAT(a.fName, ' ', COALESCE(a.mName, ''), ' ', a.lName)) LIKE ?
-          OR LOWER(a.profession) LIKE ?
-          OR LOWER(a.hobbies) LIKE ?
-        )
+  static async getRecords({ search, sortBy, bloodType }) {
+    try {
+      let query = `
+        SELECT 
+          a."PID",
+          a."fName",
+          a."mName",
+          a."lName",
+          a."profession",
+          a."hobbies",
+          a."bloodType"
+        FROM "person" a
+        WHERE 1=1
       `;
-      const searchPattern = `%${search.toLowerCase()}%`;
-      params.push(...Array(3).fill(searchPattern));
+
+      const params = [];
+      let paramCount = 1;
+
+      if (bloodType && bloodType !== 'all') {
+        query += ` AND a."bloodType" = $${paramCount}`;
+        params.push(bloodType);
+        paramCount++;
+      }
+
+      if (search) {
+        query += ` AND (
+          LOWER(a."fName" || ' ' || COALESCE(a."mName", '') || ' ' || a."lName") LIKE $${paramCount}
+          OR LOWER(a."profession") LIKE $${paramCount}
+        )`;
+        params.push(`%${search.toLowerCase()}%`);
+      }
+
+      // Add sorting
+      query += ` ORDER BY a."lName" ${sortBy === 'za' ? 'DESC' : 'ASC'}`;
+
+      const { rows } = await pool.query(query, params);
+      return rows;
+    } catch (error) {
+      console.error('Database query error:', error);
+      throw error;
     }
-
-    const sortField = {
-      'az': 'a.lName',
-      'za': 'a.lName',
-      'newest': 'date',
-      'oldest': 'date',
-      'bloodtype': 'a.bloodType'
-    }[sortBy] || 'a.lName';
-
-    const order = {
-      'az': 'ASC',
-      'za': 'DESC',
-      'newest': 'DESC',
-      'oldest': 'ASC',
-      'bloodtype': 'ASC'
-    }[sortBy] || 'ASC';
-
-    query += ` ORDER BY ${sortField} ${order}`;
-
-    const [rows] = await pool.query(query, params);
-    return rows;
   }
 
   static async getPersonDetails(pid) {
@@ -91,30 +70,35 @@ class RecordModel {
   }
 
   static async getDocuments(pid) {
-    const [rows] = await pool.query(`
-      SELECT 
-        b.PDSfile,
-        c.SALNfile,
-        b.pdsID,
-        c.salnID
-      FROM person AS a
-      LEFT JOIN pds AS b ON a.pdsID = b.pdsID
-      LEFT JOIN saln AS c ON a.salnID = c.salnID
-      WHERE a.PID = ?
-    `, [pid]);
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT 
+          b."PDSfile",
+          c."SALNfile",
+          b."pdsID",
+          c."salnID"
+        FROM "person" AS a
+        LEFT JOIN "pds" AS b ON a."pdsID" = b."pdsID"
+        LEFT JOIN "saln" AS c ON a."salnID" = c."salnID"
+        WHERE a."PID" = $1
+      `, [pid]);
 
-    if (rows.length === 0) return null;
+      if (rows.length === 0) return null;
 
-    return {
-      pds: rows[0].PDSfile ? {
-        id: rows[0].pdsID,
-        data: rows[0].PDSfile.toString('base64')
-      } : null,
-      saln: rows[0].SALNfile ? {
-        id: rows[0].salnID,
-        data: rows[0].SALNfile.toString('base64')
-      } : null
-    };
+      return {
+        pds: rows[0].PDSfile ? {
+          id: rows[0].pdsID,
+          data: Buffer.from(rows[0].PDSfile).toString('base64')
+        } : null,
+        saln: rows[0].SALNfile ? {
+          id: rows[0].salnID,
+          data: Buffer.from(rows[0].SALNfile).toString('base64')
+        } : null
+      };
+    } finally {
+      client.release();
+    }
   }
 
   static async getPersonHistory(pid) {
