@@ -1,10 +1,10 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
-async function createWindow() {
-  const isDev = (await import('electron-is-dev')).default;
+let mainWindow;
 
-  const mainWindow = new BrowserWindow({
+async function createWindow() {
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     fullscreen: true, // Start in full screen
@@ -14,12 +14,31 @@ async function createWindow() {
     }
   });
 
-  // Load the React app
-  mainWindow.loadURL(
-    isDev 
-      ? 'http://localhost:5173' // Vite dev server URL
-      : `file://${path.join(__dirname, '../frontend/dist/index.html')}`
-  );
+  const isDev = !app.isPackaged;
+  const devURL = 'http://localhost:5173';
+  const prodURL = `file://${path.join(__dirname, '../frontend/dist/index.html')}`;
+
+  if (isDev) {
+    await loadDevURL(mainWindow, devURL);
+  } else {
+    mainWindow.loadURL(prodURL).catch(err => {
+      console.error('Failed to load production build:', err);
+    });
+  }
+}
+
+async function loadDevURL(window, url, retries = 5, delay = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await window.loadURL(url);
+      console.log('Loaded dev server successfully.');
+      return;
+    } catch (err) {
+      console.warn(`Retry ${i + 1}/${retries}: Failed to load ${url}. Retrying in ${delay / 1000}s...`);
+      await new Promise(res => setTimeout(res, delay));
+    }
+  }
+  console.error('Failed to load dev server. Please ensure Vite is running.');
 }
 
 app.whenReady().then(createWindow);
