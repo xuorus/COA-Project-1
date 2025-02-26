@@ -3,84 +3,110 @@ const logger = require('../utils/logger');
 
 const getRecords = async (req, res) => {
   try {
-    const records = await RecordModel.getRecords({
-      search: req.query.search || '',
-      sortBy: req.query.sortBy || 'az',
-      bloodType: req.query.bloodType || 'all'
-    });
+    const records = await RecordModel.getRecords(req.query);
     res.json(records);
   } catch (error) {
-    console.error('Error fetching records:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error fetching records', 
-      error: error.message 
-    });
+    logger.error('Error fetching records:', error);
+    res.status(500).json({ message: 'Error fetching records', error: error.message });
   }
 };
 
 const getPersonDetails = async (req, res) => {
   try {
-    const person = await RecordModel.getPersonDetails(req.params.pid);
-    if (!person) {
-      return res.status(404).json({ message: 'Person not found' });
+    const { pid } = req.params;
+    console.log('Fetching details for PID:', pid); // Debug log
+
+    const personDetails = await RecordModel.getPersonDetails(pid);
+    console.log('Query result:', personDetails); // Debug log
+
+    if (personDetails) {
+      res.json(personDetails);
+    } else {
+      res.status(404).json({ message: 'Person not found' });
     }
-    res.json(person);
   } catch (error) {
-    logger.error('Error fetching person details:', error);
-    res.status(500).json({ message: 'Error fetching person details', error: error.message });
+    console.error('Error fetching person details:', error);
+    res.status(500).json({ message: 'Error fetching person details' });
   }
 };
 
 const getDocuments = async (req, res) => {
   try {
-    const documents = await RecordModel.getDocuments(req.params.pid);
-    if (!documents) {
-      return res.status(404).json({ message: 'Documents not found' });
+    const { pid } = req.params;
+    console.log('Fetching documents for PID:', pid);
+    
+    const documents = await RecordModel.getDocuments(pid);
+    if (documents) {
+      res.json(documents);
+    } else {
+      res.json({ pds: null, saln: null });
     }
-    res.json(documents);
   } catch (error) {
-    logger.error('Error fetching documents:', error);
-    res.status(500).json({ message: 'Error fetching documents', error: error.message });
+    console.error('Error fetching documents:', error);
+    res.status(500).json({ message: 'Error fetching documents' });
   }
 };
 
 const getPersonHistory = async (req, res) => {
   try {
-    const history = await RecordModel.getPersonHistory(req.params.pid);
-    res.json(history);
+    const { pid } = req.params;
+    console.log('Fetching history for PID:', pid);
+    
+    const history = await RecordModel.getPersonHistory(pid);
+    res.json(history || []);
   } catch (error) {
-    logger.error('Error fetching person history:', error);
-    res.status(500).json({ message: 'Error fetching history', error: error.message });
+    console.error('Error fetching history:', error);
+    res.status(500).json({ message: 'Error fetching history' });
   }
 };
 
 const updatePersonDetails = async (req, res) => {
   try {
-    const result = await RecordModel.updatePersonDetails(req.params.pid, req.body);
-    if (!result) {
-      return res.status(404).json({ message: 'Person not found' });
+    const { pid } = req.params;
+    const updates = req.body;
+    
+    console.log('Updating person:', pid, 'with data:', updates);
+
+    // Handle empty string blood type
+    if (updates.bloodType === '') {
+      updates.bloodType = null;
     }
-    if (!result.success && result.message) {
-      return res.json({ message: result.message });
+
+    // Validate required fields
+    if (!updates) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No update data provided' 
+      });
     }
+
+    const result = await RecordModel.updatePersonDetails(pid, updates);
+    
     if (!result.success) {
-      return res.status(400).json({ message: 'Update failed' });
+      return res.status(400).json({ 
+        success: false, 
+        message: result.message 
+      });
     }
+
     res.json({ 
-      message: 'Person details updated successfully',
-      updatedFields: result.updatedFields
+      success: true, 
+      data: result.data 
     });
+
   } catch (error) {
-    logger.error('Error updating person details:', error);
-    res.status(500).json({ message: 'Error updating person details', error: error.message });
+    console.error('Controller error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error while updating details' 
+    });
   }
 };
 
-module.exports = { 
-  getRecords, 
-  getPersonDetails, 
-  getDocuments, 
-  getPersonHistory, 
-  updatePersonDetails 
+module.exports = {
+  getRecords,
+  getPersonDetails,
+  getDocuments,
+  getPersonHistory,
+  updatePersonDetails
 };
