@@ -18,6 +18,23 @@ import PersonIcon from '@mui/icons-material/Person';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import WorkIcon from '@mui/icons-material/Work';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
+import { motion } from 'framer-motion';
+
+const buttonContainerVariants = {
+  hidden: { 
+    opacity: 0,
+    x: 20,
+    transition: { duration: 0.2 }
+  },
+  visible: { 
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.3,
+      ease: "easeOut"
+    }
+  }
+};
 
 const DisplayField = ({ label, value, icon }) => (
   <Box sx={{ mb: 2 }}>
@@ -68,6 +85,9 @@ const StyledTextField = ({ label, value, onChange, icon, ...props }) => (
     </Box>
   </Box>
 );
+
+const AnimatedIconButton = motion(IconButton);
+const AnimatedButton = motion(Button);
 
 const PersonalDetails = ({ personDetails, onUpdate }) => {
   const [editMode, setEditMode] = useState(false);
@@ -128,8 +148,10 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
             <Typography variant="h5" fontWeight="500">Personal Information</Typography>
           </Box>
           {!editMode ? (
-            <IconButton 
+            <AnimatedIconButton 
               onClick={handleEdit} 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               sx={{ 
                 backgroundColor: 'rgba(25, 118, 210, 0.08)',
                 '&:hover': {
@@ -138,29 +160,39 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
               }}
             >
               <EditIcon />
-            </IconButton>
+            </AnimatedIconButton>
           ) : (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                startIcon={<SaveIcon />}
-                onClick={handleSave}
-                variant="contained"
-                sx={{
-                  backgroundColor: 'success.main',
-                  '&:hover': { backgroundColor: 'success.dark' }
-                }}
-              >
-                Save Changes
-              </Button>
-              <Button
-                startIcon={<CancelIcon />}
-                onClick={handleCancel}
-                variant="outlined"
-                color="error"
-              >
-                Cancel
-              </Button>
-            </Box>
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={buttonContainerVariants}
+            >
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <AnimatedButton
+                  startIcon={<SaveIcon />}
+                  onClick={handleSave}
+                  variant="contained"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  sx={{
+                    backgroundColor: 'success.main',
+                    '&:hover': { backgroundColor: 'success.dark' }
+                  }}
+                >
+                  Save Changes
+                </AnimatedButton>
+                <AnimatedButton
+                  startIcon={<CancelIcon />}
+                  onClick={handleCancel}
+                  variant="outlined"
+                  color="error"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Cancel
+                </AnimatedButton>
+              </Box>
+            </motion.div>
           )}
         </Box>
 
