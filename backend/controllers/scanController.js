@@ -2,9 +2,31 @@ const { exec } = require("child_process");
 const path = require("path");
 const fs = require('fs').promises;
 
+// Constants
+const VALID_DOCUMENT_TYPES = ['PDS', 'SALN'];
+const SCAN_TIMEOUT = 30000; // 30 seconds
+
+// Helper Functions
+const sanitizeDocumentType = (docType) => {
+    return docType.replace(/[^a-zA-Z0-9]/g, '').substring(0, 10);
+};
+
+const createScanResponse = (success, message, documentType, output = null, error = null) => {
+    return {
+        success,
+        ...(success ? { message, output } : { error: error.message }),
+        documentType
+    };
+};
+
 // Base scanning function
 const performScan = async (documentType) => {
+    if (!VALID_DOCUMENT_TYPES.includes(documentType)) {
+        throw new Error(`Invalid document type: ${documentType}`);
+    }
+
     const scriptPath = path.join(__dirname, "../scripts/scan.ps1");
+    const sanitizedDocType = sanitizeDocumentType(documentType);
     
     try {
         // Check if script exists
@@ -15,9 +37,13 @@ const performScan = async (documentType) => {
 
     return new Promise((resolve, reject) => {
         const ps = exec(
-            `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -DocumentType "${documentType}"`,
-            { timeout: 30000 }, // 30 second timeout
+            `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -DocumentType "${sanitizedDocType}"`,
+            { timeout: SCAN_TIMEOUT },
             (error, stdout, stderr) => {
+                if (error?.code === 'ETIMEDOUT') {
+                    reject(new Error(`Scanner operation timed out after ${SCAN_TIMEOUT/1000} seconds`));
+                    return;
+                }
                 if (error) {
                     console.error('Execution error:', error);
                     reject(new Error(`Scanner error: ${error.message}`));
@@ -48,19 +74,21 @@ exports.scanPDS = async (req, res) => {
         }
 
         console.log('PDS scan completed:', scanResult);
-        return res.json({ 
-            success: true, 
-            message: "PDS scanned successfully", 
-            documentType: "PDS",
-            output: scanResult 
-        });
+        return res.json(createScanResponse(
+            true,
+            "PDS scanned successfully",
+            "PDS",
+            scanResult
+        ));
     } catch (error) {
         console.error('Error scanning PDS:', error);
-        return res.status(500).json({ 
-            success: false, 
-            error: error.message,
-            documentType: "PDS"
-        });
+        return res.status(500).json(createScanResponse(
+            false,
+            null,
+            "PDS",
+            null,
+            error
+        ));
     }
 };
 
@@ -74,18 +102,20 @@ exports.scanSALN = async (req, res) => {
         }
 
         console.log('SALN scan completed:', scanResult);
-        return res.json({ 
-            success: true, 
-            message: "SALN scanned successfully", 
-            documentType: "SALN",
-            output: scanResult 
-        });
+        return res.json(createScanResponse(
+            true,
+            "SALN scanned successfully",
+            "SALN",
+            scanResult
+        ));
     } catch (error) {
         console.error('Error scanning SALN:', error);
-        return res.status(500).json({ 
-            success: false, 
-            error: error.message,
-            documentType: "SALN"
-        });
+        return res.status(500).json(createScanResponse(
+            false,
+            null,
+            "SALN",
+            null,
+            error
+        ));
     }
 };
