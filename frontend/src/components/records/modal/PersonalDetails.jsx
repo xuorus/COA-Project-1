@@ -1,225 +1,222 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
   Grid,
-  Divider,
   IconButton,
-  OutlinedInput,
-  Select,
-  MenuItem
+  TextField,
+  MenuItem,
+  Button,
+  Paper,
+  Divider,
+  Chip
 } from '@mui/material';
-import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
+import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
+import CancelIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import WorkIcon from '@mui/icons-material/Work';
+import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 
-const PersonalDetails = ({
-  personDetails,
-  editingField,
-  editedDetails,
-  handleFieldEdit,
-  handleFieldSave,
-  handleFieldCancel,
-  setEditedDetails
-}) => {
+const PersonalDetails = ({ personDetails, onUpdate }) => {
+  const [editMode, setEditMode] = useState(false);
+  const [editedDetails, setEditedDetails] = useState(null);
+
+  const handleEdit = () => {
+    setEditedDetails({ ...personDetails });
+    setEditMode(true);
+  };
+
+  const handleCancel = () => {
+    setEditedDetails(null);
+    setEditMode(false);
+  };
+
+  const handleSave = async () => {
+    try {
+      if (!editedDetails) {
+        console.error('No changes to save');
+        return;
+      }
+
+      console.log('Saving changes:', editedDetails); // Debug log
+      const success = await onUpdate(editedDetails);
+      
+      if (success) {
+        setEditMode(false);
+        setEditedDetails(null);
+      } else {
+        // You might want to show an error message here
+        console.error('Failed to save changes');
+      }
+    } catch (error) {
+      console.error('Error saving details:', error);
+      // You might want to show an error message here
+    }
+  };
+
+  const handleChange = (field) => (event) => {
+    setEditedDetails(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
+  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+  const bloodTypeValue = editMode 
+    ? (editedDetails.bloodType || '') 
+    : (personDetails.bloodType || '');
+
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h6" gutterBottom>Personal Information</Typography>
-      </Box>
-      {personDetails && (
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="primary.main" gutterBottom>
+      <Paper elevation={0} sx={{ p: 3, backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <PersonIcon sx={{ fontSize: 28, color: 'primary.main' }} />
+            <Typography variant="h5" fontWeight="500">Personal Information</Typography>
+          </Box>
+          {!editMode ? (
+            <IconButton 
+              onClick={handleEdit} 
+              sx={{ 
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                '&:hover': {
+                  backgroundColor: 'rgba(25, 118, 210, 0.15)'
+                }
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+          ) : (
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                startIcon={<SaveIcon />}
+                onClick={handleSave}
+                variant="contained"
+                sx={{
+                  backgroundColor: 'success.main',
+                  '&:hover': { backgroundColor: 'success.dark' }
+                }}
+              >
+                Save Changes
+              </Button>
+              <Button
+                startIcon={<CancelIcon />}
+                onClick={handleCancel}
+                variant="outlined"
+                color="error"
+              >
+                Cancel
+              </Button>
+            </Box>
+          )}
+        </Box>
+
+        <Divider sx={{ mb: 4 }} />
+
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Basic Information
             </Typography>
-          </Grid>
-          {[
-            { label: 'First Name', field: 'firstName' },
-            { label: 'Middle Name', field: 'middleName' },
-            { label: 'Last Name', field: 'lastName' }
-          ].map((item) => (
-            <Grid item xs={12} key={item.field}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
-                <Box sx={{ minWidth: '120px' }}>
-                  <Typography><strong>{item.label}:</strong></Typography>
-                </Box>
-                {editingField === item.field ? (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <OutlinedInput
-                      value={editedDetails[item.field] || ''}
-                      onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                      size="small"
-                      sx={{ 
-                        width: '200px',
-                        height: '32px',
-                        '& input': {
-                          padding: '4px 8px',
-                        },
-                      }}
-                    />
-                    <IconButton 
-                      size="small" 
-                      onClick={() => handleFieldSave(item.field)}
-                      sx={{ 
-                        padding: '4px',
-                        '&:focus': { outline: 'none' },
-                        '&.Mui-focusVisible': { outline: 'none' }
-                      }}
-                    >
-                      <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                    </IconButton>
-                    <IconButton 
-                      size="small" 
-                      onClick={handleFieldCancel}
-                      sx={{ 
-                        padding: '4px',
-                        '&:focus': { outline: 'none' },
-                        '&.Mui-focusVisible': { outline: 'none' }
-                      }}
-                    >
-                      <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
-                    </IconButton>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
-                    <Typography>{personDetails[item.field] || 'N/A'}</Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleFieldEdit(item.field)}
-                      sx={{ 
-                        padding: '4px',
-                        color: 'rgba(0, 0, 0, 0.38)',
-                        '&:hover': { color: 'primary.main' },
-                        '&:focus': { outline: 'none' },
-                        '&.Mui-focusVisible': { outline: 'none' }
-                      }}
-                    >
-                      <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </Box>
-                )}
-              </Box>
-            </Grid>
-          ))}
-          
-          <Grid item xs={12}>
-            <Divider sx={{ my: 2 }} />
+            <TextField
+              fullWidth
+              label="First Name"
+              value={editMode ? editedDetails.fName : personDetails.fName}
+              onChange={handleChange('fName')}
+              disabled={!editMode}
+              variant="outlined"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Middle Name"
+              value={editMode ? editedDetails.mName : personDetails.mName}
+              onChange={handleChange('mName')}
+              disabled={!editMode}
+              variant="outlined"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Surname"
+              value={editMode ? editedDetails.lName : personDetails.lName}
+              onChange={handleChange('lName')}
+              disabled={!editMode}
+              variant="outlined"
+            />
           </Grid>
 
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="primary.main" gutterBottom>
-              Additional Information
-            </Typography>
+          <Grid item xs={12} md={6}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Medical Information
+              </Typography>
+              <TextField
+                fullWidth
+                select
+                label="Blood Type"
+                value={bloodTypeValue}
+                onChange={handleChange('bloodType')}
+                disabled={!editMode}
+                variant="outlined"
+                InputProps={{
+                  startAdornment: <LocalHospitalIcon sx={{ mr: 1, color: 'error.main' }} />
+                }}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {bloodTypes.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Professional Information
+              </Typography>
+              <TextField
+                fullWidth
+                label="Profession"
+                value={editMode ? editedDetails.profession : personDetails.profession}
+                onChange={handleChange('profession')}
+                disabled={!editMode}
+                variant="outlined"
+                InputProps={{
+                  startAdornment: <WorkIcon sx={{ mr: 1, color: 'primary.main' }} />
+                }}
+              />
+            </Box>
+
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                Personal Interests
+              </Typography>
+              <TextField
+                fullWidth
+                label="Hobbies"
+                value={editMode ? editedDetails.hobbies : personDetails.hobbies}
+                onChange={handleChange('hobbies')}
+                disabled={!editMode}
+                multiline
+                rows={2}
+                variant="outlined"
+                InputProps={{
+                  startAdornment: <SportsSoccerIcon sx={{ mr: 1, color: 'success.main' }} />
+                }}
+              />
+            </Box>
           </Grid>
-          
-          {[
-            { 
-              label: 'Blood Type', 
-              field: 'bloodType',
-              type: 'select',
-              options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
-            },
-            { label: 'Profession', field: 'profession' },
-            { label: 'Hobbies', field: 'hobbies' }
-          ].map((item) => (
-            <Grid item xs={12} key={item.field}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, height: '32px' }}>
-                <Box sx={{ minWidth: '120px' }}>
-                  <Typography><strong>{item.label}:</strong></Typography>
-                </Box>
-                {editingField === item.field ? (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {item.type === 'select' ? (
-                      <Select
-                        value={editedDetails[item.field] || ''}
-                        onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                        size="small"
-                        sx={{ 
-                          width: '100px',
-                          height: '32px',
-                          '& .MuiSelect-select': {
-                            padding: '4px 8px',
-                          },
-                        }}
-                      >
-                        {item.options.map(option => (
-                          <MenuItem key={option} value={option}>{option}</MenuItem>
-                        ))}
-                      </Select>
-                    ) : (
-                      <OutlinedInput
-                        value={editedDetails[item.field] || ''}
-                        onChange={(e) => setEditedDetails({...editedDetails, [item.field]: e.target.value})}
-                        size="small"
-                        sx={{ 
-                          width: '200px',
-                          height: '32px',
-                          '& input': {
-                            padding: '4px 8px',
-                          },
-                        }}
-                      />
-                    )}
-                    <IconButton 
-                      size="small" 
-                      onClick={() => handleFieldSave(item.field)}
-                      sx={{ 
-                        padding: '4px',
-                        '&:focus': { outline: 'none' },
-                        '&.Mui-focusVisible': { outline: 'none' }
-                      }}
-                    >
-                      <SaveIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                    </IconButton>
-                    <IconButton 
-                      size="small" 
-                      onClick={handleFieldCancel}
-                      sx={{ 
-                        padding: '4px',
-                        '&:focus': { outline: 'none' },
-                        '&.Mui-focusVisible': { outline: 'none' }
-                      }}
-                    >
-                      <CloseIcon sx={{ fontSize: 18, color: 'error.main' }} />
-                    </IconButton>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, gap: 1 }}>
-                    <Typography>{personDetails[item.field] || 'N/A'}</Typography>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleFieldEdit(item.field)}
-                      sx={{ 
-                        padding: '4px',
-                        color: 'rgba(0, 0, 0, 0.38)',
-                        '&:hover': { color: 'primary.main' },
-                        '&:focus': { outline: 'none' },
-                        '&.Mui-focusVisible': { outline: 'none' }
-                      }}
-                    >
-                      <BorderColorRoundedIcon sx={{ fontSize: 18 }} />
-                    </IconButton>
-                  </Box>
-                )}
-              </Box>
-            </Grid>
-          ))}
         </Grid>
-      )}
+      </Paper>
     </Box>
   );
-};
-
-PersonalDetails.propTypes = {
-  personDetails: PropTypes.object,
-  editingField: PropTypes.string,
-  editedDetails: PropTypes.object,
-  handleFieldEdit: PropTypes.func.isRequired,
-  handleFieldSave: PropTypes.func.isRequired,
-  handleFieldCancel: PropTypes.func.isRequired,
-  setEditedDetails: PropTypes.func.isRequired
 };
 
 export default PersonalDetails;
