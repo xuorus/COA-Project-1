@@ -52,6 +52,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Close';
 import RecordFilters from '../components/records/RecordFilters';
 import Pagination from '../components/records/Pagination';
+import { recordsApi } from '../services/api';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -319,7 +320,7 @@ const Records = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [bloodTypeAnchorEl, setBloodTypeAnchorEl] = useState(null);
   const [selectedBloodType, setSelectedBloodType] = useState('all');
-  const [records, setRecords] = useState(sampleRecords);
+  const [records, setRecords] = useState([]);
   const [originalRecords, setOriginalRecords] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(20);
@@ -337,6 +338,8 @@ const Records = () => {
   const [editingField, setEditingField] = useState(null); // Keep only this one
   const [editMode, setEditMode] = useState(false);
   const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -346,19 +349,28 @@ const Records = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/records');
-        setRecords(response.data);
-        setOriginalRecords(response.data); // Store original records
-      } catch (error) {
-        console.error('Error fetching records:', error);
-      }
-    };
+  const fetchRecords = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await recordsApi.getRecords({
+        search: searchQuery,
+        sortBy: nameSort || dateSort,
+        bloodType: selectedBloodType
+      });
+      console.log('Fetched data:', data); // Debug log
+      setRecords(data);
+    } catch (err) {
+      console.error('Error fetching records:', err);
+      setError(err.message || 'Failed to fetch records');
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery, nameSort, dateSort, selectedBloodType]);
 
+  useEffect(() => {
     fetchRecords();
-  }, []);
+  }, [fetchRecords]);
 
   useEffect(() => {
     if (selectedRecord) {
