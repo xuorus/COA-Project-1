@@ -19,6 +19,56 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import WorkIcon from '@mui/icons-material/Work';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
 
+const DisplayField = ({ label, value, icon }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+      {label}
+    </Typography>
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 1,
+      p: 1,
+      borderRadius: 1,
+      bgcolor: 'rgba(0, 0, 0, 0.02)'
+    }}>
+      {icon}
+      <Typography>{value || 'Not specified'}</Typography>
+    </Box>
+  </Box>
+);
+
+const StyledTextField = ({ label, value, onChange, icon, ...props }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+      {label}
+    </Typography>
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 1,
+      p: 1,
+      borderRadius: 1,
+      bgcolor: 'rgba(0, 0, 0, 0.02)'
+    }}>
+      {icon}
+      <TextField
+        {...props}
+        fullWidth
+        value={value}
+        onChange={onChange}
+        variant="outlined"
+        size="small"
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            bgcolor: 'white',
+          }
+        }}
+      />
+    </Box>
+  </Box>
+);
+
 const PersonalDetails = ({ personDetails, onUpdate }) => {
   const [editMode, setEditMode] = useState(false);
   const [editedDetails, setEditedDetails] = useState(null);
@@ -121,32 +171,46 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Basic Information
             </Typography>
-            <TextField
-              fullWidth
-              label="First Name"
-              value={editMode ? editedDetails.fName : personDetails.fName}
-              onChange={handleChange('fName')}
-              disabled={!editMode}
-              variant="outlined"
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Middle Name"
-              value={editMode ? editedDetails.mName : personDetails.mName}
-              onChange={handleChange('mName')}
-              disabled={!editMode}
-              variant="outlined"
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Surname"
-              value={editMode ? editedDetails.lName : personDetails.lName}
-              onChange={handleChange('lName')}
-              disabled={!editMode}
-              variant="outlined"
-            />
+            {editMode ? (
+              <>
+                <StyledTextField
+                  label="First Name"
+                  value={editedDetails.fName}
+                  onChange={handleChange('fName')}
+                  icon={<PersonIcon sx={{ color: 'primary.main' }} />}
+                />
+                <StyledTextField
+                  label="Middle Name"
+                  value={editedDetails.mName}
+                  onChange={handleChange('mName')}
+                  icon={<PersonIcon sx={{ color: 'primary.main' }} />}
+                />
+                <StyledTextField
+                  label="Surname"
+                  value={editedDetails.lName}
+                  onChange={handleChange('lName')}
+                  icon={<PersonIcon sx={{ color: 'primary.main' }} />}
+                />
+              </>
+            ) : (
+              <>
+                <DisplayField 
+                  label="First Name"
+                  value={personDetails.fName}
+                  icon={<PersonIcon sx={{ color: 'primary.main' }} />}
+                />
+                <DisplayField 
+                  label="Middle Name"
+                  value={personDetails.mName}
+                  icon={<PersonIcon sx={{ color: 'primary.main' }} />}
+                />
+                <DisplayField 
+                  label="Surname"
+                  value={personDetails.lName}
+                  icon={<PersonIcon sx={{ color: 'primary.main' }} />}
+                />
+              </>
+            )}
           </Grid>
 
           <Grid item xs={12} md={6}>
@@ -154,63 +218,72 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                 Medical Information
               </Typography>
-              <TextField
-                fullWidth
-                select
-                label="Blood Type"
-                value={bloodTypeValue}
-                onChange={handleChange('bloodType')}
-                disabled={!editMode}
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <LocalHospitalIcon sx={{ mr: 1, color: 'error.main' }} />
-                }}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                {bloodTypes.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
+              {editMode ? (
+                <StyledTextField
+                  select
+                  label="Blood Type"
+                  value={bloodTypeValue}
+                  onChange={handleChange('bloodType')}
+                  icon={<LocalHospitalIcon sx={{ color: 'error.main' }} />}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
                   </MenuItem>
-                ))}
-              </TextField>
+                  {bloodTypes.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </StyledTextField>
+              ) : (
+                <DisplayField 
+                  label="Blood Type"
+                  value={personDetails.bloodType}
+                  icon={<LocalHospitalIcon sx={{ color: 'error.main' }} />}
+                />
+              )}
             </Box>
 
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                 Professional Information
               </Typography>
-              <TextField
-                fullWidth
-                label="Profession"
-                value={editMode ? editedDetails.profession : personDetails.profession}
-                onChange={handleChange('profession')}
-                disabled={!editMode}
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <WorkIcon sx={{ mr: 1, color: 'primary.main' }} />
-                }}
-              />
+              {editMode ? (
+                <StyledTextField
+                  label="Profession"
+                  value={editedDetails.profession}
+                  onChange={handleChange('profession')}
+                  icon={<WorkIcon sx={{ color: 'primary.main' }} />}
+                />
+              ) : (
+                <DisplayField 
+                  label="Profession"
+                  value={personDetails.profession}
+                  icon={<WorkIcon sx={{ color: 'primary.main' }} />}
+                />
+              )}
             </Box>
 
             <Box>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                 Personal Interests
               </Typography>
-              <TextField
-                fullWidth
-                label="Hobbies"
-                value={editMode ? editedDetails.hobbies : personDetails.hobbies}
-                onChange={handleChange('hobbies')}
-                disabled={!editMode}
-                multiline
-                rows={2}
-                variant="outlined"
-                InputProps={{
-                  startAdornment: <SportsSoccerIcon sx={{ mr: 1, color: 'success.main' }} />
-                }}
-              />
+              {editMode ? (
+                <StyledTextField
+                  label="Hobbies"
+                  value={editedDetails.hobbies}
+                  onChange={handleChange('hobbies')}
+                  multiline
+                  rows={2}
+                  icon={<SportsSoccerIcon sx={{ color: 'success.main' }} />}
+                />
+              ) : (
+                <DisplayField 
+                  label="Hobbies"
+                  value={personDetails.hobbies}
+                  icon={<SportsSoccerIcon sx={{ color: 'success.main' }} />}
+                />
+              )}
             </Box>
           </Grid>
         </Grid>
