@@ -8,10 +8,15 @@ const scanRoutes = require('./routes/scanRoutes');
 const pool = require('./config/db');
 
 const app = express();
+const PORT = process.env.PORT || 5000; // Changed from 3000 to 5000
 
 // Enable CORS
 app.use(cors({
-  origin: ['http://localhost:5173', 'app://.*'],
+  origin: [
+    'http://localhost:5173',  // Replace with your frontend IP
+    'http://your-domain.com',   // If you have a domain
+    'app://.*'
+  ],
   credentials: true
 }));
 
@@ -43,7 +48,6 @@ pool.connect()
     console.log('Database connected successfully');
     client.release();
     
-    const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
