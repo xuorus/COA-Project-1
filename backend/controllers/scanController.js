@@ -3,28 +3,51 @@ const path = require("path");
 const fs = require('fs').promises;
 
 // Base scanning function
-const performScan = (req, res) => {
+const performScan = async (documentType) => {
+    const scriptPath = path.join(__dirname, "../scripts/scan.ps1");
+    
+    try {
+        // Check if script exists
+        await fs.access(scriptPath);
+    } catch (error) {
+        throw new Error('Scanning script not found');
+    }
+
     return new Promise((resolve, reject) => {
-        const scriptPath = path.join(__dirname, "../scripts/scan.ps1");
-        exec(`powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}"`, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-                return;
+        const ps = exec(
+            `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -DocumentType "${documentType}"`,
+            { timeout: 30000 }, // 30 second timeout
+            (error, stdout, stderr) => {
+                if (error) {
+                    console.error('Execution error:', error);
+                    reject(new Error(`Scanner error: ${error.message}`));
+                    return;
+                }
+                if (stderr) {
+                    console.error('Scanner stderr:', stderr);
+                    reject(new Error(stderr));
+                    return;
+                }
+                resolve(stdout.trim());
             }
-            if (stderr) {
-                reject(new Error(stderr));
-                return;
-            }
-            resolve(stdout.trim());
+        );
+
+        ps.on('error', (error) => {
+            reject(new Error(`PowerShell execution failed: ${error.message}`));
         });
     });
 };
 
 exports.scanPDS = async (req, res) => {
     try {
-        const scanResult = await performScan();
+        console.log('Starting PDS scan...');
+        const scanResult = await performScan('PDS');
         
-        // Here you can add your PDS-specific processing
+        if (!scanResult) {
+            throw new Error('No scan result received');
+        }
+
+        console.log('PDS scan completed:', scanResult);
         return res.json({ 
             success: true, 
             message: "PDS scanned successfully", 
@@ -43,9 +66,14 @@ exports.scanPDS = async (req, res) => {
 
 exports.scanSALN = async (req, res) => {
     try {
-        const scanResult = await performScan();
+        console.log('Starting SALN scan...');
+        const scanResult = await performScan('SALN');
         
-        // Here you can add your SALN-specific processing
+        if (!scanResult) {
+            throw new Error('No scan result received');
+        }
+
+        console.log('SALN scan completed:', scanResult);
         return res.json({ 
             success: true, 
             message: "SALN scanned successfully", 
