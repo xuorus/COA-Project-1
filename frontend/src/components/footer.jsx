@@ -48,9 +48,12 @@ const Footer = ({ currentTime }) => {
           fontFamily: 'roboto',
           fontWeight: 'bold',
           whiteSpace: 'nowrap', // Prevent text wrapping
+          textAlign: 'right', // Align text to the right
         }}
       >
-        {currentTime.toLocaleDateString()} {currentTime.toLocaleTimeString()}
+        {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        <br />
+        {currentTime.toLocaleDateString()}
       </Typography>
     </Box>
   );
