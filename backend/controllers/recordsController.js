@@ -3,11 +3,19 @@ const logger = require('../utils/logger');
 
 const getRecords = async (req, res) => {
   try {
-    const records = await RecordModel.getRecords(req.query);
+    const records = await RecordModel.getRecords({
+      search: req.query.search || '',
+      sortBy: req.query.sortBy || 'az',
+      bloodType: req.query.bloodType || 'all'
+    });
     res.json(records);
   } catch (error) {
-    logger.error('Error fetching records:', error);
-    res.status(500).json({ message: 'Error fetching records', error: error.message });
+    console.error('Error fetching records:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching records', 
+      error: error.message 
+    });
   }
 };
 
@@ -69,10 +77,10 @@ const updatePersonDetails = async (req, res) => {
   }
 };
 
-module.exports = {
-  getRecords,
-  getPersonDetails,
-  getDocuments,
-  getPersonHistory,
-  updatePersonDetails
+module.exports = { 
+  getRecords, 
+  getPersonDetails, 
+  getDocuments, 
+  getPersonHistory, 
+  updatePersonDetails 
 };
