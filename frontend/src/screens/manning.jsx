@@ -14,6 +14,8 @@ import BorderColorRoundedIcon from '@mui/icons-material/BorderColorRounded';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PropTypes from 'prop-types';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
 
 const theme = createTheme({
   palette: {
@@ -30,7 +32,10 @@ const EditModal = ({ open, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [thirdModalOpen, setThirdModalOpen] = useState(false);
   const [selectedLgas, setSelectedLgas] = useState('');
-  const [officeItems, setOfficeItems] = useState([]);
+  const [editingCell, setEditingCell] = useState(null);
+  const [tempName, setTempName] = useState('');
+  const [names, setNames] = useState(Array(4).fill(''));
+  const [currentNumber, setCurrentNumber] = useState(1);
 
   const lgasList = [
     'Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1',
@@ -196,11 +201,29 @@ const EditModal = ({ open, onClose }) => {
     setSearchQuery('');
   };
 
-  const lgasAOffices = [
-    'COA Regional Office No. X, Cagayan de Oro City',
-    'PSAO-Camiguin, Mambajao, Camiguin',
-    'Office of the Auditor, Magsaysay, Misl Or.'
-  ];
+  const NameCell = () => {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        gap: 1 
+      }}>
+        <IconButton
+          size="small"
+          sx={{ 
+            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
+            },
+            padding: '4px'
+          }}
+        >
+          <AddIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    );
+  };
 
   return (
     <>
@@ -476,7 +499,6 @@ const EditModal = ({ open, onClose }) => {
                       onClick={() => {
                         if (item === 'Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1') {
                           setSelectedLgas(item);
-                          setOfficeItems(lgasAOffices);
                           setThirdModalOpen(true);
                         }
                       }}
@@ -512,7 +534,7 @@ const EditModal = ({ open, onClose }) => {
 
       <Modal
         open={thirdModalOpen}
-        onClose={() => setThirdModalOpen(false)}
+        onClose={handleCloseAll}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -529,20 +551,16 @@ const EditModal = ({ open, onClose }) => {
       >
         <Box
           sx={{
-            width: '80%',
-            height: '65vh',
+            width: '90%',
+            height: '80vh',
             bgcolor: '#fff',
             borderRadius: 2,
             boxShadow: 24,
             display: 'flex',
             flexDirection: 'column',
-            overflow: 'hidden',
-            transform: thirdModalOpen ? 'scale(1)' : 'scale(0.9)',
-            opacity: thirdModalOpen ? 1 : 0,
-            transition: 'transform 500ms ease-in-out, opacity 500ms ease-in-out'
+            overflow: 'hidden'
           }}
         >
-          {/* Fixed Header */}
           <Box 
             sx={{ 
               display: 'flex', 
@@ -550,11 +568,7 @@ const EditModal = ({ open, onClose }) => {
               alignItems: 'center',
               p: 4,
               pb: 3,
-              borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
-              backgroundColor: '#fff',
-              position: 'sticky',
-              top: 0,
-              zIndex: 1
+              borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
             }}
           >
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
@@ -562,9 +576,6 @@ const EditModal = ({ open, onClose }) => {
                 onClick={() => setThirdModalOpen(false)}
                 sx={{ 
                   color: 'rgba(0, 0, 0, 0.54)',
-                  '&:focus': {
-                    outline: 'none'
-                  },
                   '&:hover': {
                     backgroundColor: 'transparent'
                   }
@@ -572,118 +583,118 @@ const EditModal = ({ open, onClose }) => {
               >
                 <ArrowBackIcon />
               </IconButton>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                <Typography variant="h6">
-                  {selectedLgas}
-                </Typography>
-              </Box>
+              <Typography variant="h6">
+                {selectedLgas}
+              </Typography>
             </Box>
-
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <TextField
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                variant="outlined"
-                size="small"
-                placeholder="Search"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {searchQuery ? (
-                        <IconButton
-                          onClick={handleClearSearch}
-                          sx={{ 
-                            p: 0.5,
-                            '&:focus': {
-                              outline: 'none'
-                            }
-                          }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      ) : (
-                        <SearchIcon />
-                      )}
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    borderRadius: '12px',
-                    '& fieldset': {
-                      borderRadius: '12px',
-                    },
-                  }
-                }}
-                sx={{
-                  width: '250px',
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '20px',
-                    backgroundColor: 'none',
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      border: '1px solid rgba(0, 0, 0, 0.23)',
-                    },
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      border: '1px solid rgba(0, 0, 0, 0.23)',
-                    }
-                  }
-                }}
-              />
-              <IconButton
-                onClick={handleCloseAll}
-                sx={{ 
-                  color: 'rgba(0, 0, 0, 0.54)',
-                  '&:focus': {
-                    outline: 'none'
-                  },
-                  '&:hover': {
-                    backgroundColor: 'transparent'
-                  }
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
+            <IconButton
+              onClick={handleCloseAll}
+              sx={{ 
+                color: 'rgba(0, 0, 0, 0.54)',
+                '&:hover': {
+                  backgroundColor: 'transparent'
+                }
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
           </Box>
 
-          {/* Scrollable Content */}
-          <Box 
+          <TableContainer 
             sx={{ 
               flex: 1,
               overflow: 'auto',
-              p: 4,
-              pt: 2
+              '& .MuiTableCell-root': {
+                textAlign: 'center',
+                verticalAlign: 'middle',
+                border: '1px solid #ddd',
+                padding: '8px 16px',
+                whiteSpace: 'normal',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
+                minHeight: '48px',
+                display: 'table-cell',
+              }
             }}
           >
-            <Grid container spacing={2}>
-              {filterItems(officeItems, searchQuery).map((item, index) => (
-                <Grid item xs={12} key={index}>
-                  <Button
-                    fullWidth
-                    sx={{
-                      justifyContent: 'flex-start',
-                      py: 2,
-                      px: 3,
-                      color: 'black',
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                      },
-                      '&:focus': {
-                        outline: 'none',
-                      },
-                      textTransform: 'none',
-                      fontSize: '0.9rem',
-                      fontWeight: 'normal',
-                      textAlign: 'left',
-                      whiteSpace: 'normal',
-                      lineHeight: 1.5
-                    }}
-                  >
-                    {highlightSearchMatch(item, searchQuery)}
-                  </Button>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
+            <Table 
+              stickyHeader 
+              size="small" 
+              sx={{ 
+                borderCollapse: 'collapse',
+                tableLayout: 'fixed',
+                minWidth: '150%'
+              }}
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: '8%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Sector</TableCell>
+                  <TableCell sx={{ width: '10%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>AG</TableCell>
+                  <TableCell sx={{ width: '8%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Team No.</TableCell>
+                  <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Official Station</TableCell>
+                  <TableCell sx={{ width: '24%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Auditees</TableCell>
+                  <TableCell sx={{ width: '12%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
+                  <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Position</TableCell>
+                  <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Designation</TableCell>
+                  <TableCell sx={{ width: '6%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>No.</TableCell>
+                  <TableCell sx={{ width: '12%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Office Order</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {/* Group A */}
+                <TableRow>
+                  <TableCell rowSpan={4}>LGAS</TableCell>
+                  <TableCell rowSpan={4}>A</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
+                  <TableCell>Misamis Oriental 1</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+                {[...Array(3)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>-</TableCell>
+                    <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell><NameCell /></TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                  </TableRow>
+                ))}
+
+                {/* Group B */}
+                <TableRow>
+                  <TableCell rowSpan={3}>LGAS</TableCell>
+                  <TableCell rowSpan={3}>A</TableCell>
+                  <TableCell>Team 01</TableCell>
+                  <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
+                  <TableCell>Provincial Government of Camiguin</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+                {[...Array(2)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell><NameCell /></TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Box>
       </Modal>
     </>
