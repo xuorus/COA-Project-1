@@ -84,7 +84,7 @@ const EditModal = ({ open, onClose }) => {
   const sectorMap = {
     'LGAS A-I': 'LGAS A-I',
     'NGAS Cluster 1-8': 'NGAS Cluster 1-8',
-    'NGAS SUCs & Other SAA': 'NGAS SUCs & Other SAA',
+    'NGAS SUCs & Other SAAs': 'NGAS SUCs & Other SAAs',
     'CGAS Cluster 1-6': 'CGAS CLUSTER 1-6',
     'CGAS WD & Other SAAs': 'CGAS WD & OTHER SAAs',
     'ORD': 'ORD',
@@ -107,11 +107,17 @@ const EditModal = ({ open, onClose }) => {
     [
       'LGAS A-I',
       'NGAS Cluster 1-8',
-      'NGAS SUCs & Other SAA',
+      { 
+        text: 'NGAS SUCs & Other SAAs',
+        sx: { fontSize: '0.8rem' } // Match the font size with others
+      },
       'CGAS Cluster 1-6',
-      'CGAS WD & Other',
+      { 
+        text: 'CGAS WD & Other SAAs',
+        sx: { fontSize: '0.8rem' }
+      },
       'ORD'
-    ],
+    ].map(item => typeof item === 'string' ? { text: item, sx: { fontSize: '0.9rem' } } : item),
     [
       'OARD',
       'ATFD',
@@ -133,34 +139,52 @@ const EditModal = ({ open, onClose }) => {
     ]
   ];
   const handleSectionClick = (section) => {
-    if (section === 'LGAS A-I') {
-      setLgasItems(lgasList);
-    } else if (section === 'NGAS Cluster 1-8') {
-      setLgasItems(ngasList);
-    } else if (section === 'NGAS SUCs & Other SAA') {
-      setLgasItems(ngasSucsList);
-    } else if (section === 'CGAS Cluster 1-6') {
-      setLgasItems(cgasList);
-    } else if (section === 'CGAS WD & Other') {
-      setLgasItems(cgasWdList);
-    }
     setSelectedSection(section);
+    switch(section) {
+      case 'LGAS A-I':
+        setLgasItems(lgasList);
+        break;
+      case 'NGAS Cluster 1-8':
+        setLgasItems(ngasList);
+        break;
+      case 'NGAS SUCs & Other SAAs':
+        setLgasItems(ngasSucsList);
+        break;
+      case 'CGAS Cluster 1-6':
+        setLgasItems(cgasList);
+        break;
+      case 'CGAS WD & Other SAAs':
+        setLgasItems(cgasWdList);
+        break;
+      default:
+        setLgasItems([]);
+    }
     setSecondModalOpen(true);
   };
 
   const handleSectionChange = (e) => {
     const newSection = e.target.value;
     setSelectedSection(newSection);
-    if (newSection === 'LGAS A-I') {
-      setLgasItems(lgasList);
-    } else if (newSection === 'NGAS Cluster 1-8') {
-      setLgasItems(ngasList);
-    } else if (newSection === 'NGAS SUCs & Other SAA') {
-      setLgasItems(ngasSucsList);
-    } else if (newSection === 'CGAS Cluster 1-6') {
-      setLgasItems(cgasList);
-    } else if (newSection === 'CGAS WD & Other') {
-      setLgasItems(cgasWdList);
+    
+    // Update items based on the selected section text
+    switch(newSection) {
+      case 'LGAS A-I':
+        setLgasItems(lgasList);
+        break;
+      case 'NGAS Cluster 1-8':
+        setLgasItems(ngasList);
+        break;
+      case 'NGAS SUCs & Other SAAs':
+        setLgasItems(ngasSucsList);
+        break;
+      case 'CGAS Cluster 1-6':
+        setLgasItems(cgasList);
+        break;
+      case 'CGAS WD & Other SAAs':
+        setLgasItems(cgasWdList);
+        break;
+      default:
+        setLgasItems([]);
     }
     setSearchQuery('');
   };
@@ -281,7 +305,7 @@ const EditModal = ({ open, onClose }) => {
                   <Button
                     key={itemIndex}
                     fullWidth
-                    onClick={() => handleSectionClick(item)}
+                    onClick={() => handleSectionClick(typeof item === 'object' ? item.text : item)}
                     sx={{
                       justifyContent: 'flex-start',
                       py: 2,
@@ -297,10 +321,11 @@ const EditModal = ({ open, onClose }) => {
                       },
                       textTransform: 'none',
                       fontSize: '0.9rem',
-                      fontWeight: 'normal'
+                      fontWeight: 'normal',
+                      ...(typeof item === 'object' ? item.sx : {})
                     }}
                   >
-                    {item}
+                    {typeof item === 'object' ? item.text : item}
                   </Button>
                 ))}
               </Grid>
@@ -399,20 +424,23 @@ const EditModal = ({ open, onClose }) => {
                   }
                 }}
               >
-                {columns.flat().map((item, index) => (
-                  <MenuItem 
-                    key={index} 
-                    value={item}
-                    sx={{
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      maxWidth: '250px'
-                    }}
-                  >
-                    {item}
-                  </MenuItem>
-                ))}
+                {columns.flat().map((item, index) => {
+                  const itemText = typeof item === 'object' ? item.text : item;
+                  return (
+                    <MenuItem 
+                      key={index} 
+                      value={itemText} // Use the text value for both value and display
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '250px'
+                      }}
+                    >
+                      {itemText}
+                    </MenuItem>
+                  );
+                })}
               </Select>
               <TextField
                 value={searchQuery}
@@ -490,7 +518,7 @@ const EditModal = ({ open, onClose }) => {
               pt: 2
             }}
           >
-            {(selectedSection === 'LGAS A-I' || selectedSection === 'NGAS Cluster 1-8' || selectedSection === 'NGAS SUCs & Other SAA' || selectedSection === 'CGAS Cluster 1-6' || selectedSection === 'CGAS WD & Other') && (
+            {(selectedSection === 'LGAS A-I' || selectedSection === 'NGAS Cluster 1-8' || selectedSection === 'NGAS SUCs & Other SAAs' || selectedSection === 'CGAS Cluster 1-6' || selectedSection === 'CGAS WD & Other SAAs') && (
               <Grid container spacing={2}>
                 {filterItems(lgasItems, searchQuery).map((item, index) => (
                   <Grid item xs={12} key={index}>
@@ -692,6 +720,30 @@ const EditModal = ({ open, onClose }) => {
                     <TableCell>-</TableCell>
                   </TableRow>
                 ))}
+
+                {/* Group C */}
+                <TableRow>
+                  <TableCell rowSpan={2}>LGAS</TableCell>
+                  <TableCell rowSpan={2}>A</TableCell>
+                  <TableCell>Team 02</TableCell>
+                  <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
+                  <TableCell>1. Municipality of Mambajao with 15 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>2. Municipality of Catarman with 14 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </TableContainer>
