@@ -419,8 +419,18 @@ const Records = () => {
       try {
         console.log('Fetching details for PID:', selectedRecord.PID);
         const response = await axios.get(`http://localhost:5000/api/records/${selectedRecord.PID}`);
-        console.log('Fetched person details:', response.data);
-        setPersonDetails(response.data);
+        const data = response.data;
+        console.log('Database result:', data);
+
+        // Ensure all fields are present
+        setPersonDetails({
+          fName: data.fName || '',
+          mName: data.mName || '',
+          lName: data.lName || '',
+          bloodType: data.bloodType || '',
+          profession: data.profession || '',
+          hobbies: data.hobbies || ''
+        });
       } catch (error) {
         console.error('Error fetching person details:', error);
         setPersonDetails(null);
@@ -598,25 +608,33 @@ const handleDocumentClick = useCallback((documentData) => {
   }, 100);
 }, []);
 
-// Add this near your other handlers
-const handleAddDocument = () => {
-  navigate('/scan', { 
+// In your records component where you handle "Add Document" click
+const handleAddDocument = (record) => {
+  console.log('Record data from database:', record); // Debug log
+  
+  // Get the data from personDetails if it exists, otherwise use record
+  const dataToPass = {
+    PID: record.PID,
+    fName: record.fName || personDetails?.fName || '',
+    mName: record.mName || personDetails?.mName || '',
+    lName: record.lName || personDetails?.lName || '',
+    bloodType: record.bloodType || personDetails?.bloodType || '',
+    profession: record.profession || personDetails?.profession || '',
+    hobbies: record.hobbies || personDetails?.hobbies || ''
+  };
+
+  console.log('Data being passed to scan:', dataToPass); // Debug log
+
+  navigate('/scan', {
     state: {
-      prefillData: {
-        firstName: personDetails?.firstName || '',
-        middleName: personDetails?.middleName || '',
-        lastName: personDetails?.lastName || '',
-        bloodType: personDetails?.bloodType || '',
-        profession: personDetails?.profession || '',
-        hobbies: personDetails?.hobbies || ''
-      },
+      prefillData: dataToPass,
       isPrefilledDisabled: true
     }
   });
 };
 
 const handleEditClick = () => {
-   setEditMode(true);
+   setEditMode(true); 
   setEditedDetails({
     fName: personDetails.firstName || '',
     mName: personDetails.middleName || '',
@@ -749,6 +767,32 @@ const handleDateSort = useCallback((newSort) => {
   setDateSort(newSort);
   setNameSort(null); // Reset name sort when sorting by date
 }, []);
+
+// Add this function to handle edit document
+const handleEditDocument = (record, documentType) => {
+  console.log('Editing document:', { record, documentType });
+  
+  const dataToPass = {
+    PID: record.PID,
+    fName: record.fName || personDetails?.fName || '',
+    mName: record.mName || personDetails?.mName || '',
+    lName: record.lName || personDetails?.lName || '',
+    bloodType: record.bloodType || personDetails?.bloodType || '',
+    profession: record.profession || personDetails?.profession || '',
+    hobbies: record.hobbies || personDetails?.hobbies || '',
+    documentType: documentType // Pass the document type
+  };
+
+  console.log('Data being passed to scan:', dataToPass);
+
+  navigate('/scan', {
+    state: {
+      prefillData: dataToPass,
+      isPrefilledDisabled: true,
+      fixedDocumentType: documentType // Add this to fix document type
+    }
+  });
+};
 
   return (
     <ThemeProvider theme={theme}>
@@ -1138,54 +1182,59 @@ const handleDateSort = useCallback((newSort) => {
                 height: '400px',
                 display: 'flex',
                 flexDirection: 'column',
-                cursor: 'pointer',
-                backgroundColor: 'rgba(27, 27, 27, 0.95)', // Updated to consistent dark color
-                '&:hover': {
-                  backgroundColor: 'rgba(27, 27, 27, 0.85)' // Slightly lighter on hover
-                },
+                backgroundColor: 'rgba(27, 27, 27, 0.95)',
                 position: 'relative',
                 overflow: 'hidden'
               }}
-              onClick={() => handleDocumentClick(documents.pds.data)}
             >
-              <Typography 
-                variant="subtitle1" 
-                gutterBottom
-                sx={{
-                  color: 'white',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  mb: 2,
-                  fontWeight: 500
-                }}
-              >
-                Personal Data Sheet
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                mb: 2
+              }}>
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{
+                    color: 'white',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontWeight: 500
+                  }}
+                >
+                  Personal Data Sheet
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditDocument(selectedRecord, 'PDS');
+                    }}
+                    size="small"
+                    sx={{
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                      }
+                    }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
               <Box 
                 sx={{ 
                   flex: 1,
                   overflow: 'hidden',
                   position: 'relative',
                   backgroundColor: '#fff',
-                  border: '1px solid rgba(255, 255, 255, 0.1)' // Updated border color
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  cursor: 'pointer'
                 }}
+                onClick={() => handleDocumentClick(documents.pds.data)}
               >
-                {documents.pds.data ? (
-                  <StablePDFViewer 
-                    data={documents.pds.data} 
-                    isPreview={true}
-                  />
-                ) : (
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    height: '100%'
-                  }}>
-                    <Typography color="text.secondary">No PDS available</Typography>
-                  </Box>
-                )}
+                {/* ... rest of the PDS viewer content ... */}
               </Box>
             </Paper>
           </Grid>
@@ -1200,38 +1249,57 @@ const handleDateSort = useCallback((newSort) => {
                 height: '400px',
                 display: 'flex',
                 flexDirection: 'column',
-                cursor: 'pointer',
-                backgroundColor: 'rgba(27, 27, 27, 0.95)', // Same dark color
-                '&:hover': {
-                  backgroundColor: 'rgba(27, 27, 27, 0.85)' // Same hover effect
-                },
+                backgroundColor: 'rgba(27, 27, 27, 0.95)',
                 position: 'relative',
                 overflow: 'hidden'
               }}
-              onClick={() => handleDocumentClick(documents.saln.data)}
             >
-              <Typography 
-                variant="subtitle1" 
-                gutterBottom
-                sx={{
-                  color: 'white',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  mb: 2,
-                  fontWeight: 500
-                }}
-              >
-                Statement of Assets, Liabilities and Net Worth
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                mb: 2
+              }}>
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{
+                    color: 'white',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    fontWeight: 500
+                  }}
+                >
+                  Statement of Assets, Liabilities and Net Worth
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditDocument(selectedRecord, 'SALN');
+                    }}
+                    size="small"
+                    sx={{
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                      }
+                    }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
               <Box 
                 sx={{ 
                   flex: 1,
                   overflow: 'hidden',
                   position: 'relative',
                   backgroundColor: '#fff',
-                  border: '1px solid rgba(255, 255, 255, 0.1)' // Updated border color
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  cursor: 'pointer'
                 }}
+                onClick={() => handleDocumentClick(documents.saln.data)}
               >
                 {documents.saln.data ? (
                   <StablePDFViewer 
@@ -1268,7 +1336,7 @@ const handleDateSort = useCallback((newSort) => {
               position: 'relative',
               overflow: 'hidden'
             }}
-            onClick={handleAddDocument}
+            onClick={() => handleAddDocument(selectedRecord)}
           >
             <Typography 
               variant="subtitle1" 
