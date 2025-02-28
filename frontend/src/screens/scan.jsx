@@ -97,21 +97,41 @@ const Main = () => {
   const isPrefilledDisabled = location.state?.isPrefilledDisabled;
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [documentType, setDocumentType] = useState('');
+  const [documentType, setDocumentType] = useState(() => {
+    // If fixedDocumentType is provided in location state, use it
+    return location.state?.fixedDocumentType || '';
+  });
   const [pdfFile, setPdfFile] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  
 
-  const [formValues, setFormValues] = useState({
-    firstName: prefillData?.firstName || '',
-    middleName: prefillData?.middleName || '',
-    lastName: prefillData?.lastName || '',
-    bloodType: prefillData?.bloodType || '',
-    profession: prefillData?.profession || '',
-    hobbies: prefillData?.hobbies || ''
+  // Update the formValues initialization to check if coming from sidebar
+  const [formValues, setFormValues] = useState(() => {
+    // Only use prefillData if not coming from sidebar
+    if (location.state?.from === 'sidebar') {
+      return {
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        bloodType: '',
+        profession: '',
+        hobbies: ''
+      };
+    }
+
+    const prefillData = location.state?.prefillData || {};
+    console.log('Initializing form with data:', prefillData);
+    
+    return {
+      firstName: prefillData.fName || '',
+      middleName: prefillData.mName || '',
+      lastName: prefillData.lName || '',
+      bloodType: prefillData.bloodType || '',
+      profession: prefillData.profession || '',
+      hobbies: prefillData.hobbies || ''
+    };
   });
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -124,8 +144,10 @@ const Main = () => {
     hobbies: false // Add this if required
   });
 
+  // Update handleInputChange to include logging
   const handleInputChange = (field) => (event) => {
     const value = event.target.value;
+    console.log(`Field ${field} changed to:`, value);
     setFormValues(prev => ({
       ...prev,
       [field]: value
@@ -139,7 +161,10 @@ const Main = () => {
     }
   };
 
+  // Update handleSubmit to include logging
   const handleSubmit = () => {
+    console.log('Submitting form with values:', formValues);
+    console.log('Document type:', documentType);
     // Reset errors
     const newErrors = {
       firstName: false,
@@ -185,6 +210,33 @@ const Main = () => {
       }, 5000);
     }
   };
+
+  // Update the useEffect for prefillData to check source
+  useEffect(() => {
+    if (location.state?.from === 'sidebar') {
+      // Reset form if coming from sidebar
+      setFormValues({
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        bloodType: '',
+        profession: '',
+        hobbies: ''
+      });
+    } else if (location.state?.prefillData) {
+      const prefillData = location.state.prefillData;
+      console.log('Updating form values with:', prefillData);
+      
+      setFormValues({
+        firstName: prefillData.fName || '',
+        middleName: prefillData.mName || '',
+        lastName: prefillData.lName || '',
+        bloodType: prefillData.bloodType || '',
+        profession: prefillData.profession || '',
+        hobbies: prefillData.hobbies || ''
+      });
+    }
+  }, [location.state]);
 
   // Add useEffect to update the time
   useEffect(() => {
@@ -324,6 +376,7 @@ const Main = () => {
                     value={documentType}
                     label="Document Type"
                     onChange={(e) => setDocumentType(e.target.value)}
+                    disabled={location.state?.fixedDocumentType} // Disable if fixed type
                     MenuProps={{
                       PaperProps: {
                         sx: {
