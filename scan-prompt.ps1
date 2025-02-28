@@ -36,18 +36,14 @@ function Initialize-Scanner {
         $deviceManager = New-Object -ComObject WIA.DeviceManager
         $devices = $deviceManager.DeviceInfos | Where-Object { $_.Type -eq 1 }
         
-        Write-Host "Searching for Canon DR-M260..." -ForegroundColor Cyan
-        $scanner = $devices | Where-Object { 
-            $deviceName = $_.Properties('Name').Value
-            Write-Host "Found device: $deviceName"
-            $deviceName -like "*CANON DR-M260*" -or $deviceName -like "*Canon DR*"
-        } | Select-Object -First 1
+        Write-Host "Searching for available scanners..." -ForegroundColor Cyan
+        $scanner = $devices | Select-Object -First 1
 
         if ($null -eq $scanner) {
             Write-Host "`nScanner not found. Please check:" -ForegroundColor Red
             Write-Host "1. Scanner is powered on" -ForegroundColor Yellow
             Write-Host "2. USB cable is connected" -ForegroundColor Yellow
-            Write-Host "3. Canon driver is installed" -ForegroundColor Yellow
+            Write-Host "3. Scanner driver is installed" -ForegroundColor Yellow
             return $null
         }
 
@@ -65,6 +61,16 @@ function Initialize-Scanner {
         Write-Host "`nError initializing scanner: $($_.Exception.Message)" -ForegroundColor Red
         return $null
     }
+}
+
+function Check-FileFormat {
+    param (
+        [string]$filePath,
+        [string]$expectedFormat = "png"
+    )
+
+    $fileExtension = [System.IO.Path]::GetExtension($filePath).TrimStart('.').ToLower()
+    return $fileExtension -eq $expectedFormat
 }
 
 function Start-DocumentScan {
@@ -150,6 +156,14 @@ function Start-DocumentScan {
         # Ensure output directory exists
         if (!(Test-Path $outputPath)) {
             New-Item -ItemType Directory -Path $outputPath -Force | Out-Null
+        }
+
+        # Check file formats
+        foreach ($tempFile in $tempFiles) {
+            if (-not (Check-FileFormat -filePath $tempFile -expectedFormat "png")) {
+                Write-Host "Error: File $tempFile is not in PNG format" -ForegroundColor Red
+                return $null
+            }
         }
 
         # Create PDF

@@ -8,6 +8,8 @@
         "dev": "nodemon index.js"
     },
     "dependencies": {
+        "body-parser": "^1.20.3",
+        "child_process": "^1.0.2",
         "cors": "^2.8.5",
         "dotenv": "^16.4.7",
         "dwt": "^18.5.1",

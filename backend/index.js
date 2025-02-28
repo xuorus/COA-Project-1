@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const requestLogger = require('./middleware/logger');
 const logsRouter = require('./routes/logs');
 const recordsRouter = require('./routes/records');
@@ -22,6 +23,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(requestLogger);
+app.use(bodyParser.json());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
