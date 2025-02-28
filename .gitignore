@@ -15,3 +15,4 @@ Thumbs.db
 # Ignore environment files (if you have them)
 .env
 .env.local
+backend/logs/app.log

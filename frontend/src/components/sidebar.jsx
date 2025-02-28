@@ -23,6 +23,24 @@ const Sidebar = ({ open, onClose }) => {
       navigate(path);
     }, 100);
   };
+
+  const handleScanClick = () => {
+    const drawer = document.querySelector('.MuiDrawer-root');
+    if (drawer) {
+      drawer.style.transition = 'opacity 0.4s ease';
+      drawer.style.opacity = '0';
+    }
+    
+    setTimeout(() => {
+      onClose();
+      navigate('/scan', {
+        state: {
+          from: 'sidebar'
+        }
+      });
+    }, 100);
+  };
+
   Sidebar.propTypes = {
     open: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired
@@ -105,7 +123,7 @@ const Sidebar = ({ open, onClose }) => {
 <Button
   fullWidth
   disableRipple
-  onClick={() => handleNavigation('/scan')}
+  onClick={handleScanClick}
   sx={{ 
     justifyContent: 'flex-start', 
     textAlign: 'left',

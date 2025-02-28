@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
     "dwt": "^18.5.1",
+    "framer-motion": "^12.4.7",
     "pdfjs-dist": "^4.10.38",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
@@ -27,6 +28,7 @@
     "react-icons": "^5.4.0",
     "react-pdf": "^9.2.1",
     "react-router-dom": "^7.1.5",
+    "react-toastify": "^11.0.5",
     "tailwindcss": "^4.0.6"
   },
   "devDependencies": {

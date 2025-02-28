@@ -3,6 +3,13 @@ param(
     [string]$DocumentType = "Document"
 )
 
+# Constants for Canon DR-M260
+$SCANNER_MODEL = "Canon DR-M260"
+$DPI_SETTING = 300
+$COLOR_MODE = 1  # 1 for color
+$BIT_DEPTH = 24
+$DUPLEX_MODE = 1 # 1 for duplex, 0 for simplex
+
 # Check if running with admin privileges
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {
@@ -19,7 +26,7 @@ try {
         Start-Sleep -Seconds 2
     }
 
-    Write-Host "Checking for scanners..."
+    Write-Host "Checking for Canon DR-M260 scanner..."
     $deviceManager = New-Object -ComObject WIA.DeviceManager
     $devices = $deviceManager.DeviceInfos | Where-Object { $_.Type -eq 1 }
     
@@ -33,7 +40,16 @@ try {
         exit 1
     }
 
-    $scanner = $devices | Select-Object -First 1
+    # Find Canon DR-M260 specifically
+    $scanner = $devices | Where-Object { 
+        $_.Properties('Name').Value -like "*Canon*DR-M260*" 
+    } | Select-Object -First 1
+
+    if ($null -eq $scanner) {
+        Write-Error "Canon DR-M260 not found. Please ensure it's properly connected."
+        exit 1
+    }
+
     Write-Host "Found scanner: $($scanner.Properties('Name').Value)"
 
     # Connect to scanner
@@ -41,11 +57,22 @@ try {
     $device = $scanner.Connect()
     $item = $device.Items.Item(1)
 
-    # Configure scan settings
+    # Configure scan settings for Canon DR-M260
     Write-Host "Configuring scan settings..."
-    $item.Properties("6146").Value = 300  # DPI
-    $item.Properties("6147").Value = 1     # Color mode (1 for color)
-    $item.Properties("6148").Value = 24    # Bit depth
+    
+    # Basic settings
+    $item.Properties("6146").Value = $DPI_SETTING        # DPI
+    $item.Properties("6147").Value = $COLOR_MODE         # Color mode
+    $item.Properties("6148").Value = $BIT_DEPTH         # Bit depth
+
+    # Canon-specific settings
+    $item.Properties("4104").Value = $DUPLEX_MODE       # Duplex mode
+    $item.Properties("3088").Value = 0                  # Auto color detection off
+    $item.Properties("3091").Value = 1                  # Auto page size detection on
+    
+    # Additional Canon DR-M260 specific settings if needed
+    $item.Properties("3092").Value = 1                  # Enable document skew correction
+    $item.Properties("3093").Value = 1                  # Enable blank page removal
 
     # Create a timestamped filename
     $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -74,10 +101,15 @@ try {
     Write-Host $_.Exception
     exit 1
 } finally {
+    # Cleanup
+    if ($null -ne $image) {
+        [System.Runtime.Interopservices.Marshal]::ReleaseComObject($image)
+    }
     if ($null -ne $device) {
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($device)
     }
     if ($null -ne $deviceManager) {
         [System.Runtime.Interopservices.Marshal]::ReleaseComObject($deviceManager)
     }
+    [System.GC]::Collect()
 }
