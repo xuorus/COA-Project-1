@@ -1234,7 +1234,21 @@ const handleEditDocument = (record, documentType) => {
                 }}
                 onClick={() => handleDocumentClick(documents.pds.data)}
               >
-                {/* ... rest of the PDS viewer content ... */}
+                {documents.pds.data ? (
+                  <StablePDFViewer 
+                    data={documents.pds.data} 
+                    isPreview={true}
+                  />
+                ) : (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    height: '100%'
+                  }}>
+                    <Typography color="text.secondary">No PDS available</Typography>
+                  </Box>
+                )}
               </Box>
             </Paper>
           </Grid>
@@ -1249,7 +1263,7 @@ const handleEditDocument = (record, documentType) => {
                 height: '400px',
                 display: 'flex',
                 flexDirection: 'column',
-                backgroundColor: 'rgba(27, 27, 27, 0.95)',
+                  backgroundColor: 'rgba(27, 27, 27, 0.95)',
                 position: 'relative',
                 overflow: 'hidden'
               }}
