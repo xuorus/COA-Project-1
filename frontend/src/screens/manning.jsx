@@ -16,6 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PropTypes from 'prop-types';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
+import WindowControl from '../components/WindowControl';
 
 const theme = createTheme({
   palette: {
@@ -835,6 +836,7 @@ const Manning = () => {
           }
         }}
       >
+        <WindowControl />
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
         <Sidebar 

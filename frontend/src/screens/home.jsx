@@ -9,6 +9,7 @@ import Sidebar from '../components/sidebar';
 import Header from '../components/header';
 import Footer from '../components/footer';
 import logo from '../assets/logo.png';
+import WindowControl from '../components/WindowControl'; // Add this import
 
 const theme = createTheme({
   palette: {
@@ -33,6 +34,7 @@ const Main = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <WindowControl /> {/* Add this line here */}
       <Box
         sx={{
           height: '100vh',
@@ -122,7 +124,7 @@ const Main = () => {
                     sm: '28px', // Small tablets
                     md: '32px', // Tablets
                     lg: '40px'  // Desktop
-                  }, // Responsive font sizes
+                  },
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   lineHeight: 1.2,

@@ -54,6 +54,7 @@ import RecordFilters from '../components/records/RecordFilters';
 import Pagination from '../components/records/Pagination';
 import { recordsApi } from '../services/api';
 import PersonalDetails from '../components/records/modal/PersonalDetails';
+import WindowControl from '../components/WindowControl';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -824,8 +825,8 @@ const handleEditDocument = (record, documentType) => {
           }
         }}
       >
-
-      <Header onMenuClick={() => setSidebarOpen(true)} />
+        <WindowControl />
+        <Header onMenuClick={() => setSidebarOpen(true)} />
 
         <Sidebar 
           open={sidebarOpen} 

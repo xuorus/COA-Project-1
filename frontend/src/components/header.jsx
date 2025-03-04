@@ -11,7 +11,7 @@ const Header = ({ onMenuClick }) => {
   return (
     <Box
       sx={{
-        position: 'absolute',
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
@@ -22,7 +22,8 @@ const Header = ({ onMenuClick }) => {
         justifyContent: 'space-between',
         padding: { xs: '0 12px', sm: '0 18px', md: '0 24px' },
         zIndex: 1,
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+        paddingRight: '100px' // Add padding to avoid overlap with window controls
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5, md: 2 } }}>

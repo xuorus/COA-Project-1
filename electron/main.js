@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
 let mainWindow;
@@ -7,10 +7,14 @@ async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1920,
     height: 1080,
-    fullscreen: false, // Start in full screen
+    frame: false, // Add this to use custom window controls
+    fullscreen: false,
+    backgroundColor: 'transparent',
+    transparent: true,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: true, // Change to true for security
+      contextIsolation: true, // Change to true for security
+      preload: path.join(__dirname, 'preload.js') // Make sure preload path is correct
     }
   });
 
@@ -40,6 +44,18 @@ async function loadDevURL(window, url, retries = 5, delay = 2000) {
   }
   console.error('Failed to load dev server. Please ensure Vite is running.');
 }
+
+ipcMain.on('minimize-window', () => {
+  if (mainWindow) {
+    mainWindow.minimize();
+  }
+});
+
+ipcMain.on('close-window', () => {
+  if (mainWindow) {
+    mainWindow.close();
+  }
+});
 
 app.whenReady().then(createWindow);
 
