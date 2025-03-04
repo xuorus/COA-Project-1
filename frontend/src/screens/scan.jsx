@@ -248,7 +248,7 @@ const Main = () => {
   }, []);
 
   const handleScanButtonClick = () => {
-    fetch('http://localhost:5000/start-scan', {
+    fetch('http://localhost:5000/api/scan/start-scan', {
       method: 'POST'
     })
     .then(response => response.json())
@@ -263,7 +263,7 @@ const Main = () => {
       console.error('Error:', error);
       alert('An error occurred while starting the scan.');
     });
-  };
+};
 
   return (
     <ThemeProvider theme={theme}>

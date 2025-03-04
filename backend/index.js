@@ -5,8 +5,7 @@ const bodyParser = require('body-parser');
 const requestLogger = require('./middleware/logger');
 const logsRouter = require('./routes/logs');
 const recordsRouter = require('./routes/records');
-const { exec } = require('child_process');
-const path = require('path');
+const scanRoutes = require('./routes/scanRoutes');
 const pool = require('./config/db');
 
 const app = express();
@@ -34,20 +33,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/logs', logsRouter);
 app.use('/api/records', recordsRouter);
-
-app.post('/start-scan', (req, res) => {
-  const scriptPath = path.join(__dirname, 'scripts', 'scan.ps1');
-
-  exec(`powershell -File "${scriptPath}"`, (error, stdout, stderr) => {
-      if (error) {
-          console.error(`Error executing script: ${stderr}`);
-          return res.json({ success: false, message: stderr });
-      }
-
-      console.log(`Script output: ${stdout}`);
-      res.json({ success: true, message: stdout });
-  });
-});
+app.use('/api/scan', scanRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
