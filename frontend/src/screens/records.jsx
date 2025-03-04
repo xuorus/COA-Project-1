@@ -1410,8 +1410,7 @@ const handleEditDocument = (record, documentType) => {
               display: 'flex', 
               justifyContent: 'center', 
               p: 4 
-            }}>
-              <Typography color="text.secondary">No documents available</Typography>
+            }}>  
             </Box>
           </Grid>
         )}
