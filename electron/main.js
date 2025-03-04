@@ -5,9 +5,9 @@ let mainWindow;
 
 async function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    fullscreen: true, // Start in full screen
+    width: 1920,
+    height: 1080,
+    fullscreen: false, // Start in full screen
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
