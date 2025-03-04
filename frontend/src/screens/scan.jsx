@@ -15,7 +15,6 @@ import Footer from '../components/footer';
 import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
-import ScanButton from '../components/ScanButton';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -248,6 +247,24 @@ const Main = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const handleScanButtonClick = () => {
+    fetch('http://localhost:5000/start-scan', {
+      method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Scan completed successfully!');
+      } else {
+        alert('Scan failed: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while starting the scan.');
+    });
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -438,7 +455,25 @@ const Main = () => {
                   ) : (
                     <Typography>Click to scan a document</Typography>
                   )}
-                  <ScanButton />
+                  {/* FOR SCAN BUTTON */}
+                  <Button
+                variant="contained"
+                color="primary"
+                onClick={handleScanButtonClick}
+                sx={{
+                  mt: 2,
+                  borderRadius: '10px',
+                  textTransform: 'none',
+                  '&:focus': {
+                    outline: 'none',
+                  },
+                  '&.Mui-focusVisible': {
+                    outline: 'none',
+                  },
+                }}
+              >
+                Start Scan
+              </Button>
                 </Box>
               </Box>
 
