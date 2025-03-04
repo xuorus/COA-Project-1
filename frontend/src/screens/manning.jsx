@@ -81,6 +81,14 @@ const EditModal = ({ open, onClose }) => {
     'Reg X - Corporate Government Audit Sector (CGAS) - Water Districts & Stand-Alone Agencies (WD & other SAAs)'
   ];
 
+  const technicalAuditList = [
+    'TECHNICAL AUDIT GROUP',
+    'TECHNICAL AUDIT TEAM A',
+    'TECHNICAL AUDIT TEAM B',
+    'TECHNICAL AUDIT TEAM C',
+    'TECHNICAL AUDIT TEAM D'
+  ];
+
   const sectorMap = {
     'LGAS A-I': 'LGAS A-I',
     'NGAS Cluster 1-8': 'NGAS Cluster 1-8',
@@ -156,6 +164,9 @@ const EditModal = ({ open, onClose }) => {
       case 'CGAS WD & Other SAAs':
         setLgasItems(cgasWdList);
         break;
+      case 'TECHNICAL AUDIT GROUP A-D':
+        setLgasItems(technicalAuditList);
+        break;
       default:
         setLgasItems([]);
     }
@@ -182,6 +193,9 @@ const EditModal = ({ open, onClose }) => {
         break;
       case 'CGAS WD & Other SAAs':
         setLgasItems(cgasWdList);
+        break;
+      case 'TECHNICAL AUDIT GROUP A-D':
+        setLgasItems(technicalAuditList);
         break;
       default:
         setLgasItems([]);
@@ -518,44 +532,49 @@ const EditModal = ({ open, onClose }) => {
               pt: 2
             }}
           >
-            {(selectedSection === 'LGAS A-I' || selectedSection === 'NGAS Cluster 1-8' || selectedSection === 'NGAS SUCs & Other SAAs' || selectedSection === 'CGAS Cluster 1-6' || selectedSection === 'CGAS WD & Other SAAs') && (
-              <Grid container spacing={2}>
-                {filterItems(lgasItems, searchQuery).map((item, index) => (
-                  <Grid item xs={12} key={index}>
-                    <Button
-                      fullWidth
-                      onClick={() => {
-                        if (item === 'Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1') {
-                          setSelectedLgas(item);
-                          setThirdModalOpen(true);
-                        }
-                      }}
-                      sx={{
-                        justifyContent: 'flex-start',
-                        py: 2,
-                        px: 3,
-                        color: 'black',
-                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.08)',
-                        },
-                        '&:focus': {
-                          outline: 'none',
-                        },
-                        textTransform: 'none',
-                        fontSize: '0.9rem',
-                        fontWeight: 'normal',
-                        textAlign: 'left',
-                        whiteSpace: 'normal',
-                        lineHeight: 1.5
-                      }}
-                    >
-                      {highlightSearchMatch(item, searchQuery)}
-                    </Button>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
+            {(selectedSection === 'LGAS A-I' || 
+  selectedSection === 'NGAS Cluster 1-8' || 
+  selectedSection === 'NGAS SUCs & Other SAAs' || 
+  selectedSection === 'CGAS Cluster 1-6' || 
+  selectedSection === 'CGAS WD & Other SAAs' ||
+  selectedSection === 'TECHNICAL AUDIT GROUP A-D') && (
+  <Grid container spacing={2}>
+    {filterItems(lgasItems, searchQuery).map((item, index) => (
+      <Grid item xs={12} key={index}>
+        <Button
+          fullWidth
+          onClick={() => {
+            if (item === 'Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1') {
+              setSelectedLgas(item);
+              setThirdModalOpen(true);
+            }
+          }}
+          sx={{
+            justifyContent: 'flex-start',
+            py: 2,
+            px: 3,
+            color: 'black',
+            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
+            },
+            '&:focus': {
+              outline: 'none',
+            },
+            textTransform: 'none',
+            fontSize: '0.9rem',
+            fontWeight: 'normal',
+            textAlign: 'left',
+            whiteSpace: 'normal',
+            lineHeight: 1.5
+          }}
+        >
+          {highlightSearchMatch(item, searchQuery)}
+        </Button>
+      </Grid>
+    ))}
+  </Grid>
+)}
           </Box>
         </Box>
       </Modal>
