@@ -1,5 +1,6 @@
 const RecordModel = require('../models/recordModel');
 const logger = require('../utils/logger');
+const pool = require('../config/db');
 
 const getRecords = async (req, res) => {
   try {
@@ -103,10 +104,91 @@ const updatePersonDetails = async (req, res) => {
   }
 };
 
+const addHistory = async (req, res) => {
+  const { pid } = req.params;
+  const { status } = req.body;
+  const client = await pool.connect();
+
+  try {
+    await client.query(
+      `INSERT INTO "logs" ("PID", "status", "timestamp") 
+       VALUES ($1, $2, CURRENT_TIMESTAMP)`,
+      [pid, status]
+    );
+
+    res.json({
+      success: true,
+      message: 'History added successfully'
+    });
+  } catch (error) {
+    console.error('Add history error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  } finally {
+    client.release();
+  }
+};
+
+const deleteDocument = async (req, res) => {
+  const { pid, type } = req.params;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Get document ID
+    const docType = type.toLowerCase();
+    const idColumn = `"${docType}ID"`;
+    
+    const docResult = await client.query(
+      `SELECT ${idColumn} FROM "person" WHERE "PID" = $1`,
+      [pid]
+    );
+
+    const docId = docResult.rows[0]?.[`${docType}ID`];
+    if (!docId) {
+      throw new Error(`No ${type} found for this person`);
+    }
+
+    // Update person table first
+    await client.query(
+      `UPDATE "person" SET ${idColumn} = NULL WHERE "PID" = $1`,
+      [pid]
+    );
+
+    // Delete document
+    await client.query(
+      `DELETE FROM "${docType}" WHERE ${idColumn} = $1`,
+      [docId]
+    );
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      message: `${type.toUpperCase()} document deleted successfully`
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Delete error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   getRecords,
   getPersonDetails,
   getDocuments,
   getPersonHistory,
-  updatePersonDetails
+  updatePersonDetails,
+  deleteDocument,
+  addHistory  // Add this export
 };

@@ -1,6 +1,7 @@
 const { exec } = require("child_process");
 const path = require("path");
 const fs = require('fs').promises;
+const pool = require('../config/db');
 
 // Constants
 const VALID_DOCUMENT_TYPES = ['PDS', 'SALN'];
@@ -118,4 +119,53 @@ exports.scanSALN = async (req, res) => {
             error
         ));
     }
+};
+
+const uploadScannedDocument = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { pid, type, data } = req.body;
+    
+    await client.query('BEGIN');
+
+    // Insert into appropriate document table
+    const docQuery = `
+      INSERT INTO "${type.toLowerCase()}" ("${type}file")
+      VALUES ($1)
+      RETURNING "${type}ID"
+    `;
+    
+    const docResult = await client.query(docQuery, [data]);
+    const docId = docResult.rows[0][`${type.toLowerCase()}id`];
+
+    // Update person table with document reference
+    await client.query(
+      `UPDATE "person" 
+       SET "${type}ID" = $1 
+       WHERE "PID" = $2`,
+      [docId, pid]
+    );
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      message: `${type} document uploaded successfully`
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  } finally {
+    client.release();
+  }
+};
+
+// Make sure to export the controller function
+module.exports = {
+  uploadScannedDocument
 };
