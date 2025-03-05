@@ -8,7 +8,7 @@ async function createWindow() {
     width: 1920,
     height: 1080,
     frame: false, // Add this to use custom window controls
-    fullscreen: false,
+    fullscreen: true,
     backgroundColor: 'transparent',
     transparent: true,
     webPreferences: {
