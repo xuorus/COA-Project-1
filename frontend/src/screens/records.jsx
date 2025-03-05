@@ -32,6 +32,9 @@ import {
   MenuItem,
   OutlinedInput,
   FormControl,
+    DialogActions,
+  DialogContentText,
+  DialogTitle
 } from '@mui/material';
 
 import { Menu } from '@mui/material';
@@ -55,6 +58,8 @@ import Pagination from '../components/records/Pagination';
 import { recordsApi } from '../services/api';
 import PersonalDetails from '../components/records/modal/PersonalDetails';
 import WindowControl from '../components/WindowControl';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PropTypes from 'prop-types';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -109,6 +114,18 @@ const StablePDFViewer = React.memo(({ data, isPreview }) => {
     </Box>
   );
 }, (prev, next) => prev.data === next.data && prev.isPreview === next.isPreview);
+StablePDFViewer.displayName = 'StablePDFViewer';
+
+// Add prop types for StablePDFViewer component
+StablePDFViewer.propTypes = {
+  data: PropTypes.string,
+  isPreview: PropTypes.bool
+};
+
+StablePDFViewer.defaultProps = {
+  data: '',
+  isPreview: false
+};
 
 // 2. Create a new DocumentViewerModal component
 const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
@@ -311,6 +328,19 @@ const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
     </Dialog>
   );
 }, (prev, next) => prev.document === next.document && prev.name === next.name);
+DocumentViewerModal.displayName = 'DocumentViewerModal';
+
+// Add prop types for DocumentViewerModal component
+DocumentViewerModal.propTypes = {
+  document: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  name: PropTypes.string
+};
+
+DocumentViewerModal.defaultProps = {
+  document: '',
+  name: 'Document Viewer'
+};
 
 const Records = () => {
   const navigate = useNavigate();
@@ -342,6 +372,8 @@ const Records = () => {
   const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -795,6 +827,50 @@ const handleEditDocument = (record, documentType) => {
   });
 };
 
+// Add these handlers
+const handleDeleteClick = (e, docType) => {
+  e.stopPropagation();
+  setDocumentToDelete(docType);
+  setDeleteConfirmOpen(true);
+};
+
+const handleDeleteConfirm = async () => {
+  if (!selectedRecord?.PID || !documentToDelete) return;
+
+  try {
+    setError(null);
+
+    const response = await axios.delete(
+      `http://localhost:5000/api/records/${selectedRecord.PID}/documents/${documentToDelete.toLowerCase()}`
+    );
+
+    if (response.data.success) {
+      // Add to history with status instead of activity
+      await axios.post(
+        `http://localhost:5000/api/records/${selectedRecord.PID}/history`,
+        {
+          status: `Deleted ${documentToDelete} document`
+        }
+      );
+
+      // Close dialog and refresh UI
+      setDeleteConfirmOpen(false);
+      setDocumentToDelete(null);
+      setError(null);
+      
+      // Refresh documents and records
+      await fetchDocuments(selectedRecord.PID);
+      await fetchRecords();
+    }
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    setError(
+      error.response?.data?.message || 
+      'Failed to delete document. Please try again.'
+    );
+  }
+};
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -1222,6 +1298,16 @@ const handleEditDocument = (record, documentType) => {
                   >
                     <EditIcon fontSize="small" />
                   </IconButton>
+                  <IconButton
+                    onClick={(e) => handleDeleteClick(e, 'PDS')}
+                    size="small"
+                    sx={{
+                      color: '#ff4444',
+                      '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.1)' }
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
                 </Box>
               </Box>
               <Box 
@@ -1302,6 +1388,16 @@ const handleEditDocument = (record, documentType) => {
                     }}
                   >
                     <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    onClick={(e) => handleDeleteClick(e, 'SALN')}
+                    size="small"
+                    sx={{
+                      color: '#ff4444',
+                      '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.1)' }
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Box>
               </Box>
@@ -1478,6 +1574,50 @@ const handleEditDocument = (record, documentType) => {
                 </Modal>
               )}
 
+<Dialog
+  open={deleteConfirmOpen}
+  onClose={() => setDeleteConfirmOpen(false)}
+  PaperProps={{
+    sx: {
+      borderRadius: 2,
+      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    }
+  }}
+>
+  <DialogTitle>Confirm Delete</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      Are you sure you want to delete this {documentToDelete} document? 
+      This action cannot be undone.
+    </DialogContentText>
+    {error && (
+      <Box sx={{ mt: 2, color: 'error.main' }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    )}
+  </DialogContent>
+  <DialogActions sx={{ p: 2 }}>
+    <Button
+      onClick={() => {
+        setDeleteConfirmOpen(false);
+        setError(null);
+      }}
+      sx={{ color: 'text.secondary' }}
+    >
+      Cancel
+    </Button>
+    <Button
+      onClick={handleDeleteConfirm}
+      variant="contained"
+      color="error"
+      sx={{ borderRadius: 1 }}
+    >
+      Delete
+    </Button>
+  </DialogActions>
+</Dialog>
+
 </Box>
           </Container>
         </Box>
@@ -1488,5 +1628,6 @@ const handleEditDocument = (record, documentType) => {
     </ThemeProvider>
   );
 };
+Records.displayName = 'Records';
 
 export default Records;
