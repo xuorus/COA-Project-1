@@ -15,6 +15,7 @@ import Footer from '../components/footer';
 import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
+import WindowControl from '../components/WindowControl';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -295,6 +296,7 @@ const Main = () => {
           }
         }}
       >
+        <WindowControl />
          <Header onMenuClick={() => setSidebarOpen(true)} />
 <Sidebar 
   open={sidebarOpen} 

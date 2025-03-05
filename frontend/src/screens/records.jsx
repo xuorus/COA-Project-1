@@ -57,6 +57,7 @@ import RecordFilters from '../components/records/RecordFilters';
 import Pagination from '../components/records/Pagination';
 import { recordsApi } from '../services/api';
 import PersonalDetails from '../components/records/modal/PersonalDetails';
+import WindowControl from '../components/WindowControl';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 // Add PDF worker
@@ -874,8 +875,8 @@ const handleDeleteConfirm = async () => {
           }
         }}
       >
-
-      <Header onMenuClick={() => setSidebarOpen(true)} />
+        <WindowControl />
+        <Header onMenuClick={() => setSidebarOpen(true)} />
 
         <Sidebar 
           open={sidebarOpen} 

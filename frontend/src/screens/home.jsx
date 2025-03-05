@@ -9,6 +9,7 @@ import Sidebar from '../components/sidebar';
 import Header from '../components/header';
 import Footer from '../components/footer';
 import logo from '../assets/logo.png';
+import WindowControl from '../components/WindowControl'; // Add this import
 
 const theme = createTheme({
   palette: {
@@ -17,6 +18,25 @@ const theme = createTheme({
     },
   },
 });
+
+const getMonthColors = () => {
+  const month = new Date().getMonth(); // 0-11
+  const colors = {
+    0: ['rgba(255, 255, 255, 0.4)', 'rgba(173, 216, 230, 0.8)'], // January
+    1: ['rgba(220, 20, 60, 0.4)', 'rgba(255, 192, 203, 0.8)'],   // February
+    2: ['rgba(46, 139, 87, 0.4)', 'rgba(147, 112, 219, 0.8)'],   // March
+    3: ['rgba(255, 255, 224, 0.4)', 'rgba(124, 252, 0, 0.8)'],   // April
+    4: ['rgba(255, 253, 208, 0.4)', 'rgba(200, 162, 200, 0.8)'], // May
+    5: ['rgba(255, 218, 185, 0.4)', 'rgba(234, 224, 200, 0.8)'], // June
+    6: ['rgba(255, 127, 80, 0.4)', 'rgba(255, 255, 0, 0.8)'],    // July
+    7: ['rgba(178, 34, 34, 0.4)', 'rgba(255, 165, 0, 0.8)'],     // August
+    8: ['rgba(183, 65, 14, 0.4)', 'rgba(0, 191, 255, 0.8)'],     // September
+    9: ['rgba(128, 0, 0, 0.4)', 'rgba(75, 0, 130, 0.8)'],        // October
+    10: ['rgba(139, 69, 19, 0.4)', 'rgba(255, 215, 0, 0.8)'],    // November
+    11: ['rgba(34, 139, 34, 0.4)', 'rgba(139, 0, 0, 0.8)']       // December
+  };
+  return colors[month];
+};
 
 const Main = () => {
   const navigate = useNavigate();
@@ -33,6 +53,7 @@ const Main = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <WindowControl /> {/* Add this line here */}
       <Box
         sx={{
           height: '100vh',
@@ -89,7 +110,7 @@ const Main = () => {
               width: '92%',
               maxWidth: 1500,
               height: '90%',
-              background: 'linear-gradient(179deg, hsla(152, 63.70%, 57.80%, 0.4) 0%, rgb(255, 255, 255, 0.8) 100%)',
+              background: `linear-gradient(179deg, ${getMonthColors()[0]} 0%, ${getMonthColors()[1]} 100%)`,
               backdropFilter: 'blur(3px)',
               borderRadius: 2,
               padding: '2%',
@@ -122,7 +143,8 @@ const Main = () => {
                     sm: '28px', // Small tablets
                     md: '32px', // Tablets
                     lg: '40px'  // Desktop
-                  }, // Responsive font sizes
+                  },
+                  mt:30,
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   lineHeight: 1.2,
@@ -136,10 +158,10 @@ const Main = () => {
               <Typography
                 sx={{
                   fontSize: { 
-                    xs: '24px',
-                    sm: '28px',
-                    md: '32px',
-                    lg: '40px'
+                    xs: '20px',
+                    sm: '24px',
+                    md: '28px',
+                    lg: '36px'
                   },
                   fontFamily: 'Roboto',
                   fontWeight: 600,
@@ -147,7 +169,7 @@ const Main = () => {
                   color: 'rgba(255, 255, 255, 0.87)',
                   marginBottom: '8px',
                   whiteSpace: { xs: 'normal', lg: 'nowrap' },
-                  textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+                  textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
                 }}
               >
                 INFORMATION SYSTEM
@@ -164,11 +186,86 @@ const Main = () => {
                   fontWeight: 600,
                   color: 'rgba(255, 255, 255, 0.87)',
                   whiteSpace: { xs: 'normal', lg: 'nowrap' },
-                  textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+                  textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
+                  mb: 3 // Add margin bottom for spacing
                 }}
               >
                 COA REGION 10
               </Typography>
+
+              {/* Add Vision and Mission section */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  gap: { xs: 2, md: 4 },
+                  mt: 2
+                }}
+              >
+                <Box
+                  sx={{
+                    flex: 1,
+                    maxWidth: { xs: '100%', md: '50%' }
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: { xs: '14px', sm: '16px', md: '18px' },
+                      fontFamily: 'Roboto',
+                      fontWeight: 600,
+                      color: 'rgba(255, 255, 255, 0.87)',
+                      textAlign: { xs: 'center', lg: 'center' },
+                      mb: 1,
+                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+                    }}
+                  >
+                    VISION
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: { xs: '12px', sm: '14px', md: '16px' },
+                      fontFamily: 'Roboto',
+                      color: 'rgba(255, 255, 255, 0.87)',
+                      textAlign: { xs: 'center', lg: 'center' },
+                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+                    }}
+                  >
+                    A trustworthy, respected and independent audit institution that is an enabling partner of government in ensuring a better life for every Filipino.
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    flex: 1,
+                    maxWidth: { xs: '100%', md: '50%' }
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: { xs: '14px', sm: '16px', md: '18px' },
+                      fontFamily: 'Roboto',
+                      fontWeight: 600,
+                      textAlign: { xs: 'center', lg: 'center' },
+                      color: 'rgba(255, 255, 255, 0.87)',
+                      mb: 1,
+                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+                    }}
+                  >
+                    MISSION
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: { xs: '12px', sm: '14px', md: '16px' },
+                      fontFamily: 'Roboto',
+                      color: 'rgba(255, 255, 255, 0.87)',
+                      textAlign: { xs: 'center', lg: 'center' },
+                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+                    }}
+                  >
+                    To ensure accountability for public resources, promote transparency, and help improve government operations, in partnership with stakeholders, for the benefit of the Filipino people.
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
             <Box
               sx={{
