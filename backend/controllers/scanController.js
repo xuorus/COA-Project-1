@@ -1,4 +1,4 @@
-const { exec } = require("child_process");
+const { spawn } = require('child_process');
 const path = require("path");
 const fs = require('fs').promises;
 const pool = require('../config/db');
@@ -32,92 +32,82 @@ const performScan = async (documentType) => {
     try {
         // Check if script exists
         await fs.access(scriptPath);
-    } catch (error) {
-        throw new Error('Scanning script not found');
-    }
+        console.log('Found scan script at:', scriptPath);
 
-    return new Promise((resolve, reject) => {
-        const ps = exec(
-            `powershell.exe -ExecutionPolicy Bypass -File "${scriptPath}" -DocumentType "${sanitizedDocType}"`,
-            { timeout: SCAN_TIMEOUT },
-            (error, stdout, stderr) => {
-                if (error?.code === 'ETIMEDOUT') {
-                    reject(new Error(`Scanner operation timed out after ${SCAN_TIMEOUT/1000} seconds`));
-                    return;
-                }
-                if (error) {
-                    console.error('Execution error:', error);
-                    reject(new Error(`Scanner error: ${error.message}`));
-                    return;
-                }
-                if (stderr) {
-                    console.error('Scanner stderr:', stderr);
-                    reject(new Error(stderr));
-                    return;
-                }
-                resolve(stdout.trim());
-            }
-        );
+        return new Promise((resolve, reject) => {
+            console.log(`Executing scan script for ${documentType}...`);
+            
+            // Use spawn instead of exec for better process control
+            const scanProcess = spawn('powershell.exe', [
+                '-ExecutionPolicy',
+                'Bypass',
+                '-File',
+                scriptPath,
+                '-documentType',
+                sanitizedDocType
+            ]);
 
-        ps.on('error', (error) => {
-            reject(new Error(`PowerShell execution failed: ${error.message}`));
+            let outputData = '';
+            let errorData = '';
+
+            scanProcess.stdout.on('data', (data) => {
+                outputData += data.toString();
+                console.log('Scan output:', data.toString());
+            });
+
+            scanProcess.stderr.on('data', (data) => {
+                errorData += data.toString();
+                console.error('Scan error:', data.toString());
+            });
+
+            scanProcess.on('close', (code) => {
+                if (code === 0) {
+                    resolve(outputData.trim());
+                } else {
+                    reject(new Error(`Scan failed with code ${code}: ${errorData}`));
+                }
+            });
+
+            scanProcess.on('error', (error) => {
+                reject(new Error(`Failed to start scan process: ${error.message}`));
+            });
+
+            // Set timeout
+            setTimeout(() => {
+                scanProcess.kill();
+                reject(new Error('Scan operation timed out'));
+            }, SCAN_TIMEOUT);
         });
-    });
-};
-
-exports.scanPDS = async (req, res) => {
-    try {
-        console.log('Starting PDS scan...');
-        const scanResult = await performScan('PDS');
-        
-        if (!scanResult) {
-            throw new Error('No scan result received');
-        }
-
-        console.log('PDS scan completed:', scanResult);
-        return res.json(createScanResponse(
-            true,
-            "PDS scanned successfully",
-            "PDS",
-            scanResult
-        ));
     } catch (error) {
-        console.error('Error scanning PDS:', error);
-        return res.status(500).json(createScanResponse(
-            false,
-            null,
-            "PDS",
-            null,
-            error
-        ));
+        console.error('Scan setup error:', error);
+        throw new Error(`Failed to initialize scan: ${error.message}`);
     }
 };
 
-exports.scanSALN = async (req, res) => {
+const startScan = async (req, res) => {
     try {
-        console.log('Starting SALN scan...');
-        const scanResult = await performScan('SALN');
-        
-        if (!scanResult) {
-            throw new Error('No scan result received');
+        const { documentType } = req.body;
+        console.log('Received scan request for:', documentType);
+
+        if (!documentType) {
+            return res.status(400).json({
+                success: false,
+                message: 'Document type is required'
+            });
         }
 
-        console.log('SALN scan completed:', scanResult);
-        return res.json(createScanResponse(
-            true,
-            "SALN scanned successfully",
-            "SALN",
-            scanResult
-        ));
+        const result = await performScan(documentType);
+        return res.json({
+            success: true,
+            message: `Successfully scanned ${documentType}`,
+            output: result
+        });
     } catch (error) {
-        console.error('Error scanning SALN:', error);
-        return res.status(500).json(createScanResponse(
-            false,
-            null,
-            "SALN",
-            null,
-            error
-        ));
+        console.error('Scan controller error:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
@@ -165,7 +155,9 @@ const uploadScannedDocument = async (req, res) => {
   }
 };
 
-// Make sure to export the controller function
+// Make sure to export the controller functions
 module.exports = {
+  performScan,
+  startScan,
   uploadScannedDocument
 };

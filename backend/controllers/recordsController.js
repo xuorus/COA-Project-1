@@ -190,5 +190,5 @@ module.exports = {
   getPersonHistory,
   updatePersonDetails,
   deleteDocument,
-  addHistory  // Add this export
+  addHistory
 };
