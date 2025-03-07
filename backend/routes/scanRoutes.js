@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const scanController = require('../controllers/scanController');
 
-router.post('/start-scan', scanController.startScan);
+// POST route for uploading scanned documents
+router.post('/', scanController.uploadScannedDocument);
 
 module.exports = router;

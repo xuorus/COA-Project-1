@@ -14,4 +14,8 @@ router.get('/:pid/history', recordsController.getPersonHistory);
 
 router.put('/:pid', recordsController.updatePersonDetails);
 
+router.delete('/:pid/documents/:type', recordsController.deleteDocument);
+
+router.post('/:pid/history', recordsController.addHistory);
+
 module.exports = router;

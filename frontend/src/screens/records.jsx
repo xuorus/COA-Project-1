@@ -58,8 +58,6 @@ import Pagination from '../components/records/Pagination';
 import { recordsApi } from '../services/api';
 import PersonalDetails from '../components/records/modal/PersonalDetails';
 import WindowControl from '../components/WindowControl';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PropTypes from 'prop-types';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
