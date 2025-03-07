@@ -1,39 +1,53 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, IconButton } from '@mui/material';
 import MinimizeIcon from '@mui/icons-material/Remove';
 import CloseIcon from '@mui/icons-material/Close';
 
 const WindowControl = () => {
+  useEffect(() => {
+    // Set initial background colors
+    document.documentElement.style.backgroundColor = 'transparent';
+    document.body.style.backgroundColor = 'transparent';
+    
+    return () => {
+      // Cleanup
+      document.documentElement.style.backgroundColor = '';
+      document.body.style.backgroundColor = '';
+    };
+  }, []);
+
   const handleMinimize = () => {
     const mainWindow = document.querySelector('#root');
-    const body = document.body;
     if (mainWindow) {
+      // Ensure background is transparent before animation
       document.documentElement.style.backgroundColor = 'transparent';
-      body.style.backgroundColor = 'transparent';
-      // Prevent scroll during animation
-      document.documentElement.style.overflow = 'hidden';
-      body.style.overflow = 'hidden';
+      document.body.style.backgroundColor = 'transparent';
+      mainWindow.style.backgroundColor = 'transparent';
       
-      mainWindow.style.transition = 'all 300ms ease-in-out';
+      // Add transition
+      mainWindow.style.transition = 'all 200ms ease-in-out';
       mainWindow.style.transform = 'translate3d(0, 100vh, 0) scale(0.6)';
-      mainWindow.style.transformOrigin = 'bottom';
-      mainWindow.style.opacity = '0.6';
+      mainWindow.style.opacity = '0';
       
+      // Minimize after short delay
       setTimeout(() => {
         window?.electron?.minimize();
-        // Reset styles after minimize
-        setTimeout(() => {
-          mainWindow.style.transform = 'none';
-          mainWindow.style.opacity = '1';
-          // Don't reset background colors to maintain transparency
-        }, 300);
-      }, 300);
+        
+        // Reset transform and opacity immediately
+        mainWindow.style.transition = 'none';
+        mainWindow.style.transform = 'none';
+        mainWindow.style.opacity = '1';
+      }, 150);
     }
   };
 
   const handleClose = () => {
     const mainWindow = document.querySelector('#root');
     if (mainWindow) {
+      document.documentElement.style.backgroundColor = 'transparent';
+      document.body.style.backgroundColor = 'transparent';
+      mainWindow.style.backgroundColor = 'transparent';
+      
       mainWindow.style.transition = 'opacity 150ms ease-out';
       mainWindow.style.opacity = '0';
       
@@ -50,7 +64,8 @@ const WindowControl = () => {
         top: '1px',
         right: '1px',
         display: 'flex',
-        zIndex: 9999
+        zIndex: 9999,
+        '-webkit-app-region': 'no-drag'
       }}
     >
       <IconButton
