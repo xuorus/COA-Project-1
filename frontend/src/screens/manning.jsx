@@ -17,7 +17,8 @@ import PropTypes from 'prop-types';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import WindowControl from '../components/WindowControl';
-
+import LgasTable from '../components/manning_table/LGAS_A-I/LgasTable';
+import NameCell from '../components/NameCell';
 const theme = createTheme({
   palette: {
     primary: {
@@ -25,30 +26,6 @@ const theme = createTheme({
     },
   },
 });
-
-const NameCell = () => {
-  return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      gap: 1 
-    }}>
-      <IconButton
-        size="small"
-        sx={{ 
-          backgroundColor: 'rgba(0, 0, 0, 0.04)',
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.08)',
-          },
-          padding: '4px'
-        }}
-      >
-        <AddIcon fontSize="small" />
-      </IconButton>
-    </Box>
-  );
-};
 
 const EditModal = ({ open, onClose }) => {
   const [secondModalOpen, setSecondModalOpen] = useState(false);
@@ -689,352 +666,22 @@ const EditModal = ({ open, onClose }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {/* First group (Misamis Oriental 1) */}
-                <TableRow>
-                  <TableCell rowSpan={4}>LGAS</TableCell>
-                  <TableCell rowSpan={4}>A</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
-                  <TableCell>Misamis Oriental 1</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-                {[...Array(3)].map((_, index) => (
-                  <TableRow key={index}>
+                {selectedLgas === 'Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1' ? (
+                  <LgasTable />
+                ) : (
+                  <TableRow>
                     <TableCell>-</TableCell>
-                    <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
                     <TableCell>-</TableCell>
-                    <TableCell><NameCell /></TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
+                    <TableCell>-</TableCell>
                     <TableCell>-</TableCell>
                     <TableCell>-</TableCell>
                     <TableCell>-</TableCell>
                     <TableCell>-</TableCell>
                   </TableRow>
-                ))}
-
-                {/* Group B */}
-                <TableRow>
-                  <TableCell rowSpan={3}>LGAS</TableCell>
-                  <TableCell rowSpan={3}>A</TableCell>
-                  <TableCell>Team 01</TableCell>
-                  <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
-                  <TableCell>Provincial Government of Camiguin</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-                {[...Array(2)].map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell>-</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell><NameCell /></TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>-</TableCell>
-                    <TableCell>-</TableCell>
-                  </TableRow>
-                ))}
-
-                {/* Group C */}
-                <TableRow>
-                  <TableCell rowSpan={2}>LGAS</TableCell>
-                  <TableCell rowSpan={2}>A</TableCell>
-                  <TableCell>Team 02</TableCell>
-                  <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
-                  <TableCell>1. Municipality of Mambajao with 15 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>2. Municipality of Catarman with 14 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-                {/* New Group with 3 rows */}
-                <TableRow>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                      height: '100%',
-                      padding: '0',
-                      '&.MuiTableCell-root': {
-                        display: 'table-cell',
-                        verticalAlign: 'middle'
-                      }
-                    }}
-                  >
-                    LGAS
-                  </TableCell>
-                  <TableCell 
-                    rowSpan={3}
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                      height: '100%',
-                      padding: '0',
-                      '&.MuiTableCell-root': {
-                        display: 'table-cell',
-                        verticalAlign: 'middle'
-                      }
-                    }}
-                  >
-                    A
-                  </TableCell>
-                  <TableCell>Team 03</TableCell>
-                  <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
-                  <TableCell>1. Municipality of Sagay with 9 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>2. Municipality of Guinsiliban with 7 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>3. Municipality of Mahinog with 13 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                {/* New Group with 3 rows */}
-                <TableRow>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    LGAS
-                  </TableCell>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    A
-                  </TableCell>
-                  <TableCell>Team 04</TableCell>
-                  <TableCell>Office of the Auditor, Magsaysay, Misl Or.</TableCell>
-                  <TableCell>1. Municipality of Magsaysay with 25 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>2. Municipality of Medina with 19 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>3. Municipality of Talisayan with 18 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                {/* After the previous Team 04 group, add this new group */}
-                <TableRow>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    LGAS
-                  </TableCell>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    A
-                  </TableCell>
-                  <TableCell>Team 05</TableCell>
-                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
-                  <TableCell>1. Municipality of Balingoan with 9 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>2. Municipality of Kinoguitan with 15 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>3. Municipality of Sugbongcogon with 10 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                {/* Add right after the Team 05 group */}
-                <TableRow>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    LGAS
-                  </TableCell>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    A
-                  </TableCell>
-                  <TableCell>Team 06</TableCell>
-                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
-                  <TableCell>1. Municipality of Binuangan with 8 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>2. Municipality of Salay with 18 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>3. Municipality of Lagonglong with 10 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                {/* Add right after the Team 06 group */}
-                <TableRow>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    LGAS
-                  </TableCell>
-                  <TableCell 
-                    rowSpan={3} 
-                    sx={{ 
-                      textAlign: 'center',
-                      verticalAlign: 'middle',
-                    }}
-                  >
-                    A
-                  </TableCell>
-                  <TableCell>Team 07</TableCell>
-                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
-                  <TableCell>1. Municipality of Balingasag with 30 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>2. Municipality of Jasaan with 15 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
-
-                <TableRow>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>3. Municipality of Claveria with 24 Barangays</TableCell>
-                  <TableCell><NameCell /></TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                  <TableCell>-</TableCell>
-                </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
@@ -1309,6 +956,18 @@ const Manning = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
+                    <TableRow>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                      <TableCell>-</TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
