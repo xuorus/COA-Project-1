@@ -248,22 +248,40 @@ const Main = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleScanButtonClick = () => {
-    fetch('http://localhost:5000/api/scan/start-scan', {
-      method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Scan completed successfully!');
-      } else {
-        alert('Scan failed: ' + data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while starting the scan.');
-    });
+  const handleScanButtonClick = async () => {
+    try {
+        if (!documentType) {
+            alert('Please select a document type');
+            return;
+        }
+
+        console.log('Starting scan...', { documentType });
+        const response = await fetch('http://localhost:5000/api/scan/start-scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ documentType })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        }
+
+        if (data.success) {
+            if (data.output) {
+                setPdfFile(data.output);
+            }
+            setSuccessModalOpen(true);
+        } else {
+            throw new Error(data.message || 'Scan failed');
+        }
+    } catch (error) {
+        console.error('Scan error:', error);
+        alert(`Scanning failed: ${error.message}`);
+    }
 };
 
   return (

@@ -9,7 +9,6 @@ const scanRoutes = require('./routes/scanRoutes');
 const pool = require('./config/db');
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Changed from 3000 to 5000
 
 // Enable CORS
 app.use(cors({
@@ -76,4 +75,5 @@ const shutdown = async () => {
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
+const PORT = process.env.PORT || 5000;
 module.exports = app;
