@@ -145,6 +145,7 @@ const Main = () => {
                     lg: '40px'  // Desktop
                   },
                   mt:30,
+                  ml: 10,
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   lineHeight: 1.2,
@@ -163,6 +164,7 @@ const Main = () => {
                     md: '28px',
                     lg: '36px'
                   },
+                  ml: 8,
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   lineHeight: 1.2,
@@ -182,6 +184,7 @@ const Main = () => {
                     md: '20px',
                     lg: '25px'
                   },
+                  ml: 22,
                   fontFamily: 'Roboto',
                   fontWeight: 600,
                   color: 'rgba(255, 255, 255, 0.87)',
