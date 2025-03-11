@@ -58,7 +58,6 @@ import Pagination from '../components/records/Pagination';
 import { recordsApi } from '../services/api';
 import PersonalDetails from '../components/records/modal/PersonalDetails';
 import WindowControl from '../components/WindowControl';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 // Add PDF worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -113,6 +112,18 @@ const StablePDFViewer = React.memo(({ data, isPreview }) => {
     </Box>
   );
 }, (prev, next) => prev.data === next.data && prev.isPreview === next.isPreview);
+StablePDFViewer.displayName = 'StablePDFViewer';
+
+// Add prop types for StablePDFViewer component
+StablePDFViewer.propTypes = {
+  data: PropTypes.string,
+  isPreview: PropTypes.bool
+};
+
+StablePDFViewer.defaultProps = {
+  data: '',
+  isPreview: false
+};
 
 // 2. Create a new DocumentViewerModal component
 const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
@@ -315,6 +326,19 @@ const DocumentViewerModal = React.memo(({ document, onClose, name }) => {
     </Dialog>
   );
 }, (prev, next) => prev.document === next.document && prev.name === next.name);
+DocumentViewerModal.displayName = 'DocumentViewerModal';
+
+// Add prop types for DocumentViewerModal component
+DocumentViewerModal.propTypes = {
+  document: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  name: PropTypes.string
+};
+
+DocumentViewerModal.defaultProps = {
+  document: '',
+  name: 'Document Viewer'
+};
 
 const Records = () => {
   const navigate = useNavigate();
@@ -1602,5 +1626,6 @@ const handleDeleteConfirm = async () => {
     </ThemeProvider>
   );
 };
+Records.displayName = 'Records';
 
 export default Records;
