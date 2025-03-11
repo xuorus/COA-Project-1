@@ -26,6 +26,30 @@ const theme = createTheme({
   },
 });
 
+const NameCell = () => {
+  return (
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      gap: 1 
+    }}>
+      <IconButton
+        size="small"
+        sx={{ 
+          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+          },
+          padding: '4px'
+        }}
+      >
+        <AddIcon fontSize="small" />
+      </IconButton>
+    </Box>
+  );
+};
+
 const EditModal = ({ open, onClose }) => {
   const [secondModalOpen, setSecondModalOpen] = useState(false);
   const [selectedSection, setSelectedSection] = useState('');
@@ -238,30 +262,6 @@ const EditModal = ({ open, onClose }) => {
 
   const handleClearSearch = () => {
     setSearchQuery('');
-  };
-
-  const NameCell = () => {
-    return (
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        gap: 1 
-      }}>
-        <IconButton
-          size="small"
-          sx={{ 
-            backgroundColor: 'rgba(0, 0, 0, 0.04)',
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',
-            },
-            padding: '4px'
-          }}
-        >
-          <AddIcon fontSize="small" />
-        </IconButton>
-      </Box>
-    );
   };
 
   return (
@@ -689,7 +689,7 @@ const EditModal = ({ open, onClose }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {/* Group A */}
+                {/* First group (Misamis Oriental 1) */}
                 <TableRow>
                   <TableCell rowSpan={4}>LGAS</TableCell>
                   <TableCell rowSpan={4}>A</TableCell>
@@ -758,6 +758,277 @@ const EditModal = ({ open, onClose }) => {
                   <TableCell>-</TableCell>
                   <TableCell>-</TableCell>
                   <TableCell>2. Municipality of Catarman with 14 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+                {/* New Group with 3 rows */}
+                <TableRow>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                      height: '100%',
+                      padding: '0',
+                      '&.MuiTableCell-root': {
+                        display: 'table-cell',
+                        verticalAlign: 'middle'
+                      }
+                    }}
+                  >
+                    LGAS
+                  </TableCell>
+                  <TableCell 
+                    rowSpan={3}
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                      height: '100%',
+                      padding: '0',
+                      '&.MuiTableCell-root': {
+                        display: 'table-cell',
+                        verticalAlign: 'middle'
+                      }
+                    }}
+                  >
+                    A
+                  </TableCell>
+                  <TableCell>Team 03</TableCell>
+                  <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
+                  <TableCell>1. Municipality of Sagay with 9 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>2. Municipality of Guinsiliban with 7 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>3. Municipality of Mahinog with 13 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                {/* New Group with 3 rows */}
+                <TableRow>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    LGAS
+                  </TableCell>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    A
+                  </TableCell>
+                  <TableCell>Team 04</TableCell>
+                  <TableCell>Office of the Auditor, Magsaysay, Misl Or.</TableCell>
+                  <TableCell>1. Municipality of Magsaysay with 25 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>2. Municipality of Medina with 19 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>3. Municipality of Talisayan with 18 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                {/* After the previous Team 04 group, add this new group */}
+                <TableRow>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    LGAS
+                  </TableCell>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    A
+                  </TableCell>
+                  <TableCell>Team 05</TableCell>
+                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
+                  <TableCell>1. Municipality of Balingoan with 9 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>2. Municipality of Kinoguitan with 15 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>3. Municipality of Sugbongcogon with 10 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                {/* Add right after the Team 05 group */}
+                <TableRow>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    LGAS
+                  </TableCell>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    A
+                  </TableCell>
+                  <TableCell>Team 06</TableCell>
+                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
+                  <TableCell>1. Municipality of Binuangan with 8 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>2. Municipality of Salay with 18 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>3. Municipality of Lagonglong with 10 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                {/* Add right after the Team 06 group */}
+                <TableRow>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    LGAS
+                  </TableCell>
+                  <TableCell 
+                    rowSpan={3} 
+                    sx={{ 
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                    }}
+                  >
+                    A
+                  </TableCell>
+                  <TableCell>Team 07</TableCell>
+                  <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
+                  <TableCell>1. Municipality of Balingasag with 30 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>2. Municipality of Jasaan with 15 Barangays</TableCell>
+                  <TableCell><NameCell /></TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>-</TableCell>
+                  <TableCell>-</TableCell>
+                  <TableCell>3. Municipality of Claveria with 24 Barangays</TableCell>
                   <TableCell><NameCell /></TableCell>
                   <TableCell>-</TableCell>
                   <TableCell>-</TableCell>
@@ -1038,93 +1309,6 @@ const Manning = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TableRow>
-                      <TableCell 
-                        rowSpan={4} 
-                        sx={{ 
-                          textAlign: 'center',
-                          verticalAlign: 'middle',
-                          height: '100%',
-                          padding: '0',
-                          '&.MuiTableCell-root': {
-                            display: 'table-cell',
-                            verticalAlign: 'middle'
-                          }
-                        }}
-                      >
-                        LGAS
-                      </TableCell>
-                      <TableCell 
-                        rowSpan={4}
-                        sx={{ 
-                          textAlign: 'center',
-                          verticalAlign: 'middle',
-                          height: '100%',
-                          padding: '0',
-                          '&.MuiTableCell-root': {
-                            display: 'table-cell',
-                            verticalAlign: 'middle'
-                          }
-                        }}
-                      >
-                        A
-                      </TableCell>
-                      <TableCell 
-                        rowSpan={4}
-                        sx={{ 
-                          textAlign: 'center',
-                          verticalAlign: 'middle',
-                          height: '100%',
-                          padding: '0',
-                          '&.MuiTableCell-root': {
-                            display: 'table-cell',
-                            verticalAlign: 'middle'
-                          }
-                        }}
-                      >
-                        1
-                      </TableCell>
-                      <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
-                      <TableCell>Region X</TableCell>
-                      <TableCell>John Doe</TableCell>
-                      <TableCell>Auditor</TableCell>
-                      <TableCell>Team Leader</TableCell>
-                      <TableCell>1</TableCell>
-                      <TableCell>2025-001</TableCell>
-                    </TableRow>
-
-                    {/* Second row - First PSAO-Camiguin entry */}
-                    <TableRow>
-                      <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
-                      <TableCell>Region X</TableCell>
-                      <TableCell>Jane Smith</TableCell>
-                      <TableCell>Auditor</TableCell>
-                      <TableCell>Member</TableCell>
-                      <TableCell>2</TableCell>
-                      <TableCell>2025-001</TableCell>
-                    </TableRow>
-
-                    {/* Third row - Second PSAO-Camiguin entry with no name */}
-                    <TableRow>
-                      <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
-                      <TableCell>Region X</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>2025-001</TableCell>
-                    </TableRow>
-
-                    {/* Fourth row - Third PSAO-Camiguin entry with no name */}
-                    <TableRow>
-                      <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
-                      <TableCell>Region X</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>2025-001</TableCell>
-                    </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
