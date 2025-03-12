@@ -21,7 +21,7 @@
     "axios": "^1.7.9",
     "dwt": "^18.5.1",
     "framer-motion": "^12.4.7",
-    "pdfjs-dist": "^4.10.38",
+    "pdfjs-dist": "^3.4.120",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -16,6 +16,9 @@ import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
 import WindowControl from '../components/WindowControl';
+import CircularProgress from '@mui/material/CircularProgress';
+import ScanIcon from '@mui/icons-material/DocumentScanner';
+
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -106,6 +109,7 @@ const Main = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Update the formValues initialization to check if coming from sidebar
   const [formValues, setFormValues] = useState(() => {
@@ -248,22 +252,47 @@ const Main = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleScanButtonClick = () => {
-    fetch('http://localhost:5000/api/scan/start-scan', {
-      method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Scan completed successfully!');
-      } else {
-        alert('Scan failed: ' + data.message);
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('An error occurred while starting the scan.');
-    });
+  const handleScanButtonClick = async () => {
+    try {
+        if (!documentType) {
+            alert('Please select a document type');
+            return;
+        }
+
+        setIsLoading(true);
+        console.log('Starting scan...', { documentType });
+        
+        const response = await fetch('http://localhost:5000/api/scan/start-scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ documentType })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        }
+
+        if (data.success) {
+            if (data.output) {
+                // Convert the file path to a blob URL for preview
+                const pdfResponse = await fetch(`http://localhost:5000/api/scan/get-pdf/${data.output}`);
+                const pdfBlob = await pdfResponse.blob();
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                setPdfFile(pdfUrl);
+            }
+        } else {
+            throw new Error(data.message || 'Scan failed');
+        }
+    } catch (error) {
+        console.error('Scan error:', error);
+        alert(`Scanning failed: ${error.message}`);
+    } finally {
+        setIsLoading(false);
+    }
 };
 
   return (
@@ -436,7 +465,7 @@ const Main = () => {
                     width: '100%',
                     flex: 1,
                     maxWidth: '300px',
-                    aspectRatio: '1 / 1.4142',
+                    aspectRatio: '1 / 1.4142', // A4 aspect ratio
                     margin: '0 auto',
                     border: '1px solid rgba(0, 0, 0, 0.2)',
                     borderRadius: 2,
@@ -444,38 +473,87 @@ const Main = () => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'rgba(138, 138, 138, 0.9)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
                     cursor: 'pointer',
                     overflow: 'hidden',
-                    boxShadow: 'inset 0 2px 4px rgba(32, 32, 32, 0.77)'
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    position: 'relative'
                   }}
                 >
-                  {pdfFile ? (
-                    <Document file={pdfFile}>
-                      <Page pageNumber={1} width={400} />
-                    </Document>
+                  {isLoading ? (
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center',
+                      gap: 2 
+                    }}>
+                      <CircularProgress />
+                      <Typography>Scanning...</Typography>
+                    </Box>
+                  ) : pdfFile ? (
+                    <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+                      <Document
+                        file={pdfFile}
+                        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                        loading={
+                          <Box sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center',
+                            height: '100%' 
+                          }}>
+                            <CircularProgress />
+                          </Box>
+                        }
+                      >
+                        <Page
+                          pageNumber={pageNumber}
+                          width={280} // Adjust based on your box size
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                        />
+                      </Document>
+                      {numPages > 0 && (
+                        <Typography
+                          sx={{
+                            position: 'absolute',
+                            bottom: 8,
+                            right: 8,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            color: 'white',
+                            padding: '2px 6px',
+                            borderRadius: 1,
+                            fontSize: '0.75rem'
+                          }}
+                        >
+                          Page {pageNumber} of {numPages}
+                        </Typography>
+                      )}
+                    </Box>
                   ) : (
-                    <Typography>Click to scan a document</Typography>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center',
+                      gap: 2 
+                    }}>
+                      <Typography>Click to scan a document</Typography>
+                      <IconButton
+                      variant="contained"
+                        color="primary"
+                        onClick={handleScanButtonClick}
+                        disabled={isLoading}
+                        sx={{ 
+                          backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                          }
+                        }}
+                      >
+                        <ScanIcon sx={{ fontSize: 40 }} />
+                      </IconButton>
+                    </Box>
                   )}
-                  {/* FOR SCAN BUTTON */}
-                  <Button
-                variant="contained"
-                color="primary"
-                onClick={handleScanButtonClick}
-                sx={{
-                  mt: 2,
-                  borderRadius: '10px',
-                  textTransform: 'none',
-                  '&:focus': {
-                    outline: 'none',
-                  },
-                  '&.Mui-focusVisible': {
-                    outline: 'none',
-                  },
-                }}
-              >
-                Start Scan
-              </Button>
                 </Box>
               </Box>
 
