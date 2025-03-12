@@ -1,27 +1,123 @@
-import React from 'react';
-import { Box, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, IconButton, TextField } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import EditIcon from '@mui/icons-material/Edit';
+import { useManningContext } from '../context/ManningContext';
 
-const NameCell = () => {
+const NameCell = ({ isEditable = false, cellId }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempName, setTempName] = useState('');
+  const { manningData, updateManningData } = useManningContext();
+
+  const savedName = manningData[cellId] || '';
+
+  const handleSave = () => {
+    // Update to handle empty value case
+    updateManningData(cellId, tempName.trim());
+    setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    setTempName(savedName);
+    setIsEditing(true);
+  };
+
+  if (!isEditable) {
+    return (
+      <Box sx={{ textAlign: 'center' }}>
+        {savedName || '-'}
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      gap: 1 
+      position: 'relative', 
+      width: '100%', 
+      minHeight: '32px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
     }}>
-      <IconButton
-        size="small"
-        sx={{ 
-          backgroundColor: 'rgba(0, 0, 0, 0.04)',
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.08)',
-          },
-          padding: '4px'
-        }}
-      >
-        <AddIcon fontSize="small" />
-      </IconButton>
+      {isEditing ? (
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          width: '100%'
+        }}>
+          <TextField
+            value={tempName}
+            onChange={(e) => setTempName(e.target.value)}
+            size="small"
+            autoFocus
+            fullWidth
+            sx={{ 
+              flex: 1,
+              '& input': {
+                textAlign: 'center'
+              }
+            }}
+          />
+          <IconButton 
+            onClick={handleSave}
+            size="small"
+            sx={{ padding: '2px', '&:focus': {
+                    outline: 'none'
+                  } }}
+          >
+            <CheckIcon sx={{ fontSize: '1rem' }} />
+          </IconButton>
+        </Box>
+      ) : (
+        <Box sx={{ 
+          width: '100%',
+          position: 'relative',
+          textAlign: 'center'
+        }}>
+          {savedName ? (
+            <>
+              <span>{savedName}</span>
+              <IconButton 
+                onClick={handleEdit}
+                size="small"
+                sx={{ 
+                  padding: 0,
+                  minWidth: '16px',
+                  minHeight: '16px',
+                  width: '16px',
+                  height: '16px',
+                  position: 'absolute',
+                  right: -15,
+                  top: -15,
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  },
+                  '&:focus': {
+                    outline: 'none'
+                  }
+                }}
+              >
+                <EditIcon sx={{ fontSize: '0.75rem' }} />
+              </IconButton>
+            </>
+          ) : (
+            <IconButton 
+              onClick={() => {
+                setTempName('');
+                setIsEditing(true);
+              }}
+              size="small"
+              sx={{ padding: '2px', '&:focus': {
+                    outline: 'none'
+                  }}}
+            >
+              <AddIcon sx={{ fontSize: '1rem' }} />
+            </IconButton>
+          )}
+        </Box>
+      )}
     </Box>
   );
 };
