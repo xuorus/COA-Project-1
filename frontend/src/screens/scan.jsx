@@ -276,13 +276,22 @@ const Main = () => {
             throw new Error(data.message || `HTTP error! status: ${response.status}`);
         }
 
-        if (data.success) {
-            if (data.output) {
-                // Convert the file path to a blob URL for preview
-                const pdfResponse = await fetch(`http://localhost:5000/api/scan/get-pdf/${data.output}`);
-                const pdfBlob = await pdfResponse.blob();
-                const pdfUrl = URL.createObjectURL(pdfBlob);
+        if (data.success && data.output) {
+            try {
+                // Convert base64 to blob
+                const binaryString = window.atob(data.output);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const blob = new Blob([bytes], { type: 'application/pdf' });
+                const pdfUrl = URL.createObjectURL(blob);
+                
+                console.log('PDF URL created:', pdfUrl);
                 setPdfFile(pdfUrl);
+            } catch (error) {
+                console.error('Error processing PDF data:', error);
+                throw new Error('Failed to process scanned document');
             }
         } else {
             throw new Error(data.message || 'Scan failed');
@@ -294,6 +303,14 @@ const Main = () => {
         setIsLoading(false);
     }
 };
+  useEffect(() => {
+    // Cleanup PDF URL when component unmounts or when PDF changes
+    return () => {
+        if (pdfFile && pdfFile.startsWith('blob:')) {
+            URL.revokeObjectURL(pdfFile);
+        }
+    };
+  }, [pdfFile]);
 
   return (
     <ThemeProvider theme={theme}>
