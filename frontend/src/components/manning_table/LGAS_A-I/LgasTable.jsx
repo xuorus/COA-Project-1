@@ -7,7 +7,7 @@ const LgasTable = () => {
     <>
       {/* First group (Misamis Oriental 1) */}
       <TableRow>
-        <TableCell rowSpan={4}>LGASSSS</TableCell>
+        <TableCell rowSpan={4}>LGAS</TableCell>
         <TableCell rowSpan={4}>A</TableCell>
         <TableCell>-</TableCell>
         <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
