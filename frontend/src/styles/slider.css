@@ -17,12 +17,12 @@
   width: auto;
   height: auto;
   &:before {
-    display: none;  /* This removes the default arrow */
+    display: none;
   }
 }
 
 .slick-prev {
-  left: -50px;  /* Move the left arrow further out */
+  left: -50px;
 }
 
 .slick-next {
