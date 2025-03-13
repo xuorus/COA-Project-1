@@ -26,21 +26,46 @@ const createScanResponse = (success, message, documentType, output = null, error
     };
 };
 
+const initializeDirs = async () => {
+    try {
+        await fs.access(SCAN_OUTPUT_DIR);
+    } catch {
+        await fs.mkdir(SCAN_OUTPUT_DIR, { recursive: true });
+    }
+    try {
+        await fs.access(SCANNED_DOCS_DIR);
+    } catch {
+        await fs.mkdir(SCANNED_DOCS_DIR, { recursive: true });
+    }
+    try {
+        await fs.access(ARCHIVE_DIR);
+    } catch {
+        await fs.mkdir(ARCHIVE_DIR, { recursive: true });
+    }
+};
+
 const performScan = async (documentType) => {
     if (!VALID_DOCUMENT_TYPES.includes(documentType)) {
         throw new Error(`Invalid document type: ${documentType}`);
     }
 
+    await initializeDirs();
     const scriptPath = path.join(__dirname, "../scripts/scan.ps1");
+    const scanOutputPath = path.join(SCAN_OUTPUT_DIR, `${Date.now()}_${documentType}`);
     
     try {
         await fs.access(scriptPath);
         logger.info('Found scan script at:', scriptPath);
+        await fs.mkdir(scanOutputPath, { recursive: true });
 
         return new Promise((resolve, reject) => {
-            console.log(`Executing scan script for ${documentType}...`);
+            let outputData = '';
+            let errorData = '';
+            let timeoutId = null;
             
-            // Use spawn instead of exec for better process control
+            logger.info(`Executing scan script for ${documentType}...`);
+            
+            const sanitizedDocType = sanitizeDocumentType(documentType);
             const scanProcess = spawn('powershell.exe', [
                 '-ExecutionPolicy',
                 'Bypass',
@@ -49,20 +74,25 @@ const performScan = async (documentType) => {
                 '-File',
                 scriptPath,
                 '-documentType',
-                sanitizedDocType
+                sanitizedDocType,
+                '-outputDir',
+                scanOutputPath  // Add the required outputDir parameter
             ]);
 
             scanProcess.stdout.on('data', (data) => {
                 outputData += data.toString();
-                console.log('Scan output:', data.toString());
+                logger.debug('Scan output:', data.toString());
             });
 
             scanProcess.stderr.on('data', (data) => {
                 errorData += data.toString();
-                console.error('Scan error:', data.toString());
+                logger.error('Scan error:', data.toString());
             });
 
             scanProcess.on('close', (code) => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
                 if (code === 0) {
                     resolve(outputData.trim());
                 } else {
@@ -71,17 +101,19 @@ const performScan = async (documentType) => {
             });
 
             scanProcess.on('error', (error) => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
                 reject(new Error(`Failed to start scan process: ${error.message}`));
             });
 
-            // Set timeout
-            setTimeout(() => {
+            timeoutId = setTimeout(() => {
                 scanProcess.kill();
                 reject(new Error('Scan operation timed out'));
             }, SCAN_TIMEOUT);
         });
     } catch (error) {
-        console.error('Scan setup error:', error);
+        logger.error('Scan setup error:', error);
         throw new Error(`Failed to initialize scan: ${error.message}`);
     }
 };
@@ -89,36 +121,68 @@ const performScan = async (documentType) => {
 const startScan = async (req, res) => {
     try {
         const { documentType } = req.body;
-        console.log('Received scan request for:', documentType);
+        logger.info('Received scan request for:', documentType);
 
         if (!documentType) {
-            return res.status(400).json({
-                success: false,
-                message: 'Document type is required'
-            });
+            return res.status(400).json(createScanResponse(
+                false,
+                null,
+                null,
+                null,
+                new Error('Document type is required')
+            ));
+        }
+
+        if (!VALID_DOCUMENT_TYPES.includes(documentType)) {
+            return res.status(400).json(createScanResponse(
+                false,
+                null,
+                documentType,
+                null,
+                new Error(`Invalid document type: ${documentType}`)
+            ));
         }
 
         const result = await performScan(documentType);
-        return res.json({
-            success: true,
-            message: `Successfully scanned ${documentType}`,
-            output: result
-        });
+        return res.json(createScanResponse(
+            true,
+            `Successfully scanned ${documentType}`,
+            documentType,
+            result
+        ));
     } catch (error) {
-        console.error('Scan controller error:', error);
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
+        logger.error('Scan controller error:', error);
+        return res.status(500).json(createScanResponse(
+            false,
+            null,
+            req.body.documentType,
+            null,
+            error
+        ));
     }
 };
 
 const uploadScannedDocument = async (req, res) => {
-  const client = await pool.connect();
-  try {
-    const { pid, type, data } = req.body;
-    
-    await client.query('BEGIN');
+    let client;
+    try {
+        const { pid, type, data } = req.body;
+
+        if (!pid || !type || !data) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
+
+        if (!VALID_DOCUMENT_TYPES.includes(type)) {
+            return res.status(400).json({
+                success: false,
+                message: `Invalid document type: ${type}`
+            });
+        }
+        
+        client = await pool.connect();
+        await client.query('BEGIN');
 
         const docQuery = `
             INSERT INTO "${type.toLowerCase()}" ("${type}file")
@@ -129,13 +193,12 @@ const uploadScannedDocument = async (req, res) => {
         const docResult = await client.query(docQuery, [data]);
         const docId = docResult.rows[0][`${type.toLowerCase()}id`];
 
-    // Update person table with document reference
-    await client.query(
-      `UPDATE "person" 
-       SET "${type}ID" = $1 
-       WHERE "PID" = $2`,
-      [docId, pid]
-    );
+        await client.query(
+            `UPDATE "person" 
+             SET "${type}ID" = $1 
+             WHERE "PID" = $2`,
+            [docId, pid]
+        );
 
         await client.query('COMMIT');
 
@@ -145,13 +208,18 @@ const uploadScannedDocument = async (req, res) => {
             documentId: docId
         });
     } catch (error) {
-        await client.query('ROLLBACK');
+        if (client) {
+            await client.query('ROLLBACK');
+        }
+        logger.error('Upload error:', error);
         res.status(500).json({
             success: false,
             message: error.message
         });
     } finally {
-        client.release();
+        if (client) {
+            client.release();
+        }
     }
 };
 
