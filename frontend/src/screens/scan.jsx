@@ -271,6 +271,7 @@ const Main = () => {
         });
 
         const data = await response.json();
+        console.log('Scan response:', data); // Add this log
         
         if (!response.ok) {
             throw new Error(data.message || `HTTP error! status: ${response.status}`);
@@ -278,7 +279,7 @@ const Main = () => {
 
         if (data.success && data.output) {
             try {
-                // Convert base64 to blob
+                console.log('Processing scan output...');
                 const binaryString = window.atob(data.output);
                 const bytes = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {
@@ -303,6 +304,7 @@ const Main = () => {
         setIsLoading(false);
     }
 };
+
   useEffect(() => {
     // Cleanup PDF URL when component unmounts or when PDF changes
     return () => {

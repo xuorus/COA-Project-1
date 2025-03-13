@@ -7,13 +7,26 @@ const pool = require('../config/db');
 const VALID_DOCUMENT_TYPES = ['PDS', 'SALN'];
 const SCAN_TIMEOUT = 30000; // 30 seconds
 const SCAN_OUTPUT_DIR = path.join(__dirname, '../temp');
+const SCANNED_DOCS_DIR = path.join(__dirname, '../scanned_documents');
+const ARCHIVE_DIR = path.join(__dirname, '../archived_documents');
 
-// Initialize temp directory
+// Initialize directories
 const initializeTempDir = async () => {
     try {
         await fs.access(SCAN_OUTPUT_DIR);
     } catch {
         await fs.mkdir(SCAN_OUTPUT_DIR, { recursive: true });
+    }
+};
+
+const initializeDirectories = async () => {
+    try {
+        await Promise.all([
+            fs.mkdir(SCANNED_DOCS_DIR, { recursive: true }),
+            fs.mkdir(ARCHIVE_DIR, { recursive: true })
+        ]);
+    } catch (error) {
+        console.error('Error creating directories:', error);
     }
 };
 
@@ -36,9 +49,8 @@ const performScan = async (documentType) => {
         throw new Error(`Invalid document type: ${documentType}`);
     }
 
-    await initializeTempDir();
+    await Promise.all([initializeTempDir(), initializeDirectories()]);
     const scriptPath = path.join(__dirname, "../scripts/scan.ps1");
-    const sanitizedDocType = sanitizeDocumentType(documentType);
     
     try {
         await fs.access(scriptPath);
@@ -56,50 +68,58 @@ const performScan = async (documentType) => {
                 '-File',
                 scriptPath,
                 '-documentType',
-                sanitizedDocType,
+                documentType,
                 '-outputDir',
-                SCAN_OUTPUT_DIR
+                SCANNED_DOCS_DIR
             ]);
 
             scanProcess.stdout.on('data', (data) => {
                 const output = data.toString().trim();
-                console.log('Raw scan output:', output);
-                
-                // Only capture the PDF file path
-                if (output.toLowerCase().endsWith('.pdf')) {
+                console.log('Scanner output:', output);
+                if (output && output.toLowerCase().endsWith('.pdf')) {
                     outputData = output;
-                    console.log('Captured PDF path:', outputData);
                 }
             });
 
             scanProcess.stderr.on('data', (data) => {
                 errorData += data.toString();
-                console.error('Scan error:', data.toString());
+                console.error('Scanner error:', data.toString());
             });
 
             scanProcess.on('close', async (code) => {
-                console.log('Scan process exit code:', code);
-                console.log('Final output data:', outputData);
-                console.log('Error data if any:', errorData);
+                console.log('Scan process finished with code:', code);
+                console.log('Final output path:', outputData);
 
                 if (code === 0 && outputData) {
                     try {
                         // Verify file exists
                         await fs.access(outputData);
-                        console.log('PDF file verified at:', outputData);
+                        const stats = await fs.stat(outputData);
+                        
+                        if (stats.size === 0) {
+                            reject(new Error('Scanned file is empty'));
+                            return;
+                        }
 
+                        // Read and convert to base64
                         const fileData = await fs.readFile(outputData);
                         const base64Data = fileData.toString('base64');
-                        
-                        // Clean up temp file
-                        await fs.unlink(outputData).catch(err => 
-                            console.error('Cleanup error:', err)
+
+                        // Move to archive
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        const archivePath = path.join(
+                            ARCHIVE_DIR, 
+                            `${documentType}_${timestamp}.pdf`
                         );
-                        
+
+                        await fs.rename(outputData, archivePath);
+                        console.log('File moved to archive:', archivePath);
+
                         resolve({
                             success: true,
-                            data: base64Data,
-                            message: `Successfully scanned ${documentType}`
+                            output: base64Data,
+                            message: `Successfully scanned ${documentType}`,
+                            archivePath: archivePath
                         });
                     } catch (error) {
                         console.error('File processing error:', error);
@@ -107,7 +127,7 @@ const performScan = async (documentType) => {
                     }
                 } else {
                     const errorMsg = errorData || 'No output file path received from scanner';
-                    console.error('Scan process failed:', errorMsg);
+                    console.error('Scan failed:', errorMsg);
                     reject(new Error(errorMsg));
                 }
             });
@@ -117,6 +137,7 @@ const performScan = async (documentType) => {
                 reject(new Error(`Failed to start scan process: ${error.message}`));
             });
 
+            // Add timeout
             const timeoutId = setTimeout(() => {
                 scanProcess.kill();
                 reject(new Error('Scan operation timed out'));
@@ -125,7 +146,7 @@ const performScan = async (documentType) => {
             scanProcess.on('close', () => clearTimeout(timeoutId));
         });
     } catch (error) {
-        console.error('Scan setup error:', error);
+        console.error('Scan initialization error:', error);
         throw new Error(`Failed to initialize scan: ${error.message}`);
     }
 };
@@ -137,16 +158,12 @@ const startScan = async (req, res) => {
 
         if (!documentType) {
             return res.status(400).json(createScanResponse(
-                false,
-                null,
-                null,
-                null,
+                false, null, null, null,
                 new Error('Document type is required')
             ));
         }
 
         const result = await performScan(documentType);
-        console.log('Scan completed successfully');
         
         return res.json({
             success: true,
@@ -154,15 +171,9 @@ const startScan = async (req, res) => {
             output: result.data,
             documentType
         });
-
     } catch (error) {
-        console.error('Scan failed:', error);
         return res.status(500).json(createScanResponse(
-            false,
-            null,
-            req.body.documentType,
-            null,
-            error
+            false, null, req.body.documentType, null, error
         ));
     }
 };
@@ -174,10 +185,6 @@ const uploadScannedDocument = async (req, res) => {
 
         if (!pid || !type || !data) {
             throw new Error('Missing required fields');
-        }
-
-        if (!VALID_DOCUMENT_TYPES.includes(type)) {
-            throw new Error(`Invalid document type: ${type}`);
         }
 
         await client.query('BEGIN');
@@ -192,9 +199,7 @@ const uploadScannedDocument = async (req, res) => {
         const docId = docResult.rows[0][`${type.toLowerCase()}id`];
 
         await client.query(
-            `UPDATE "person" 
-             SET "${type}ID" = $1 
-             WHERE "PID" = $2`,
+            `UPDATE "person" SET "${type}ID" = $1 WHERE "PID" = $2`,
             [docId, pid]
         );
 
@@ -205,10 +210,8 @@ const uploadScannedDocument = async (req, res) => {
             message: `${type} document uploaded successfully`,
             documentId: docId
         });
-
     } catch (error) {
         await client.query('ROLLBACK');
-        console.error('Upload error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -218,18 +221,11 @@ const uploadScannedDocument = async (req, res) => {
     }
 };
 
-// TEST DATABASE CONNECTION
-// Add this function to your existing controller
 const testDbConnection = async (req, res) => {
     const client = await pool.connect();
     try {
-        // Test basic connection
         const result = await client.query('SELECT NOW()');
-        
-        // Test PDS table
         await client.query('SELECT COUNT(*) FROM pds');
-        
-        // Test SALN table
         await client.query('SELECT COUNT(*) FROM saln');
 
         res.json({
@@ -247,11 +243,8 @@ const testDbConnection = async (req, res) => {
         client.release();
     }
 };
-// TEST DATABASE CONNECTION
-
 
 module.exports = {
-    performScan,
     startScan,
     uploadScannedDocument,
     testDbConnection
