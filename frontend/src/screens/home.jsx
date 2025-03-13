@@ -10,6 +10,12 @@ import Header from '../components/header';
 import Footer from '../components/footer';
 import logo from '../assets/logo.png';
 import WindowControl from '../components/WindowControl'; // Add this import
+import Slider from 'react-slick';
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import '../styles/slider.css';
+import ArrowBackIosNewRoundedIcon from '@mui/icons-material/ArrowBackIosNewRounded';
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 
 const theme = createTheme({
   palette: {
@@ -36,6 +42,180 @@ const getMonthColors = () => {
     11: ['rgba(34, 139, 34, 0.4)', 'rgba(139, 0, 0, 0.8)']       // December
   };
   return colors[month];
+};
+
+const CustomPrevArrow = ({ className, onClick }) => (
+  <Box 
+    className={className}
+    sx={{ 
+      left: '25px',
+      '&:hover': { cursor: 'pointer' }
+    }}
+    onClick={onClick}
+  >
+    <ArrowBackIosNewRoundedIcon sx={{ color: 'white', fontSize: 30, ml: -5 }} />
+  </Box>
+);
+
+const CustomNextArrow = ({ className, onClick }) => (
+  <Box 
+    className={className}
+    sx={{ 
+      right: '25px',
+      '&:hover': { cursor: 'pointer' }
+    }}
+    onClick={onClick}
+  >
+    <ArrowForwardIosRoundedIcon sx={{ color: 'white', fontSize: 30, mr: -5 }} />
+  </Box>
+);
+
+const SlideContent = () => {
+  const slides = [
+    // Slide 1
+    <Box key="title" sx={{ 
+      textAlign: 'center',
+      p: 2,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      height: '100%',
+      mt: { xs: 5, md: 15 }
+    }}>
+      <Typography
+        sx={{
+          fontSize: { xs: '24px', sm: '28px', md: '32px', lg: '40px' },
+          fontFamily: 'Roboto',
+          fontWeight: 600,
+          lineHeight: 1.2,
+          color: 'rgba(255, 255, 255, 0.87)',
+          whiteSpace: { xs: 'normal', lg: 'nowrap' },
+          textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
+          mb: 1
+        }}
+      >
+        HUMAN RESOURCE
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: { xs: '20px', sm: '24px', md: '28px', lg: '36px' },
+          fontFamily: 'Roboto',
+          fontWeight: 600,
+          lineHeight: 1.2,
+          color: 'rgba(255, 255, 255, 0.87)',
+          marginBottom: '8px',
+          whiteSpace: { xs: 'normal', lg: 'nowrap' },
+          textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
+        }}
+      >
+        INFORMATION SYSTEM
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: { xs: '16px', sm: '18px', md: '20px', lg: '25px' },
+          fontFamily: 'Roboto',
+          fontWeight: 600,
+          color: 'rgba(255, 255, 255, 0.87)',
+          whiteSpace: { xs: 'normal', lg: 'nowrap' },
+          textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
+          mb: 3
+        }}
+      >
+        COA REGION 10
+      </Typography>
+    </Box>,
+    // Slide 2
+    <Box key="vision" sx={{ 
+      textAlign: 'center', 
+      p: 2, 
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      height: '100%',
+      mt: { xs: 5, md: 15 }
+    }}>
+      <Typography
+        sx={{
+          fontSize: { xs: '24px', sm: '28px', md: '32px' },
+          fontFamily: 'Roboto',
+          fontWeight: 600,
+          color: 'rgba(255, 255, 255, 0.87)',
+          mb: 3,
+          textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+        }}
+      >
+        VISION
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: { xs: '16px', sm: '18px', md: '20px' },
+          fontFamily: 'Roboto',
+          color: 'rgba(255, 255, 255, 0.87)',
+          textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
+          maxWidth: '800px',
+          mx: 'auto',
+          lineHeight: 1.6,
+        }}
+      >
+        A trustworthy, respected and independent audit institution that is an enabling partner of government in ensuring a better life for every Filipino.
+      </Typography>
+    </Box>,
+    // Slide 3
+    <Box key="mission" sx={{ 
+      textAlign: 'center', 
+      p: 2,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      height: '100%',
+      mt: { xs: 5, md: 15 }
+    }}>
+      <Typography
+        sx={{
+          fontSize: { xs: '24px', sm: '28px', md: '32px' },
+          fontFamily: 'Roboto',
+          fontWeight: 600,
+          color: 'rgba(255, 255, 255, 0.87)',
+          mb: 3,
+          textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+        }}
+      >
+        MISSION
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: { xs: '16px', sm: '18px', md: '20px' },
+          fontFamily: 'Roboto',
+          color: 'rgba(255, 255, 255, 0.87)',
+          textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
+        }}
+      >
+        To ensure accountability for public resources, promote transparency, and help improve government operations, in partnership with stakeholders, for the benefit of the Filipino people.
+      </Typography>
+    </Box>
+  ];
+
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3500,
+    arrows: true,
+    pauseOnHover: true,
+    prevArrow: <CustomPrevArrow />,
+    nextArrow: <CustomNextArrow />
+  };
+
+  return (
+    <Box sx={{ width: '100%', maxWidth: '600px', mt: 20 }}>
+      <Slider {...settings}>
+        {slides}
+      </Slider>
+    </Box>
+  );
 };
 
 const Main = () => {
@@ -136,139 +316,7 @@ const Main = () => {
                 px: { xs: 2, lg: 0 } // Add padding on mobile
               }}
             >
-              <Typography
-                sx={{
-                  fontSize: { 
-                    xs: '24px', // Even smaller on mobile
-                    sm: '28px', // Small tablets
-                    md: '32px', // Tablets
-                    lg: '40px'  // Desktop
-                  },
-                  mt:30,
-                  ml: 10,
-                  fontFamily: 'Roboto',
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  color: 'rgba(255, 255, 255, 0.87)',
-                  whiteSpace: { xs: 'normal', lg: 'nowrap' }, // Allow wrapping on mobile
-                  textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                HUMAN RESOURCE
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: { 
-                    xs: '20px',
-                    sm: '24px',
-                    md: '28px',
-                    lg: '36px'
-                  },
-                  ml: 8,
-                  fontFamily: 'Roboto',
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  color: 'rgba(255, 255, 255, 0.87)',
-                  marginBottom: '8px',
-                  whiteSpace: { xs: 'normal', lg: 'nowrap' },
-                  textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
-                }}
-              >
-                INFORMATION SYSTEM
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: { 
-                    xs: '16px',
-                    sm: '18px',
-                    md: '20px',
-                    lg: '25px'
-                  },
-                  ml: 22,
-                  fontFamily: 'Roboto',
-                  fontWeight: 600,
-                  color: 'rgba(255, 255, 255, 0.87)',
-                  whiteSpace: { xs: 'normal', lg: 'nowrap' },
-                  textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)',
-                  mb: 3 // Add margin bottom for spacing
-                }}
-              >
-                COA REGION 10
-              </Typography>
-
-              {/* Add Vision and Mission section */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column', md: 'row' },
-                  gap: { xs: 2, md: 4 },
-                  mt: 2
-                }}
-              >
-                <Box
-                  sx={{
-                    flex: 1,
-                    maxWidth: { xs: '100%', md: '50%' }
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: { xs: '14px', sm: '16px', md: '18px' },
-                      fontFamily: 'Roboto',
-                      fontWeight: 600,
-                      color: 'rgba(255, 255, 255, 0.87)',
-                      textAlign: { xs: 'center', lg: 'center' },
-                      mb: 1,
-                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
-                    }}
-                  >
-                    VISION
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: { xs: '12px', sm: '14px', md: '16px' },
-                      fontFamily: 'Roboto',
-                      color: 'rgba(255, 255, 255, 0.87)',
-                      textAlign: { xs: 'center', lg: 'center' },
-                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
-                    }}
-                  >
-                    A trustworthy, respected and independent audit institution that is an enabling partner of government in ensuring a better life for every Filipino.
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    flex: 1,
-                    maxWidth: { xs: '100%', md: '50%' }
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: { xs: '14px', sm: '16px', md: '18px' },
-                      fontFamily: 'Roboto',
-                      fontWeight: 600,
-                      textAlign: { xs: 'center', lg: 'center' },
-                      color: 'rgba(255, 255, 255, 0.87)',
-                      mb: 1,
-                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
-                    }}
-                  >
-                    MISSION
-                  </Typography>
-                  <Typography
-                    sx={{
-                      fontSize: { xs: '12px', sm: '14px', md: '16px' },
-                      fontFamily: 'Roboto',
-                      color: 'rgba(255, 255, 255, 0.87)',
-                      textAlign: { xs: 'center', lg: 'center' },
-                      textShadow: '0 4px 3px rgba(0, 0, 0, 0.5)'
-                    }}
-                  >
-                    To ensure accountability for public resources, promote transparency, and help improve government operations, in partnership with stakeholders, for the benefit of the Filipino people.
-                  </Typography>
-                </Box>
-              </Box>
+              <SlideContent />
             </Box>
             <Box
               sx={{
@@ -314,6 +362,17 @@ const Main = () => {
                 },
                 '& .MuiPickersDay-root.Mui-selected:focus': {
                   outline: 'none'
+                },
+                // Add these styles
+                '& .MuiPickersArrowSwitcher-button': {
+                  '&:focus': {
+                    outline: 'none'
+                  }
+                },
+                '& .MuiPickersCalendarHeader-switchViewButton': {
+                  '&:focus': {
+                    outline: 'none'
+                  }
                 }
               }}
             >
