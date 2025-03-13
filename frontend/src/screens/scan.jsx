@@ -16,9 +16,7 @@ import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
 import WindowControl from '../components/WindowControl';
-import CircularProgress from '@mui/material/CircularProgress';
-import ScanIcon from '@mui/icons-material/DocumentScanner';
-
+import axios from 'axios';
 
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -109,33 +107,18 @@ const Main = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [scannedDocument, setScannedDocument] = useState(null);
 
-  // Update the formValues initialization to check if coming from sidebar
-  const [formValues, setFormValues] = useState(() => {
-    // Only use prefillData if not coming from sidebar
-    if (location.state?.from === 'sidebar') {
-      return {
-        firstName: '',
-        middleName: '',
-        lastName: '',
-        bloodType: '',
-        profession: '',
-        hobbies: ''
-      };
-    }
-
-    const prefillData = location.state?.prefillData || {};
-    console.log('Initializing form with data:', prefillData);
-    
-    return {
-      firstName: prefillData.fName || '',
-      middleName: prefillData.mName || '',
-      lastName: prefillData.lName || '',
-      bloodType: prefillData.bloodType || '',
-      profession: prefillData.profession || '',
-      hobbies: prefillData.hobbies || ''
-    };
+  // Initialize form state with empty strings instead of undefined
+  const [formValues, setFormValues] = useState({
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    bloodType: '',
+    profession: '',
+    hobbies: ''
   });
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -148,72 +131,87 @@ const Main = () => {
     hobbies: false // Add this if required
   });
 
-  // Update handleInputChange to include logging
-  const handleInputChange = (field) => (event) => {
-    const value = event.target.value;
-    console.log(`Field ${field} changed to:`, value);
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
     setFormValues(prev => ({
       ...prev,
-      [field]: value
+      [name]: value
     }));
-    
-    if (field === 'firstName' || field === 'lastName') {
-      setFormErrors(prev => ({
-        ...prev,
-        [field]: value.trim() === ''
-      }));
-    }
   };
 
-  // Update handleSubmit to include logging
-  const handleSubmit = () => {
-    console.log('Submitting form with values:', formValues);
-    console.log('Document type:', documentType);
-    // Reset errors
-    const newErrors = {
-      firstName: false,
-      lastName: false
-    };
-    
-    // Validate required fields
-    let hasErrors = false;
-    
-    // Check first name
-    if (!formValues.firstName?.trim()) {
-      newErrors.firstName = true;
-      hasErrors = true;
-    }
-    
-    // Check last name
-    if (!formValues.lastName?.trim()) {
-      newErrors.lastName = true;
-      hasErrors = true;
-    }
-    
-    // Check document type
-    if (!documentType) {
-      hasErrors = true;
-    }
-    
-    setFormErrors(newErrors);
-  
-    // Only proceed if there are no errors
-    if (!hasErrors) {
-      setSuccessModalOpen(true);
-      // Reset form after successful submission
-      setTimeout(() => {
-        setSuccessModalOpen(false);
-        setFormValues({
-          firstName: '',
-          middleName: '',
-          lastName: '',
-          profession: '', // Add this
-          hobbies: '' // Add this
-        });
-        setDocumentType('');
-      }, 5000);
-    }
+  const handleDocumentTypeChange = (event) => {
+    setDocumentType(event.target.value);
   };
+
+  const handleScanButtonClick = async () => {
+    if (!documentType) {
+        setError('Please select a document type');
+        return;
+    }
+
+    try {
+        setError(null);
+        setScanning(true);
+
+        // First, initiate the scan
+        const scanResponse = await axios.post('http://localhost:5000/api/scan/start-scan', {
+            documentType
+        });
+
+        if (!scanResponse.data.success) {
+            throw new Error(scanResponse.data.message);
+        }
+
+        // Get the document ID from scan response
+        setScannedDocument(scanResponse.data.docId);
+        
+    } catch (error) {
+        console.error('Scan error:', error);
+        setError(error.response?.data?.message || 'Failed to scan document');
+    } finally {
+        setScanning(false);
+    }
+};
+
+const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // Validate only required fields
+    if (!formValues.firstName || !formValues.lastName) {
+        setError('First name and last name are required');
+        return;
+    }
+
+    try {
+        const personData = {
+            fName: formValues.firstName.trim(),
+            mName: formValues.middleName?.trim() || null,
+            lName: formValues.lastName.trim(),
+            bloodType: formValues.bloodType || null,
+            profession: formValues.profession?.trim() || null,
+            hobbies: formValues.hobbies?.trim() || null
+        };
+
+        const response = await axios.post('http://localhost:5000/api/scan/person', personData);
+
+        if (response.data.success) {
+            setSuccessModalOpen(true);
+            // Reset form
+            setFormValues({
+                firstName: '',
+                middleName: '',
+                lastName: '',
+                bloodType: '',
+                profession: '',
+                hobbies: ''
+            });
+            setError(null);
+        }
+    } catch (error) {
+        console.error('Submit error:', error);
+        setError(error.response?.data?.message || 'Failed to submit record');
+    }
+};
 
   // Update the useEffect for prefillData to check source
   useEffect(() => {
@@ -252,57 +250,26 @@ const Main = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleScanButtonClick = async () => {
-    try {
-        if (!documentType) {
-            alert('Please select a document type');
-            return;
-        }
+// Add preview functionality
+const PreviewDocument = ({ docId }) => {
+    const [pdfUrl, setPdfUrl] = useState(null);
 
-        setIsLoading(true);
-        console.log('Starting scan...', { documentType });
-        
-        const response = await fetch('http://localhost:5000/api/scan/start-scan', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ documentType })
-        });
-
-        const data = await response.json();
-        console.log('Scan response:', data); // Add this log
-        
-        if (!response.ok) {
-            throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    useEffect(() => {
+        if (docId) {
+            setPdfUrl(`http://localhost:5000/api/scan/document/${docId}`);
         }
+    }, [docId]);
 
-        if (data.success && data.output) {
-            try {
-                console.log('Processing scan output...');
-                const binaryString = window.atob(data.output);
-                const bytes = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                }
-                const blob = new Blob([bytes], { type: 'application/pdf' });
-                const pdfUrl = URL.createObjectURL(blob);
-                
-                console.log('PDF URL created:', pdfUrl);
-                setPdfFile(pdfUrl);
-            } catch (error) {
-                console.error('Error processing PDF data:', error);
-                throw new Error('Failed to process scanned document');
-            }
-        } else {
-            throw new Error(data.message || 'Scan failed');
-        }
-    } catch (error) {
-        console.error('Scan error:', error);
-        alert(`Scanning failed: ${error.message}`);
-    } finally {
-        setIsLoading(false);
-    }
+    if (!pdfUrl) return null;
+
+    return (
+        <iframe
+            src={pdfUrl}
+            width="100%"
+            height="600px"
+            title="Document Preview"
+        />
+    );
 };
 
   useEffect(() => {
@@ -441,7 +408,8 @@ const Main = () => {
                     id="document-type"
                     value={documentType}
                     label="Document Type"
-                    onChange={(e) => setDocumentType(e.target.value)}
+                    onChange={handleDocumentTypeChange}
+                    required
                     disabled={location.state?.fixedDocumentType} // Disable if fixed type
                     MenuProps={{
                       PaperProps: {
@@ -652,7 +620,8 @@ const Main = () => {
                             <Select
                               value={formValues[field.field]}
                               label={field.label}
-                              onChange={handleInputChange(field.field)}
+                              onChange={handleInputChange}
+                              name={field.field}
                               disabled={isPrefilledDisabled}
                               MenuProps={{
                                 PaperProps: {
@@ -691,7 +660,8 @@ const Main = () => {
                               label={field.label}
                               required={field.required}
                               value={formValues[field.field]}
-                              onChange={handleInputChange(field.field)}
+                              onChange={handleInputChange}
+                              name={field.field}
                               error={formErrors[field.field]}
                               onBlur={() => {
                                 if (field.required) {
@@ -733,7 +703,7 @@ const Main = () => {
                             variant="contained"
                             color="primary"
                             onClick={handleSubmit}
-                            disabled={!formValues.firstName || !formValues.lastName || !documentType}
+                            disabled={!formValues.firstName || !formValues.lastName} // Only check required fields
                             disableRipple
                             sx={{
                               alignSelf: 'center',
