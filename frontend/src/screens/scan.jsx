@@ -16,13 +16,9 @@ import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
 import WindowControl from '../components/WindowControl';
-<<<<<<< HEAD
 import CircularProgress from '@mui/material/CircularProgress';
 import ScanIcon from '@mui/icons-material/DocumentScanner';
 
-=======
-import ScanIcon from '@mui/icons-material/Scanner';  // Add this import
->>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
 import axios from 'axios';
 
 // Initialize PDF.js worker
@@ -114,17 +110,10 @@ const Main = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
-<<<<<<< HEAD
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [scanning, setScanning] = useState(false);
   const [scannedDocument, setScannedDocument] = useState(null);
-=======
-  const [error, setError] = useState(null);
-  const [scanning, setScanning] = useState(false);
-  const [scannedDocument, setScannedDocument] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
->>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
 
   // Initialize form state with empty strings instead of undefined
   const [formValues, setFormValues] = useState({
@@ -265,77 +254,58 @@ const handleSubmit = async (event) => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleScanButtonClick = async () => {
-    try {
-        if (!documentType) {
-            alert('Please select a document type');
-            return;
-        }
+//   const handleScanButtonClick = async () => {
+//     try {
+//         if (!documentType) {
+//             alert('Please select a document type');
+//             return;
+//         }
 
-<<<<<<< HEAD
-        setIsLoading(true);
-        console.log('Starting scan...', { documentType });
+//         setIsLoading(true);
+//         console.log('Starting scan...', { documentType });
         
-        const response = await fetch('http://localhost:5000/api/scan/start-scan', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ documentType })
-        });
+//         const response = await fetch('http://localhost:5000/api/scan/start-scan', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({ documentType })
+//         });
 
-        const data = await response.json();
-        console.log('Scan response:', data); // Add this log
+//         const data = await response.json();
+//         console.log('Scan response:', data); // Add this log
         
-        if (!response.ok) {
-            throw new Error(data.message || `HTTP error! status: ${response.status}`);
-=======
-    useEffect(() => {
-        if (docId) {
-            setPdfUrl(`http://localhost:5000/api/scan/document/${docId}`);
->>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
-        }
+//         if (!response.ok) {
+//             throw new Error(data.message || `HTTP error! status: ${response.status}`);
+//         }
 
-<<<<<<< HEAD
-        if (data.success && data.output) {
-            try {
-                console.log('Processing scan output...');
-                const binaryString = window.atob(data.output);
-                const bytes = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                }
-                const blob = new Blob([bytes], { type: 'application/pdf' });
-                const pdfUrl = URL.createObjectURL(blob);
+//         if (data.success && data.output) {
+//             try {
+//                 console.log('Processing scan output...');
+//                 const binaryString = window.atob(data.output);
+//                 const bytes = new Uint8Array(binaryString.length);
+//                 for (let i = 0; i < binaryString.length; i++) {
+//                     bytes[i] = binaryString.charCodeAt(i);
+//                 }
+//                 const blob = new Blob([bytes], { type: 'application/pdf' });
+//                 const pdfUrl = URL.createObjectURL(blob);
                 
-                console.log('PDF URL created:', pdfUrl);
-                setPdfFile(pdfUrl);
-            } catch (error) {
-                console.error('Error processing PDF data:', error);
-                throw new Error('Failed to process scanned document');
-            }
-        } else {
-            throw new Error(data.message || 'Scan failed');
-        }
-    } catch (error) {
-        console.error('Scan error:', error);
-        alert(`Scanning failed: ${error.message}`);
-    } finally {
-        setIsLoading(false);
-    }
-=======
-    if (!pdfUrl) return null;
-
-    return (
-        <iframe
-            src={pdfUrl}
-            width="100%"
-            height="600px"
-            title="Document Preview"
-        />
-    );
->>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
-};
+//                 console.log('PDF URL created:', pdfUrl);
+//                 setPdfFile(pdfUrl);
+//             } catch (error) {
+//                 console.error('Error processing PDF data:', error);
+//                 throw new Error('Failed to process scanned document');
+//             }
+//         } else {
+//             throw new Error(data.message || 'Scan failed');
+//         }
+//     } catch (error) {
+//         console.error('Scan error:', error);
+//         alert(`Scanning failed: ${error.message}`);
+//     } finally {
+//         setIsLoading(false);
+//     }
+// };
 
   useEffect(() => {
     // Cleanup PDF URL when component unmounts or when PDF changes
