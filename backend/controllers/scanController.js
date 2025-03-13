@@ -266,10 +266,32 @@ const addPerson = async (req, res) => {
     }
 };
 
-// Make sure to export the controller functions
+const testDbConnection = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query('SELECT NOW()');
+        await client.query('SELECT COUNT(*) FROM pds');
+        await client.query('SELECT COUNT(*) FROM saln');
+
+        res.json({
+            success: true,
+            message: 'Database connection successful',
+            timestamp: result.rows[0].now
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Database connection failed',
+            error: error.message
+        });
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
-  performScan,
-  startScan,
-  uploadScannedDocument,
+    startScan,
+    uploadScannedDocument,
+    testDbConnection,
   addPerson
 };
