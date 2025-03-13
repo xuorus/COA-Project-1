@@ -16,9 +16,13 @@ import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
 import WindowControl from '../components/WindowControl';
+<<<<<<< HEAD
 import CircularProgress from '@mui/material/CircularProgress';
 import ScanIcon from '@mui/icons-material/DocumentScanner';
 
+=======
+import ScanIcon from '@mui/icons-material/Scanner';  // Add this import
+>>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
 import axios from 'axios';
 
 // Initialize PDF.js worker
@@ -110,10 +114,17 @@ const Main = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const fileInputRef = useRef(null);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
+<<<<<<< HEAD
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [scanning, setScanning] = useState(false);
   const [scannedDocument, setScannedDocument] = useState(null);
+=======
+  const [error, setError] = useState(null);
+  const [scanning, setScanning] = useState(false);
+  const [scannedDocument, setScannedDocument] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+>>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
 
   // Initialize form state with empty strings instead of undefined
   const [formValues, setFormValues] = useState({
@@ -261,6 +272,7 @@ const handleSubmit = async (event) => {
             return;
         }
 
+<<<<<<< HEAD
         setIsLoading(true);
         console.log('Starting scan...', { documentType });
         
@@ -277,8 +289,14 @@ const handleSubmit = async (event) => {
         
         if (!response.ok) {
             throw new Error(data.message || `HTTP error! status: ${response.status}`);
+=======
+    useEffect(() => {
+        if (docId) {
+            setPdfUrl(`http://localhost:5000/api/scan/document/${docId}`);
+>>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
         }
 
+<<<<<<< HEAD
         if (data.success && data.output) {
             try {
                 console.log('Processing scan output...');
@@ -305,6 +323,18 @@ const handleSubmit = async (event) => {
     } finally {
         setIsLoading(false);
     }
+=======
+    if (!pdfUrl) return null;
+
+    return (
+        <iframe
+            src={pdfUrl}
+            width="100%"
+            height="600px"
+            title="Document Preview"
+        />
+    );
+>>>>>>> 78339077a8061014e96d1e1c327cc5e20a8b46cf
 };
 
   useEffect(() => {
@@ -399,13 +429,12 @@ const handleSubmit = async (event) => {
                   Scan Document
                 </Typography>
 
-                {/* Document Type Dropdown - Moved up */}
+                {/* Document Type Dropdown - Centered */}
                 <FormControl 
                   sx={{ 
-                    ml:13.5,
-                    mt: 1,
-                    mb: 1,
-                    width: '60%',
+                    width: '300px', // Match the width of the scan box
+                    alignSelf: 'center', // Center horizontally
+                    mb: 1, // Add margin bottom for spacing
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '15px',
                       backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -424,7 +453,7 @@ const handleSubmit = async (event) => {
                     '& .MuiInputLabel-root': {
                       color: 'rgba(0, 0, 0, 0.6)',
                       fontFamily: 'Roboto',
-                      transform: 'translate(14px, 12px) scale(1)', // Adjusted label position
+                      transform: 'translate(14px, 12px) scale(1)',
                       '&.Mui-focused, &.MuiFormLabel-filled': {
                         transform: 'translate(14px, -9px) scale(0.75)',
                       },
@@ -434,7 +463,7 @@ const handleSubmit = async (event) => {
                     },
                     '& .MuiSelect-select': {
                       fontFamily: 'Roboto',
-                      padding: '8px 14px', // Reduced padding
+                      padding: '8px 14px',
                     }
                   }}
                 >
@@ -585,7 +614,7 @@ const handleSubmit = async (event) => {
                   Information
                 </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0, ml: 4 }}>
                   {[
                     { label: 'First Name', required: true, field: 'firstName' },
                     { label: 'Middle Name', required: false, field: 'middleName' },
@@ -613,7 +642,7 @@ const handleSubmit = async (event) => {
                         error={formErrors[field.field]}
                         sx={{ 
                           '& .MuiOutlinedInput-root': {
-                            width: '80%',
+                            width: '65%',
                             borderRadius: '15px',
                             backgroundColor: 'rgba(255, 255, 255, 0.7)',
                             fontFamily: 'Roboto',
@@ -736,32 +765,31 @@ const handleSubmit = async (event) => {
                 </Box>
 
                 <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSubmit}
-                    disabled={!formValues.firstName || !formValues.lastName} // Only check required fields
-                    disableRipple
-                    sx={{
-                      ml: 17,
-                      mt: 2,
-                      borderRadius: '10px',
-                      width: '30%',
-                      textTransform: 'none',
-                      '&:focus': {
-                        outline: 'none',
-                      },
-                      '&.Mui-focusVisible': {
-                        outline: 'none',
-                      },
-                      '&.Mui-disabled': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.12)',
-                        color: 'rgba(0, 0, 0, 0.26)'
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>
-
+                            variant="contained"
+                            color="primary"
+                            onClick={handleSubmit}
+                            disabled={!formValues.firstName || !formValues.lastName} // Only check required fields
+                            disableRipple
+                            sx={{
+                              alignSelf: 'center',
+                              mr: 15,
+                              borderRadius: '10px',
+                              width: '30%',
+                              textTransform: 'none',
+                              '&:focus': {
+                                outline: 'none',
+                              },
+                              '&.Mui-focusVisible': {
+                                outline: 'none',
+                              },
+                              '&.Mui-disabled': {
+                                backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                                color: 'rgba(0, 0, 0, 0.26)'
+                              }
+                            }}
+                          >
+                            Submit
+                          </Button>
                                 </Box>
                               </Box>
                             </Container>
