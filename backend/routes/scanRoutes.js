@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { startScan } = require('../controllers/scanController');
+const scanController = require('../controllers/scanController');
 
-router.post('/start-scan', startScan);
+router.post('/start-scan', scanController.startScan);
+router.post('/person', scanController.addPerson);
 
 module.exports = router;

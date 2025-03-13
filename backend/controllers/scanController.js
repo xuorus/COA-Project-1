@@ -2,6 +2,8 @@ const { spawn } = require('child_process');
 const path = require("path");
 const fs = require('fs').promises;
 const pool = require('../config/db');
+const ScanModel = require('../models/scanModel');
+const logger = require('../utils/logger');
 
 // Constants
 const VALID_DOCUMENT_TYPES = ['PDS', 'SALN'];
@@ -155,9 +157,53 @@ const uploadScannedDocument = async (req, res) => {
   }
 };
 
+const addPerson = async (req, res) => {
+    try {
+        const {
+            fName,
+            mName,
+            lName,
+            bloodType,
+            profession,
+            hobbies
+        } = req.body;
+
+        // Validate required fields
+        if (!fName || !lName) {
+            return res.status(400).json({
+                success: false,
+                message: 'First name and last name are required'
+            });
+        }
+
+        const result = await ScanModel.addPerson({
+            fName,
+            mName,
+            lName,
+            bloodType,
+            profession,
+            hobbies
+        });
+
+        res.json({
+            success: true,
+            message: 'Record added successfully',
+            pid: result.pid
+        });
+
+    } catch (error) {
+        logger.error('Add person error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 // Make sure to export the controller functions
 module.exports = {
   performScan,
   startScan,
-  uploadScannedDocument
+  uploadScannedDocument,
+  addPerson
 };
