@@ -17,8 +17,12 @@ import PropTypes from 'prop-types';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import WindowControl from '../components/WindowControl';
-import LgasTable from '../components/manning_table/LGAS_A-I/LgasTable';
+import LgasA from '../components/manning_table/LGAS_A-I/LgasA';
 import NameCell from '../components/NameCell';
+import { ManningProvider } from '../context/ManningContext';
+import GetAppRoundedIcon from '@mui/icons-material/GetAppRounded';
+import * as XLSX from 'xlsx';
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -673,7 +677,7 @@ const EditModal = ({ open, onClose }) => {
               </TableHead>
               <TableBody>
                 {selectedLgas === 'Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1' ? (
-                  <LgasTable />
+                  <LgasA isEditable={true} />
                 ) : (
                   <TableRow>
                     <TableCell>-</TableCell>
@@ -730,263 +734,350 @@ const Manning = () => {
     setEditModalOpen(true);
   };
 
+  // Add this function before the return statement in the Manning component
+  const exportToExcel = () => {
+    // Get the table data
+    const table = document.querySelector('table');
+    
+    // Convert table to worksheet format with formatting options
+    const ws = XLSX.utils.table_to_sheet(table, { 
+      raw: false,
+      cellStyles: true 
+    });
+    
+    // Define custom column widths based on content type
+    const columnWidths = [
+      { wch: 10 },  // Sector (8 characters)
+      { wch: 8 },  // AG (reduced from 10%)
+      { wch: 10 },  // Team No.
+      { wch: 50 }, // Official Station (increased)
+      { wch: 50 }, // Auditees
+      { wch: 30 }, // Name
+      { wch: 30 }, // Position
+      { wch: 30 }, // Designation
+      { wch: 8 },  // No.
+      { wch: 20 }  // Office Order
+    ];
+
+    // Apply the column widths to the worksheet
+    ws['!cols'] = columnWidths;
+
+    // Get the range of the worksheet
+    const range = XLSX.utils.decode_range(ws['!ref']);
+
+    // Apply cell formatting to all cells
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell_address = { c: C, r: R };
+        const cell_ref = XLSX.utils.encode_cell(cell_address);
+        
+        if (!ws[cell_ref]) {
+          // Create empty cell if it doesn't exist
+          ws[cell_ref] = { v: '', s: {} };
+        }
+        
+        // Apply styles to the cell
+        ws[cell_ref].s = {
+          alignment: {
+            vertical: 'center',
+            horizontal: 'center',
+            wrapText: true
+          },
+          border: {
+            top: { style: 'thin', color: { rgb: '000000' } },
+            bottom: { style: 'thin', color: { rgb: '000000' } },
+            left: { style: 'thin', color: { rgb: '000000' } },
+            right: { style: 'thin', color: { rgb: '000000' } }
+          },
+          font: {
+            name: 'Arial',
+            sz: 10
+          }
+        };
+      }
+    }
+
+    // Set row heights
+    ws['!rows'] = Array(range.e.r + 1).fill({ hpt: 25 }); // Slightly reduced height
+
+    // Create workbook and add worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Manning Complement');
+
+    // Save file with formatting
+    XLSX.writeFile(wb, 'manning_complement_test.xlsx', {
+      bookType: 'xlsx',
+      bookSST: false,
+      type: 'binary',
+      cellStyles: true
+    });
+  };
+
   return (
-    <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          height: '100vh',
-          width: '100vw',
-          margin: 0,
-          padding: 0,
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
+    <ManningProvider>
+      <ThemeProvider theme={theme}>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100vw',
+            margin: 0,
+            padding: 0,
             position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage: `url(${backgroundImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            opacity: 1,
-            zIndex: -1
-          }
-        }}
-      >
-        <WindowControl />
-        <Header onMenuClick={() => setSidebarOpen(true)} />
-
-        <Sidebar 
-          open={sidebarOpen} 
-          onClose={() => setSidebarOpen(false)} 
-        />
-        
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '80px',
-            left: 0,
-            right: 0,
-            bottom: '40px',
-            padding: 3,
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundImage: `url(${backgroundImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              opacity: 1,
+              zIndex: -1
+            }
           }}
         >
-          <Container maxWidth="lg">
-            <Box 
-              sx={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(3px)',
-                borderRadius: 2,
-                padding: 4,
-                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                height: 'calc(100vh - 160px)',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden'
-              }}
-            >
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                mb: 3 
-              }}>
-                <Typography variant="h5" component="h1" fontWeight="bold">
-                  Manning Complement
-                </Typography>
+          <WindowControl />
+          <Header onMenuClick={() => setSidebarOpen(true)} />
 
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <IconButton
-                    onClick={handleEditClick}
-                    sx={{
-                      backgroundColor: 'none',
-                      width: 40,
-                      height: 40,
-                      '&:focus': {
-                        outline: 'none'
-                      },
-                      '&:hover': {
-                        backgroundColor: 'transparent'
-                      }
-                    }}
-                  >
-                    <BorderColorRoundedIcon />
-                  </IconButton>
-
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                      sx: {
-                        borderRadius: '12px',
-                        '& fieldset': {
-                          borderRadius: '12px',
-                        },
-                      }
-                    }}
-                    sx={{
-                      width: '250px',
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '20px',
-                        backgroundColor: 'none',
-                        '&.Mui-focused fieldset': {
-                          borderColor: 'black',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: 'black',
-                        }
-                      }
-                    }}
-                  />
-                </Box>
-              </Box>
-
-              <TableContainer 
-                component={Paper} 
+          <Sidebar 
+            open={sidebarOpen} 
+            onClose={() => setSidebarOpen(false)} 
+          />
+          
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '80px',
+              left: 0,
+              right: 0,
+              bottom: '40px',
+              padding: 3,
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            }}
+          >
+            <Container maxWidth="lg">
+              <Box 
                 sx={{ 
-                  flexGrow: 1, 
-                  overflow: 'auto',
+                  backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(3px)',
                   borderRadius: 2,
-                  boxShadow: 3,
-                  '& .MuiTableCell-root': {
-                    textAlign: 'center',
-                    verticalAlign: 'middle',
-                    border: '1px solid #ddd',
-                    padding: '8px 16px',
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    minHeight: '48px',
-                    display: 'table-cell',
-                  },
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                    height: '8px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                    borderRadius: '4px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                    },
-                  },
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: 'rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.05)',
+                  padding: 4,
+                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  height: 'calc(100vh - 160px)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden'
                 }}
               >
-                <Table 
-                  stickyHeader 
-                  size="small" 
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  mb: 3 
+                }}>
+                  <Typography variant="h5" component="h1" fontWeight="bold">
+                    Manning Complement
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <IconButton
+                      onClick={handleEditClick}
+                      sx={{
+                        backgroundColor: 'none',
+                        width: 40,
+                        height: 40,
+                        '&:focus': {
+                          outline: 'none'
+                        },
+                        '&:hover': {
+                          backgroundColor: 'transparent'
+                        }
+                      }}
+                    >
+                      <BorderColorRoundedIcon />
+                    </IconButton>
+
+                    <IconButton
+                      onClick={exportToExcel}
+                      sx={{
+                        backgroundColor: 'none',
+                        width: 40,
+                        height: 40,
+                        '&:focus': {
+                          outline: 'none'
+                        },
+                        '&:hover': {
+                          backgroundColor: 'transparent'
+                        }
+                      }}
+                    >
+                      <GetAppRoundedIcon />
+                    </IconButton>
+
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Search"
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <SearchIcon />
+                          </InputAdornment>
+                        ),
+                        sx: {
+                          borderRadius: '12px',
+                          '& fieldset': {
+                            borderRadius: '12px',
+                          },
+                        }
+                      }}
+                      sx={{
+                        width: '250px',
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '20px',
+                          backgroundColor: 'none',
+                          '&.Mui-focused fieldset': {
+                            borderColor: 'black',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'black',
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                <TableContainer 
+                  component={Paper} 
                   sx={{ 
-                    borderCollapse: 'collapse',
-                    tableLayout: 'fixed',
-                    minWidth: '150%',
-                    '& .MuiTableRow-root': {
-                      height: 'auto',
+                    flexGrow: 1, 
+                    overflow: 'auto',
+                    borderRadius: 2,
+                    boxShadow: 3,
+                    '& .MuiTableCell-root': {
+                      textAlign: 'center',
+                      verticalAlign: 'middle',
+                      border: '1px solid #ddd',
+                      padding: '8px 16px',
+                      whiteSpace: 'normal',
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      minHeight: '48px',
+                      display: 'table-cell',
                     },
+                    '&::-webkit-scrollbar': {
+                      width: '8px',
+                      height: '8px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                      borderRadius: '4px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                      borderRadius: '4px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                      },
+                    },
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.05)',
                   }}
                 >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '8%'
-                      }}>Sector</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '10%'
-                      }}>AG</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '8%'
-                      }}>Team No.</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '16%'
-                      }}>Official Station</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '24%'
-                      }}>Auditees</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '12%'
-                      }}>Name</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '16%'
-                      }}>Position</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '16%'
-                      }}>Designation</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '6%'
-                      }}>No.</TableCell>
-                      <TableCell sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        width: '12%'
-                      }}>Office Order</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                      <TableCell>-</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          </Container>
+                  <Table 
+                    stickyHeader 
+                    size="small" 
+                    sx={{ 
+                      borderCollapse: 'collapse',
+                      tableLayout: 'fixed',
+                      minWidth: '150%',
+                      '& .MuiTableRow-root': {
+                        height: 'auto',
+                      },
+                    }}
+                  >
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '8%'
+                        }}>Sector</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '10%'
+                        }}>AG</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '8%'
+                        }}>Team No.</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '16%'
+                        }}>Official Station</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '24%'
+                        }}>Auditees</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '12%'
+                        }}>Name</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '16%'
+                        }}>Position</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '16%'
+                        }}>Designation</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '6%'
+                        }}>No.</TableCell>
+                        <TableCell sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          width: '12%'
+                        }}>Office Order</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <LgasA isEditable={false} />
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </Container>
+          </Box>
+          <Footer currentTime={currentTime} />
+          <EditModal 
+            open={editModalOpen} 
+            onClose={() => setEditModalOpen(false)} 
+          />
         </Box>
-        <Footer currentTime={currentTime} />
-        <EditModal 
-          open={editModalOpen} 
-          onClose={() => setEditModalOpen(false)} 
-        />
-      </Box>
-    </ThemeProvider>
+      </ThemeProvider>
+    </ManningProvider>
   );
 };
 

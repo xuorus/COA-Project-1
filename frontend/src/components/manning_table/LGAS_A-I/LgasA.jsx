@@ -2,7 +2,7 @@ import React from 'react';
 import { TableRow, TableCell } from '@mui/material';
 import NameCell from '../../NameCell';
 
-const LgasTable = () => {
+const LgasA = ({ isEditable = false }) => {
   return (
     <>
       {/* First group (Misamis Oriental 1) */}
@@ -12,7 +12,7 @@ const LgasTable = () => {
         <TableCell>-</TableCell>
         <TableCell>COA Regional Office No. X, Cagayan de Oro City</TableCell>
         <TableCell>Misamis Oriental 1</TableCell>
-        <TableCell><NameCell /></TableCell>
+        <TableCell><NameCell isEditable={isEditable} cellId="LGAS-A-1" /></TableCell>
         <TableCell>-</TableCell>
         <TableCell>-</TableCell>
         <TableCell>-</TableCell>
@@ -23,7 +23,7 @@ const LgasTable = () => {
           <TableCell>-</TableCell>
           <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
           <TableCell>-</TableCell>
-          <TableCell><NameCell /></TableCell>
+          <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-1-${index + 2}`} /></TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
@@ -38,7 +38,7 @@ const LgasTable = () => {
         <TableCell>Team 01</TableCell>
         <TableCell>PSAO-Camiguin, Mambajao, Camiguin</TableCell>
         <TableCell>Provincial Government of Camiguin</TableCell>
-        <TableCell><NameCell /></TableCell>
+        <TableCell><NameCell isEditable={isEditable} cellId="LGAS-A-2" /></TableCell>
         <TableCell>-</TableCell>
         <TableCell>-</TableCell>
         <TableCell>-</TableCell>
@@ -49,7 +49,7 @@ const LgasTable = () => {
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
-          <TableCell><NameCell /></TableCell>
+          <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-2-${index + 2}`} /></TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
@@ -120,7 +120,7 @@ const LgasTable = () => {
             <TableCell>Team {team.team}</TableCell>
             <TableCell>{team.station}</TableCell>
             <TableCell>{team.auditees[0]}</TableCell>
-            <TableCell><NameCell /></TableCell>
+            <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-${team.team}-1`} /></TableCell>
             <TableCell>-</TableCell>
             <TableCell>-</TableCell>
             <TableCell>-</TableCell>
@@ -131,7 +131,7 @@ const LgasTable = () => {
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
               <TableCell>{auditee}</TableCell>
-              <TableCell><NameCell /></TableCell>
+              <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-${team.team}-${index + 2}`} /></TableCell>
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
@@ -144,4 +144,4 @@ const LgasTable = () => {
   );
 };
 
-export default LgasTable;
+export default LgasA;

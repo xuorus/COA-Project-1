@@ -397,13 +397,12 @@ const Main = () => {
                   Scan Document
                 </Typography>
 
-                {/* Document Type Dropdown - Moved up */}
+                {/* Document Type Dropdown - Centered */}
                 <FormControl 
                   sx={{ 
-                    ml:13.5,
-                    mt: 1,
-                    mb: 1,
-                    width: '60%',
+                    width: '300px', // Match the width of the scan box
+                    alignSelf: 'center', // Center horizontally
+                    mb: 1, // Add margin bottom for spacing
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '15px',
                       backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -422,7 +421,7 @@ const Main = () => {
                     '& .MuiInputLabel-root': {
                       color: 'rgba(0, 0, 0, 0.6)',
                       fontFamily: 'Roboto',
-                      transform: 'translate(14px, 12px) scale(1)', // Adjusted label position
+                      transform: 'translate(14px, 12px) scale(1)',
                       '&.Mui-focused, &.MuiFormLabel-filled': {
                         transform: 'translate(14px, -9px) scale(0.75)',
                       },
@@ -432,7 +431,7 @@ const Main = () => {
                     },
                     '& .MuiSelect-select': {
                       fontFamily: 'Roboto',
-                      padding: '8px 14px', // Reduced padding
+                      padding: '8px 14px',
                     }
                   }}
                 >
@@ -582,7 +581,7 @@ const Main = () => {
                   Information
                 </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0, ml: 4 }}>
                   {[
                     { label: 'First Name', required: true, field: 'firstName' },
                     { label: 'Middle Name', required: false, field: 'middleName' },
@@ -610,7 +609,7 @@ const Main = () => {
                         error={formErrors[field.field]}
                         sx={{ 
                           '& .MuiOutlinedInput-root': {
-                            width: '80%',
+                            width: '65%',
                             borderRadius: '15px',
                             backgroundColor: 'rgba(255, 255, 255, 0.7)',
                             fontFamily: 'Roboto',
@@ -731,32 +730,31 @@ const Main = () => {
                 </Box>
 
                 <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSubmit}
-                    disabled={!formValues.firstName || !formValues.lastName || !documentType}
-                    disableRipple
-                    sx={{
-                      ml: 17,
-                      mt: 2,
-                      borderRadius: '10px',
-                      width: '30%',
-                      textTransform: 'none',
-                      '&:focus': {
-                        outline: 'none',
-                      },
-                      '&.Mui-focusVisible': {
-                        outline: 'none',
-                      },
-                      '&.Mui-disabled': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.12)',
-                        color: 'rgba(0, 0, 0, 0.26)'
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>
-
+                            variant="contained"
+                            color="primary"
+                            onClick={handleSubmit}
+                            disabled={!formValues.firstName || !formValues.lastName || !documentType}
+                            disableRipple
+                            sx={{
+                              alignSelf: 'center',
+                              mr: 15,
+                              borderRadius: '10px',
+                              width: '30%',
+                              textTransform: 'none',
+                              '&:focus': {
+                                outline: 'none',
+                              },
+                              '&.Mui-focusVisible': {
+                                outline: 'none',
+                              },
+                              '&.Mui-disabled': {
+                                backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                                color: 'rgba(0, 0, 0, 0.26)'
+                              }
+                            }}
+                          >
+                            Submit
+                          </Button>
                                 </Box>
                               </Box>
                             </Container>
