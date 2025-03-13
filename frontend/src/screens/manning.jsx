@@ -493,7 +493,7 @@ const EditModal = ({ open, onClose }) => {
                   },
                   '&:active': {
                     backgroundColor: 'transparent'
-                  }
+                  },
                 }}
               >
                 <CloseIcon />
@@ -603,6 +603,9 @@ const EditModal = ({ open, onClose }) => {
                   color: 'rgba(0, 0, 0, 0.54)',
                   '&:hover': {
                     backgroundColor: 'transparent'
+                  },
+                  '&:focus': {
+                    outline: 'none'
                   }
                 }}
               >
@@ -618,7 +621,10 @@ const EditModal = ({ open, onClose }) => {
                 color: 'rgba(0, 0, 0, 0.54)',
                 '&:hover': {
                   backgroundColor: 'transparent'
-                }
+                },
+                '&:focus': {
+                    outline: 'none'
+                  }
               }}
             >
               <CloseIcon />

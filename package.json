@@ -51,6 +51,8 @@
     "@mui/x-date-pickers": "^7.27.0",
     "@react-pdf/renderer": "^4.2.1",
     "dayjs": "^1.11.13",
-    "prop-types": "^15.8.1"
+    "prop-types": "^15.8.1",
+    "react-slick": "^0.30.3",
+    "slick-carousel": "^1.8.1"
   }
 }

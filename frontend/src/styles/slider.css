@@ -1,0 +1,45 @@
+.slick-dots {
+  bottom: -25px;
+}
+
+.slick-dots li button:before {
+  color: white;
+}
+
+.slick-dots li.slick-active button:before {
+  color: white;
+}
+
+.slick-prev, .slick-next {
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: auto;
+  height: auto;
+  &:before {
+    display: none;  /* This removes the default arrow */
+  }
+}
+
+.slick-prev {
+  left: -50px;  /* Move the left arrow further out */
+}
+
+.slick-next {
+  right: -100px;  /* Move the right arrow further out */
+}
+
+.slick-slider, .slick-list, .slick-track {
+  height: 100%;
+}
+
+.slick-slide {
+  height: 100%;
+  display: flex !important;
+  align-items: center;
+}
+
+.slick-slide > div {
+  width: 100%;
+  height: 100%;
+}
