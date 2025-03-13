@@ -16,6 +16,7 @@ import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
 import WindowControl from '../components/WindowControl';
+import ScanIcon from '@mui/icons-material/Scanner';  // Add this import
 import axios from 'axios';
 
 // Initialize PDF.js worker
@@ -110,6 +111,7 @@ const Main = () => {
   const [error, setError] = useState(null);
   const [scanning, setScanning] = useState(false);
   const [scannedDocument, setScannedDocument] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Initialize form state with empty strings instead of undefined
   const [formValues, setFormValues] = useState({
