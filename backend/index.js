@@ -75,5 +75,7 @@ const shutdown = async () => {
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
+console.log(app._router.stack.map(r => r.route && r.route.path).filter(Boolean));
+
 const PORT = process.env.PORT || 5000;
 module.exports = app;
