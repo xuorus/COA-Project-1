@@ -696,3 +696,9 @@
 {"ip":"::1","level":"info","message":"GET /api/records/33","timestamp":"2025-03-13T01:19:12.718Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
 {"ip":"::1","level":"info","message":"GET /api/records/33/documents","timestamp":"2025-03-13T01:19:12.719Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
 {"ip":"::1","level":"info","message":"GET /api/records/33","timestamp":"2025-03-13T01:19:13.958Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/uploadScannedDocument%0A","timestamp":"2025-03-14T06:02:23.890Z","userAgent":"PostmanRuntime/7.43.0"}
+{"ip":"::1","level":"info","message":"GET /api/","timestamp":"2025-03-14T06:08:00.667Z","userAgent":"curl/8.10.1"}
+{"ip":"::1","level":"info","message":"POST /api/uploadScannedDocument","timestamp":"2025-03-14T06:09:07.281Z","userAgent":"curl/8.10.1"}
+{"ip":"::1","level":"info","message":"POST /api/uploadScannedDocument%0A","timestamp":"2025-03-14T06:12:30.908Z","userAgent":"PostmanRuntime/7.43.0"}
+{"ip":"::1","level":"info","message":"POST /api/uploadScannedDocument%0A","timestamp":"2025-03-14T06:12:39.679Z","userAgent":"PostmanRuntime/7.43.0"}
+{"ip":"::1","level":"info","message":"POST /api/uploadScannedDocument","timestamp":"2025-03-14T06:15:57.514Z","userAgent":"curl/8.10.1"}
