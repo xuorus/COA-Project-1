@@ -121,44 +121,85 @@ const performScan = async (documentType) => {
 const startScan = async (req, res) => {
     try {
         const { documentType } = req.body;
-        logger.info('Received scan request for:', documentType);
-
-        if (!documentType) {
-            return res.status(400).json(createScanResponse(
-                false,
-                null,
-                null,
-                null,
-                new Error('Document type is required')
-            ));
-        }
+        logger.info('Received document storage request for:', documentType);
 
         if (!VALID_DOCUMENT_TYPES.includes(documentType)) {
-            return res.status(400).json(createScanResponse(
-                false,
-                null,
-                documentType,
-                null,
-                new Error(`Invalid document type: ${documentType}`)
-            ));
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid document type'
+            });
         }
 
-        const result = await performScan(documentType);
-        return res.json(createScanResponse(
-            true,
-            `Successfully scanned ${documentType}`,
-            documentType,
-            result
-        ));
+        try {
+            const samplePdfPath = path.join(__dirname, '../sample/sample.pdf');
+            const fileData = await fs.readFile(samplePdfPath);
+            const base64Data = fileData.toString('base64');
+
+            const client = await pool.connect();
+            try {
+                await client.query('BEGIN');
+
+                const tableName = documentType.toLowerCase();
+                const idColumn = `${tableName}ID`;
+
+                // Find next available ID
+                const findNextIdQuery = `
+                    WITH RECURSIVE sequence_numbers AS (
+                        SELECT 1 as num
+                        UNION ALL
+                        SELECT num + 1
+                        FROM sequence_numbers
+                        WHERE num < (SELECT max("${idColumn}") FROM "${tableName}")
+                    )
+                    SELECT num
+                    FROM sequence_numbers s
+                    WHERE NOT EXISTS (
+                        SELECT 1 FROM "${tableName}" t WHERE t."${idColumn}" = s.num
+                    )
+                    ORDER BY num
+                    LIMIT 1
+                `;
+
+                const nextIdResult = await client.query(findNextIdQuery);
+                const nextId = nextIdResult.rows.length > 0 
+                    ? nextIdResult.rows[0].num 
+                    : await client.query(`SELECT coalesce(max("${idColumn}") + 1, 1) as next_id FROM "${tableName}"`).then(r => r.rows[0].next_id);
+
+                // Insert document with found ID
+                const docQuery = `
+                    INSERT INTO "${tableName}" ("${idColumn}", "filePath")
+                    VALUES ($1, decode($2, 'base64'))
+                    RETURNING "${idColumn}"
+                `;
+                
+                const result = await client.query(docQuery, [nextId, base64Data]);
+                const docId = result.rows[0][idColumn.toLowerCase()];
+
+                await client.query('COMMIT');
+
+                return res.json({
+                    success: true,
+                    message: `${documentType} document stored successfully`,
+                    documentId: docId
+                });
+
+            } catch (error) {
+                await client.query('ROLLBACK');
+                throw error;
+            } finally {
+                client.release();
+            }
+
+        } catch (error) {
+            throw new Error(`Failed to read or store file: ${error.message}`);
+        }
+
     } catch (error) {
-        logger.error('Scan controller error:', error);
-        return res.status(500).json(createScanResponse(
-            false,
-            null,
-            req.body.documentType,
-            null,
-            error
-        ));
+        logger.error('Storage error:', error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
@@ -223,7 +264,7 @@ const uploadScannedDocument = async (req, res) => {
     }
 };
 
-const addPerson = async (req, res) => {
+const addPerson = async (req, res) => { //Add New Person in Scan Input
     try {
         const {
             fName,
