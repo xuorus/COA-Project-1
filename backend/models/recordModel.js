@@ -95,34 +95,42 @@ class RecordModel {
   static async getDocuments(pid) {
     const client = await pool.connect();
     try {
-      const { rows } = await client.query(`
-        SELECT 
-          b."filePath",
-          c."filePath",
-          b."pdsID",
-          c."salnID"
-        FROM "person" AS a
-        LEFT JOIN "pds" AS b ON a."pdsID" = b."pdsID"
-        LEFT JOIN "saln" AS c ON a."salnID" = c."salnID"
-        WHERE a."PID" = $1
-      `, [pid]);
+        const { rows } = await client.query(`
+            SELECT 
+                p."filePath" as "pdsPath",
+                s."filePath" as "salnPath",
+                p."pdsID",
+                s."salnID"
+            FROM "person" AS a
+            LEFT JOIN "pds" AS p ON a."pdsID" = p."pdsID"
+            LEFT JOIN "saln" AS s ON a."salnID" = s."salnID"
+            WHERE a."PID" = $1
+        `, [pid]);
 
-      if (rows.length === 0) return null;
+        console.log('Retrieved document paths:', {
+            hasPDS: !!rows[0]?.pdsPath,
+            hasSALN: !!rows[0]?.salnPath
+        });
 
-      return {
-        pds: rows[0].filePath ? {
-          id: rows[0].pdsID,
-          data: Buffer.from(rows[0].filePath).toString('base64')
-        } : null,
-        saln: rows[0].filePath ? {
-          id: rows[0].salnID,
-          data: Buffer.from(rows[0].filePath).toString('base64')
-        } : null
-      };
+        if (rows.length === 0) return null;
+
+        return {
+            pds: rows[0]?.pdsPath ? {
+                id: rows[0].pdsID,
+                data: Buffer.from(rows[0].pdsPath).toString('base64')
+            } : null,
+            saln: rows[0]?.salnPath ? {
+                id: rows[0].salnID,
+                data: Buffer.from(rows[0].salnPath).toString('base64')
+            } : null
+        };
+    } catch (error) {
+        console.error('Error retrieving documents:', error);
+        throw error;
     } finally {
-      client.release();
+        client.release();
     }
-  }
+}
 
   static async getPersonHistory(pid) {
     const client = await pool.connect();

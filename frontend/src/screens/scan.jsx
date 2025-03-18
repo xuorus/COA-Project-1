@@ -22,7 +22,7 @@ import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import CloseIcon from '@mui/icons-material/Close';
 
 import axios from 'axios';
-
+  
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -204,27 +204,56 @@ const handleDrop = (e) => {
 };
 
 const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // Validate only required fields
-    if (!formValues.firstName || !formValues.lastName) {
-        setError('First name and last name are required');
-        return;
-    }
-
     try {
-        const personData = {
-            fName: formValues.firstName.trim(),
-            mName: formValues.middleName?.trim() || null,
-            lName: formValues.lastName.trim(),
-            bloodType: formValues.bloodType || null,
-            profession: formValues.profession?.trim() || null,
-            hobbies: formValues.hobbies?.trim() || null
-        };
+        event.preventDefault();
 
-        const response = await axios.post('http://localhost:5000/api/scan/person', personData);
+        // Validate document
+        if (!previewUrl || !documentType) {
+            setError('Please scan a document first');
+            return;
+        }
+
+        // Validate required fields
+        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const missingFields = requiredFields.filter(field => !formValues[field]);
+
+        if (missingFields.length > 0) {
+            setError(`Please fill in required fields: ${missingFields.join(', ')}`);
+            return;
+        }
+
+        setIsLoading(true);
+        console.log('Starting submission...');
+
+        // Create FormData object
+        const formData = new FormData();
+        
+        // Convert base64 PDF to Blob
+        const pdfBlob = await fetch(previewUrl).then(res => res.blob());
+        formData.append('file', pdfBlob, 'document.pdf');
+        formData.append('documentType', documentType);
+        formData.append('formData', JSON.stringify({
+            firstName: formValues.firstName.trim(),
+            middleName: formValues.middleName?.trim() || null,
+            lastName: formValues.lastName.trim(),
+            bloodType: formValues.bloodType,
+            profession: formValues.profession?.trim(),
+            hobbies: formValues.hobbies?.trim() || null
+        }));
+
+        console.log('Submitting data...', documentType);
+
+        const response = await axios.post('http://localhost:5000/api/scan/submit', 
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        );
 
         if (response.data.success) {
+            console.log('Submission successful:', response.data);
             setSuccessModalOpen(true);
             // Reset form
             setFormValues({
@@ -235,11 +264,19 @@ const handleSubmit = async (event) => {
                 profession: '',
                 hobbies: ''
             });
+            setPreviewUrl(null);
+            setDocumentType('');
             setError(null);
         }
+
     } catch (error) {
         console.error('Submit error:', error);
-        setError(error.response?.data?.message || 'Failed to submit record');
+        setError(
+            error.response?.data?.message || 
+            'Failed to submit form. Please try again.'
+        );
+    } finally {
+        setIsLoading(false);
     }
 };
 
