@@ -97,8 +97,8 @@ class RecordModel {
     try {
       const { rows } = await client.query(`
         SELECT 
-          b."PDSfile",
-          c."SALNfile",
+          b."filePath",
+          c."filePath",
           b."pdsID",
           c."salnID"
         FROM "person" AS a
@@ -110,13 +110,13 @@ class RecordModel {
       if (rows.length === 0) return null;
 
       return {
-        pds: rows[0].PDSfile ? {
+        pds: rows[0].filePath ? {
           id: rows[0].pdsID,
-          data: Buffer.from(rows[0].PDSfile).toString('base64')
+          data: Buffer.from(rows[0].filePath).toString('base64')
         } : null,
-        saln: rows[0].SALNfile ? {
+        saln: rows[0].filePath ? {
           id: rows[0].salnID,
-          data: Buffer.from(rows[0].SALNfile).toString('base64')
+          data: Buffer.from(rows[0].filePath).toString('base64')
         } : null
       };
     } finally {
