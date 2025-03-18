@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { TableRow, TableCell } from '@mui/material';
+import PropTypes from 'prop-types';
 import NameCell from '../../NameCell';
+import { NumberingContext } from '../../../context/NumberingContext';
 
 const LgasA = ({ isEditable = false }) => {
+  const { getNumber } = useContext(NumberingContext);
+
   return (
     <>
       {/* First group (Misamis Oriental 1) */}
+      <TableRow data-testid="lgas-a"></TableRow>
       <TableRow>
         <TableCell rowSpan={4}>LGAS</TableCell>
         <TableCell rowSpan={4}>A</TableCell>
@@ -15,7 +20,7 @@ const LgasA = ({ isEditable = false }) => {
         <TableCell><NameCell isEditable={isEditable} cellId="LGAS-A-1" /></TableCell>
         <TableCell>-</TableCell>
         <TableCell>-</TableCell>
-        <TableCell>-</TableCell>
+        <TableCell>{getNumber("LGAS-A-1")}</TableCell>
         <TableCell>-</TableCell>
       </TableRow>
       {[...Array(3)].map((_, index) => (
@@ -26,7 +31,7 @@ const LgasA = ({ isEditable = false }) => {
           <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-1-${index + 2}`} /></TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
-          <TableCell>-</TableCell>
+          <TableCell>{getNumber(`LGAS-A-1-${index + 2}`)}</TableCell>
           <TableCell>-</TableCell>
         </TableRow>
       ))}
@@ -41,7 +46,7 @@ const LgasA = ({ isEditable = false }) => {
         <TableCell><NameCell isEditable={isEditable} cellId="LGAS-A-2" /></TableCell>
         <TableCell>-</TableCell>
         <TableCell>-</TableCell>
-        <TableCell>-</TableCell>
+        <TableCell>{getNumber("LGAS-A-2")}</TableCell>
         <TableCell>-</TableCell>
       </TableRow>
       {[...Array(2)].map((_, index) => (
@@ -52,7 +57,7 @@ const LgasA = ({ isEditable = false }) => {
           <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-2-${index + 2}`} /></TableCell>
           <TableCell>-</TableCell>
           <TableCell>-</TableCell>
-          <TableCell>-</TableCell>
+          <TableCell>{getNumber(`LGAS-A-2-${index + 2}`)}</TableCell>
           <TableCell>-</TableCell>
         </TableRow>
       ))}
@@ -112,7 +117,7 @@ const LgasA = ({ isEditable = false }) => {
             "3. Municipality of Claveria with 24 Barangays"
           ]
         }
-      ].map((team, teamIndex) => (
+      ].map((team) => (
         <React.Fragment key={team.team}>
           <TableRow>
             <TableCell rowSpan={team.auditees.length}>LGAS</TableCell>
@@ -123,7 +128,7 @@ const LgasA = ({ isEditable = false }) => {
             <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-${team.team}-1`} /></TableCell>
             <TableCell>-</TableCell>
             <TableCell>-</TableCell>
-            <TableCell>-</TableCell>
+            <TableCell>{getNumber(`LGAS-A-${team.team}-1`)}</TableCell>
             <TableCell>-</TableCell>
           </TableRow>
           {team.auditees.slice(1).map((auditee, index) => (
@@ -134,7 +139,7 @@ const LgasA = ({ isEditable = false }) => {
               <TableCell><NameCell isEditable={isEditable} cellId={`LGAS-A-${team.team}-${index + 2}`} /></TableCell>
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
-              <TableCell>-</TableCell>
+              <TableCell>{getNumber(`LGAS-A-${team.team}-${index + 2}`)}</TableCell>
               <TableCell>-</TableCell>
             </TableRow>
           ))}
@@ -143,5 +148,11 @@ const LgasA = ({ isEditable = false }) => {
     </>
   );
 };
+LgasA.propTypes = {
+  isEditable: PropTypes.bool
+};
 
+LgasA.defaultProps = {
+  isEditable: false
+};
 export default LgasA;
