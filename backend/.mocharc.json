@@ -1,0 +1,8 @@
+{
+    "extension": ["js"],
+    "spec": "test/**/*.test.js",
+    "require": "chai",
+    "timeout": 5000,
+    "exit": true,
+    "experimental-specifier-resolution": "node"
+}
