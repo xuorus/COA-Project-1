@@ -19,6 +19,8 @@ import WindowControl from '../components/WindowControl';
 import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import ScanIcon from '@mui/icons-material/DocumentScanner';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import CloseIcon from '@mui/icons-material/Close';
 
 =========
 import axios from 'axios';
@@ -118,6 +120,8 @@ const Main = () => {
   const [scanning, setScanning] = useState(false);
   const [scannedDocument, setScannedDocument] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [fullPreview, setFullPreview] = useState(false);
 
   // Initialize form state with empty strings instead of undefined
   const [formValues, setFormValues] = useState({
@@ -151,36 +155,55 @@ const Main = () => {
     setDocumentType(event.target.value);
   };
 
-const handleScanButtonClick = async () => {
-    if (!documentType) {
-        setError('Please select a document type');
+const handleFileUpload = (file) => {
+    if (!file) return;
+    
+    if (file.type !== 'application/pdf') {
+        setError('Please upload a PDF file');
         return;
     }
 
     try {
-        setIsLoading(true);
-        setError(null);
-
-        // Mock scan operation with a sample PDF
-        // This simulates a successful scan after 1.5 seconds
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Sample base64 PDF data (you can replace this with your own sample PDF)
-        const samplePdfBase64 = 'data:application/pdf;base64,JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9udAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2JqCgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G';
-
-        setPreviewUrl(samplePdfBase64);
-        setScannedDocument({
-            id: Date.now(),
-            type: documentType,
-            scanDate: new Date().toISOString()
-        });
-
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setPreviewUrl(e.target.result);
+            setScannedDocument({
+                id: Date.now(),
+                type: documentType,
+                scanDate: new Date().toISOString(),
+                fileName: file.name
+            });
+        };
+        reader.readAsDataURL(file);
     } catch (error) {
-        console.error('Scan error:', error);
-        setError('Failed to scan document. Please try again.');
-    } finally {
-        setIsLoading(false);
+        console.error('File processing error:', error);
+        setError('Failed to process PDF file');
     }
+};
+
+const handleScanButtonClick = () => {
+    if (!documentType) {
+        setError('Please select a document type');
+        return;
+    }
+    fileInputRef.current?.click();
+};
+
+const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+};
+
+const handleDragLeave = () => {
+    setIsDragging(false);
+};
+
+const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    handleFileUpload(file);
 };
 
 const handleSubmit = async (event) => {
@@ -455,98 +478,154 @@ const PreviewDocument = ({ docId }) => {
 
                 {/* PDF Upload Box */}
                 <Box
-  id="dwtcontrolContainer"
-  sx={{
-    width: '100%',
-    flex: 1,
-    maxWidth: '300px',
-    aspectRatio: '1 / 1.4142', // A4 aspect ratio
-    margin: '0 auto',
-    border: '1px solid rgba(0, 0, 0, 0.2)',
-    borderRadius: 2,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    overflow: 'hidden',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    position: 'relative'
-  }}
+    id="dwtcontrolContainer"
+    onDragOver={handleDragOver}
+    onDragLeave={handleDragLeave}
+    onDrop={handleDrop}
+    sx={{
+        width: '100%',
+        flex: 1,
+        maxWidth: '300px',
+        aspectRatio: '1 / 1.4142',
+        margin: '0 auto',
+        border: `2px dashed ${isDragging ? '#1976d2' : 'rgba(0, 0, 0, 0.2)'}`,
+        borderRadius: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: isDragging ? 'rgba(25, 118, 210, 0.08)' : 'rgba(255, 255, 255, 0.95)',
+        overflow: 'hidden',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        position: 'relative',
+        transition: 'all 0.2s ease'
+    }}
 >
-  {isLoading ? (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center',
-      gap: 2 
-    }}>
-      <CircularProgress />
-      <Typography>Scanning...</Typography>
-    </Box>
-  ) : (
-    <>
-      {error ? (
+    <input
+        type="file"
+        ref={fileInputRef}
+        accept=".pdf"
+        style={{ display: 'none' }}
+        onChange={(e) => handleFileUpload(e.target.files[0])}
+    />
+    
+    {isLoading ? (
         <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center',
-          gap: 2,
-          p: 2,
-          textAlign: 'center'
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            gap: 2 
         }}>
-          <Typography color="error">{error}</Typography>
-          <IconButton
-            color="primary"
-            onClick={() => {
-              setError(null);
-              handleScanButtonClick();
-            }}
-            sx={{ 
-              backgroundColor: 'rgba(25, 118, 210, 0.1)',
-              '&:hover': {
-                backgroundColor: 'rgba(25, 118, 210, 0.2)'
-              }
-            }}
-          >
-            <ScanIcon sx={{ fontSize: 40 }} />
-          </IconButton>
+            <CircularProgress />
+            <Typography>Processing...</Typography>
         </Box>
-      ) : previewUrl ? (
-        <iframe
-          src={previewUrl}
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-          }}
-          title="Scanned Document Preview"
-        />
-      ) : (
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center',
-          gap: 2 
-        }}>
-          <Typography>Click to scan a document</Typography>
-          <IconButton
-            color="primary"
-            onClick={handleScanButtonClick}
-            disabled={isLoading || !documentType}
-            sx={{ 
-              backgroundColor: 'rgba(25, 118, 210, 0.1)',
-              '&:hover': {
-                backgroundColor: 'rgba(25, 118, 210, 0.2)'
-              }
-            }}
-          >
-            <ScanIcon sx={{ fontSize: 40 }} />
-          </IconButton>
-        </Box>
-      )}
-    </>
-  )}
+    ) : (
+        <>
+            {error ? (
+                <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    gap: 2,
+                    p: 2,
+                    textAlign: 'center'
+                }}>
+                    <Typography color="error">{error}</Typography>
+                    <IconButton
+                        color="primary"
+                        onClick={handleScanButtonClick}
+                        sx={{ 
+                            backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                            }
+                        }}
+                    >
+                        <ScanIcon sx={{ fontSize: 40 }} />
+                    </IconButton>
+                </Box>
+            ) : previewUrl ? (
+                <Box 
+                    sx={{ 
+                        position: 'relative', 
+                        width: '100%', 
+                        height: '100%',
+                        cursor: 'pointer',
+                        '&:hover .fullscreen-overlay': {
+                            opacity: 1
+                        }
+                    }}
+                    onClick={() => setFullPreview(true)}
+                >
+                    {/* Fullscreen overlay */}
+                    <Box 
+                        className="fullscreen-overlay"
+                        sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                            opacity: 0,
+                            transition: 'opacity 0.2s ease-in-out',
+                            zIndex: 1
+                        }}
+                    >
+                        <FullscreenIcon 
+                            sx={{ 
+                                fontSize: 48,
+                                color: 'white',
+                                transition: 'transform 0.2s ease-in-out',
+                                '&:hover': {
+                                    transform: 'scale(1.1)'
+                                }
+                            }} 
+                        />
+                    </Box>
+                    <iframe
+                        src={previewUrl}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            border: 'none',
+                            pointerEvents: 'none' // Prevent iframe from capturing clicks
+                        }}
+                        title="Document Preview"
+                    />
+                </Box>
+            ) : (
+                <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    gap: 2,
+                    p: 2,
+                    textAlign: 'center'
+                }}>
+                    <Typography>
+                        {isDragging ? 'Drop PDF here' : 'Click to browse or drag PDF here'}
+                    </Typography>
+                    <IconButton
+                        color="primary"
+                        onClick={handleScanButtonClick}
+                        disabled={isLoading || !documentType}
+                        sx={{ 
+                            backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                            }
+                        }}
+                    >
+                        <ScanIcon sx={{ fontSize: 40 }} />
+                    </IconButton>
+                </Box>
+            )}
+        </>
+    )}
 </Box>
 
               </Box>
@@ -790,6 +869,58 @@ const PreviewDocument = ({ docId }) => {
                       </Box>
                     </Fade>
                   </Modal>
+                  <Modal
+    open={fullPreview}
+    onClose={() => setFullPreview(false)}
+    closeAfterTransition
+    sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)'
+        }
+    }}
+>
+    <Fade in={fullPreview}>
+        <Box
+            sx={{
+                position: 'relative',
+                width: '90vw',
+                height: '90vh',
+                backgroundColor: 'white',
+                borderRadius: 1,
+                overflow: 'hidden',
+                boxShadow: 24,
+            }}
+        >
+            <IconButton
+                onClick={() => setFullPreview(false)}
+                sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    zIndex: 1,
+                    '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    }
+                }}
+            >
+                <CloseIcon />
+            </IconButton>
+            <iframe
+                src={previewUrl}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                }}
+                title="Full Document Preview"
+            />
+        </Box>
+    </Fade>
+</Modal>
                       </ThemeProvider>
                     );
                   };
