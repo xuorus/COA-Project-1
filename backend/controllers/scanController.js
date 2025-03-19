@@ -254,57 +254,49 @@ const updatePersonDocuments = async (req, res) => {
     const client = await pool.connect();
     try {
         const { PID } = req.params;
-        const { documentType } = req.body;
+        const { documentType } = req.query; // Get from query params
         const file = req.file;
 
-        console.log('Updating documents for PID:', PID, 'Document Type:', documentType); // Debug log
+        console.log('Updating document:', { PID, documentType, hasFile: !!file });
 
         if (!file || !documentType || !PID) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing file, document type, or PID'
+                message: 'Missing required data'
             });
         }
 
         await client.query('BEGIN');
 
-        let documentId;
-        let updateQuery;
-
-        switch (documentType) {
-            case 'PDS':
-                const pdsResult = await client.query(
-                    'INSERT INTO pds ("filePath") VALUES ($1) RETURNING "pdsID"',
-                    [file.buffer]
-                );
-                documentId = pdsResult.rows[0].pdsID;
-                updateQuery = 'UPDATE person SET "pdsID" = $1 WHERE "PID" = $2';
-                break;
-
-            case 'SALN':
-                const salnResult = await client.query(
-                    'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"',
-                    [file.buffer]
-                );
-                documentId = salnResult.rows[0].salnID;
-                updateQuery = 'UPDATE person SET "salnID" = $1 WHERE "PID" = $2';
-                break;
-
-            default:
-                // Handle other document types if needed
-                throw new Error(`Unsupported document type: ${documentType}`);
+        // First, get the document ID if it exists
+        const docIdQuery = `
+            SELECT "${documentType.toLowerCase()}ID" 
+            FROM person 
+            WHERE "PID" = $1
+        `;
+        const docIdResult = await client.query(docIdQuery, [PID]);
+        
+        if (!docIdResult.rows[0]) {
+            throw new Error('Person not found');
         }
 
-        // Update person record with new document ID
-        await client.query(updateQuery, [documentId, PID]);
+        const docId = docIdResult.rows[0][`${documentType.toLowerCase()}ID`];
+
+        // Update the document file
+        const updateQuery = `
+            UPDATE ${documentType.toLowerCase()}
+            SET "filePath" = $1
+            WHERE "${documentType.toLowerCase()}ID" = $2
+            RETURNING "${documentType.toLowerCase()}ID"
+        `;
+
+        await client.query(updateQuery, [file.buffer, docId]);
 
         await client.query('COMMIT');
 
         res.json({
             success: true,
-            message: `${documentType} document added successfully`,
-            documentId,
-            PID
+            message: `${documentType} updated successfully`
         });
 
     } catch (error) {
@@ -384,6 +376,55 @@ const addDocumentToExistingPerson = async (req, res) => {
     }
 };
 
+const updateDocumentFile = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { docType, docId } = req.params;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No file provided'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // Update file path in the specific document table
+        const updateQuery = `
+            UPDATE ${docType}
+            SET "filePath" = $1,
+                "updatedAt" = CURRENT_TIMESTAMP
+            WHERE "${docType}ID" = $2
+            RETURNING "${docType}ID"
+        `;
+
+        const result = await client.query(updateQuery, [file.buffer, docId]);
+
+        if (result.rowCount === 0) {
+            throw new Error(`${docType.toUpperCase()} document not found`);
+        }
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `${docType.toUpperCase()} file updated successfully`
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Update document error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
     startScan,
     addPerson,
@@ -391,5 +432,6 @@ module.exports = {
     getPreview,
     addPersonWithDocument,
     updatePersonDocuments,
-    addDocumentToExistingPerson
+    addDocumentToExistingPerson,
+    updateDocumentFile
 };
