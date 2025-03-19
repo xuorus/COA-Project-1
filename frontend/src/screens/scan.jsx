@@ -770,6 +770,31 @@ useEffect(() => {
                               onChange={handleInputChange}
                               name={field.field}
                               disabled={isPrefilledDisabled}
+                              sx={{
+                                width: '65%',
+                                height: '45px',
+                                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                borderRadius: '15px',
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                  borderRadius: '15px',
+                                  borderColor: 'rgba(0, 0, 0, 0.23)',
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: 'rgba(0, 0, 0, 0.5)',
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: '#1976d2',
+                                },
+                                '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: '#d32f2f',
+                                },
+                                '& .MuiSelect-select': {
+                                  padding: '0 14px',
+                                  height: '45px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }
+                              }}
                               MenuProps={{
                                 PaperProps: {
                                   sx: {
@@ -818,12 +843,29 @@ useEffect(() => {
                                   }));
                                 }
                               }}
+                              disabled={isPrefilledDisabled}
                               sx={{
-                                '& input': {
-                                  padding: '8px 14px',
+                                width: '65%',
+                                '& .MuiOutlinedInput-input': {
+                                  height: '45px',
+                                  padding: '0 14px',
+                                  backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                                  borderRadius: '15px',
+                                },
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                  borderRadius: '15px',
+                                  borderColor: 'rgba(0, 0, 0, 0.23)',
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: 'rgba(0, 0, 0, 0.5)',
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: '#1976d2',
+                                },
+                                '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: '#d32f2f',
                                 }
                               }}
-                              disabled={isPrefilledDisabled}
                             />
                           </>
                         )}
