@@ -217,15 +217,15 @@ const handleSubmit = async (event) => {
         }
 
         setIsLoading(true);
+        let response;
 
         // Create FormData
         const formData = new FormData();
         const pdfBlob = await fetch(previewUrl).then(res => res.blob());
         formData.append('file', pdfBlob, 'document.pdf');
+        formData.append('documentType', documentType);
 
-        let response;
-
-        // If we have prefillData with PID and fixedDocumentType, we're editing
+        // Check if we're updating an existing document
         if (state?.prefillData?.PID && state.fixedDocumentType) {
             console.log('Updating document:', {
                 PID: state.prefillData.PID,
@@ -246,22 +246,32 @@ const handleSubmit = async (event) => {
                 }
             );
         } else if (state?.selectedRecord?.PID) {
-            // Adding new document to existing person
+            // Add new document to existing person (keep existing working code)
             response = await axios.patch(
-                `http://localhost:5000/api/scan/person/${state.selectedRecord.PID}/documents`,
+                `http://localhost:5000/api/scan/person/${state.selectedRecord.PID}/document`,
                 formData,
                 {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    params: {
-                        documentType: documentType
-                    }
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 }
             );
-        } else {
-            // Creating new person with document
-            // ... existing code for new person ...
+        } else if (state?.from === 'sidebar') {
+            // Creating new person with document (keep existing working code)
+            formData.append('formData', JSON.stringify({
+                firstName: formValues.firstName.trim(),
+                middleName: formValues.middleName?.trim() || null,
+                lastName: formValues.lastName.trim(),
+                bloodType: formValues.bloodType,
+                profession: formValues.profession?.trim(),
+                hobbies: formValues.hobbies?.trim() || null
+            }));
+
+            response = await axios.post(
+                'http://localhost:5000/api/scan/submit',
+                formData,
+                {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                }
+            );
         }
 
         if (response?.data?.success) {
@@ -271,7 +281,7 @@ const handleSubmit = async (event) => {
 
     } catch (error) {
         console.error('Submit error:', error);
-        setError(error.response?.data?.message || 'Failed to update document');
+        setError(error.response?.data?.message || 'Failed to process request');
     } finally {
         setIsLoading(false);
     }
