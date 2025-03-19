@@ -167,7 +167,7 @@ const addPerson = async (req, res) => {
             message: error.message || 'Failed to add person'
         });
     } finally {
-        client.release();
+        client.release();   
     }
 };
 
@@ -175,48 +175,39 @@ const addPersonWithDocument = async (req, res) => {
     const client = await pool.connect();
     try {
         const file = req.file;
-        const documentType = req.body.documentType;
-        const formData = JSON.parse(req.body.formData); // Parse the JSON string
+        const formData = JSON.parse(req.body.formData);
+        const { documentType } = req.body;
 
-        console.log('Received data:', {
-            file: file?.originalname,
-            documentType,
-            formData
-        });
+        // Validate required fields
+        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const missingFields = requiredFields.filter(field => !formData[field]);
 
-        if (!file || !documentType || !formData) {
+        if (missingFields.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing file, document type, or person data'
+                message: `Missing required fields: ${missingFields.join(', ')}`
             });
         }
 
         await client.query('BEGIN');
 
-        // First: Store document and get ID
+        // Store document first
         const docQuery = documentType === 'PDS' 
             ? 'INSERT INTO pds ("filePath") VALUES ($1) RETURNING "pdsID"'
             : 'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"';
 
         const docResult = await client.query(docQuery, [file.buffer]);
         const documentId = docResult.rows[0][documentType.toLowerCase() + 'ID'];
-        
-        console.log(`${documentType} stored with ID:`, documentId);
 
-        // Second: Store person data with document ID
-        const personQuery = documentType === 'PDS'
-            ? `INSERT INTO person (
+        // Create person with document reference
+        const personQuery = `
+            INSERT INTO person (
                 "fName", "mName", "lName",
                 "bloodType", profession, hobbies,
-                "pdsID"
-               ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-               RETURNING "PID"`
-            : `INSERT INTO person (
-                "fName", "mName", "lName",
-                "bloodType", profession, hobbies,
-                "salnID"
-               ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-               RETURNING "PID"`;
+                ${documentType === 'PDS' ? '"pdsID"' : '"salnID"'}
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING "PID"
+        `;
 
         const personResult = await client.query(personQuery, [
             formData.firstName,
@@ -224,27 +215,17 @@ const addPersonWithDocument = async (req, res) => {
             formData.lastName,
             formData.bloodType,
             formData.profession,
-            formData.hobbies,
+            formData.hobbies || null,
             documentId
         ]);
 
         await client.query('COMMIT');
-        console.log('Transaction completed successfully');
-
-        res.json({
-            success: true,
-            documentId,
-            personId: personResult.rows[0].PID,
-            message: 'Document and person data added successfully'
-        });
+        res.json({ success: true, PID: personResult.rows[0].PID });
 
     } catch (error) {
         await client.query('ROLLBACK');
-        console.error('Transaction error:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message || 'Failed to process request'
-        });
+        console.error('Add person error:', error);
+        res.status(500).json({ success: false, message: error.message });
     } finally {
         client.release();
     }
@@ -254,7 +235,7 @@ const updatePersonDocuments = async (req, res) => {
     const client = await pool.connect();
     try {
         const { PID } = req.params;
-        const { documentType } = req.query; // Get from query params
+        const { documentType } = req.query;
         const file = req.file;
 
         console.log('Updating document:', { PID, documentType, hasFile: !!file });
@@ -268,7 +249,7 @@ const updatePersonDocuments = async (req, res) => {
 
         await client.query('BEGIN');
 
-        // First, get the document ID if it exists
+        // Get document ID from person
         const docIdQuery = `
             SELECT "${documentType.toLowerCase()}ID" 
             FROM person 
@@ -282,7 +263,7 @@ const updatePersonDocuments = async (req, res) => {
 
         const docId = docIdResult.rows[0][`${documentType.toLowerCase()}ID`];
 
-        // Update the document file
+        // Update document file
         const updateQuery = `
             UPDATE ${documentType.toLowerCase()}
             SET "filePath" = $1
@@ -291,7 +272,6 @@ const updatePersonDocuments = async (req, res) => {
         `;
 
         await client.query(updateQuery, [file.buffer, docId]);
-
         await client.query('COMMIT');
 
         res.json({
@@ -311,6 +291,7 @@ const updatePersonDocuments = async (req, res) => {
     }
 };
 
+// Add document to existing person
 const addDocumentToExistingPerson = async (req, res) => {
     const client = await pool.connect();
     try {
@@ -318,50 +299,52 @@ const addDocumentToExistingPerson = async (req, res) => {
         const file = req.file;
         const { documentType } = req.body;
 
-        console.log('Adding document:', { PID, documentType }); // Debug log
+        console.log('Adding document:', { PID, documentType });
 
         if (!file || !documentType || !PID) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing file, document type, or person ID'
+                message: 'Missing required data'
             });
         }
 
         await client.query('BEGIN');
 
-        let documentId;
-        let updateQuery;
-
-        // Handle different document types
-        if (documentType === 'PDS') {
-            // Insert into PDS table
-            const pdsResult = await client.query(
-                'INSERT INTO pds ("filePath") VALUES ($1) RETURNING "pdsID"',
-                [file.buffer]
-            );
-            documentId = pdsResult.rows[0].pdsID;
-            updateQuery = 'UPDATE person SET "pdsID" = $1 WHERE "PID" = $2';
-        } else if (documentType === 'SALN') {
-            // Insert into SALN table
-            const salnResult = await client.query(
-                'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"',
-                [file.buffer]
-            );
-            documentId = salnResult.rows[0].salnID;
-            updateQuery = 'UPDATE person SET "salnID" = $1 WHERE "PID" = $2';
-        } else {
-            throw new Error(`Invalid document type: ${documentType}`);
+        // Check if document already exists
+        const checkQuery = `
+            SELECT "${documentType.toLowerCase()}ID" 
+            FROM person 
+            WHERE "PID" = $1
+        `;
+        const checkResult = await client.query(checkQuery, [PID]);
+        
+        if (checkResult.rows[0]?.[`${documentType.toLowerCase()}ID`]) {
+            throw new Error(`Person already has a ${documentType}`);
         }
 
-        // Update person record with new document ID
-        await client.query(updateQuery, [documentId, PID]);
+        // Insert document
+        const docQuery = `
+            INSERT INTO ${documentType.toLowerCase()} ("filePath")
+            VALUES ($1)
+            RETURNING "${documentType.toLowerCase()}ID"
+        `;
+        
+        const docResult = await client.query(docQuery, [file.buffer]);
+        const docId = docResult.rows[0][`${documentType.toLowerCase()}ID`];
 
+        // Update person record
+        const updateQuery = `
+            UPDATE person
+            SET "${documentType.toLowerCase()}ID" = $1
+            WHERE "PID" = $2
+        `;
+        
+        await client.query(updateQuery, [docId, PID]);
         await client.query('COMMIT');
 
         res.json({
             success: true,
-            message: `${documentType} added successfully`,
-            documentId
+            message: `${documentType} added successfully`
         });
 
     } catch (error) {
@@ -369,14 +352,15 @@ const addDocumentToExistingPerson = async (req, res) => {
         console.error('Add document error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to add document'
+            message: error.message
         });
     } finally {
         client.release();
     }
 };
 
-const updateDocumentFile = async (req, res) => {
+// Update existing document
+const updateDocument = async (req, res) => {
     const client = await pool.connect();
     try {
         const { docType, docId } = req.params;
@@ -391,26 +375,65 @@ const updateDocumentFile = async (req, res) => {
 
         await client.query('BEGIN');
 
-        // Update file path in the specific document table
         const updateQuery = `
             UPDATE ${docType}
-            SET "filePath" = $1,
-                "updatedAt" = CURRENT_TIMESTAMP
+            SET "filePath" = $1
             WHERE "${docType}ID" = $2
-            RETURNING "${docType}ID"
+        `;
+
+        await client.query(updateQuery, [file.buffer, docId]);
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `${docType.toUpperCase()} updated successfully`
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Update document error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    } finally {
+        client.release();
+    }
+};
+
+const updateDocumentFile = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { documentType, docId } = req.params;
+        const file = req.file;
+
+        if (!file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No file provided'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // Update only the file path in the specific document table
+        const updateQuery = `
+            UPDATE ${documentType.toLowerCase()}
+            SET "filePath" = $1
+            WHERE "${documentType.toLowerCase()}ID" = $2
         `;
 
         const result = await client.query(updateQuery, [file.buffer, docId]);
 
         if (result.rowCount === 0) {
-            throw new Error(`${docType.toUpperCase()} document not found`);
+            throw new Error('Document not found');
         }
 
         await client.query('COMMIT');
 
         res.json({
             success: true,
-            message: `${docType.toUpperCase()} file updated successfully`
+            message: 'Document updated successfully'
         });
 
     } catch (error) {
@@ -433,5 +456,6 @@ module.exports = {
     addPersonWithDocument,
     updatePersonDocuments,
     addDocumentToExistingPerson,
-    updateDocumentFile
+    updateDocumentFile,
+    updateDocument
 };
