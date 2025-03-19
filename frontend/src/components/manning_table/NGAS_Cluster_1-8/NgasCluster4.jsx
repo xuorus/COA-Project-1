@@ -75,6 +75,7 @@ const NgasCluster4 = ({ isEditable = false }) => {
           }
       ].map((team) => (
         <React.Fragment key={team.team}>
+          <TableRow data-testid="ngas-cluster4"></TableRow>
           <TableRow>
             <TableCell rowSpan={team.auditees.length}>NGAS</TableCell>
             <TableCell rowSpan={team.auditees.length}>Cluster 4</TableCell>
