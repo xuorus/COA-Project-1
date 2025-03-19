@@ -103,7 +103,10 @@ const Main = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const prefillData = location.state?.prefillData;
-  const isPrefilledDisabled = location.state?.isPrefilledDisabled;
+  
+  // Add this state declaration
+  const [isPrefilledDisabled, setIsPrefilledDisabled] = useState(false);
+  
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [documentType, setDocumentType] = useState(() => {
@@ -209,75 +212,93 @@ const handleDrop = (e) => {
 const handleSubmit = async (event) => {
     try {
         event.preventDefault();
+        const { state } = location;
+        console.log('Location state:', state);
 
-        // Validate document
         if (!previewUrl || !documentType) {
             setError('Please scan a document first');
             return;
         }
 
-        // Validate required fields
-        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
-        const missingFields = requiredFields.filter(field => !formValues[field]);
-
-        if (missingFields.length > 0) {
-            setError(`Please fill in required fields: ${missingFields.join(', ')}`);
-            return;
-        }
-
         setIsLoading(true);
-        console.log('Starting submission...');
 
-        // Create FormData object
+        // Create FormData
         const formData = new FormData();
-        
-        // Convert base64 PDF to Blob
         const pdfBlob = await fetch(previewUrl).then(res => res.blob());
         formData.append('file', pdfBlob, 'document.pdf');
         formData.append('documentType', documentType);
-        formData.append('formData', JSON.stringify({
-            firstName: formValues.firstName.trim(),
-            middleName: formValues.middleName?.trim() || null,
-            lastName: formValues.lastName.trim(),
-            bloodType: formValues.bloodType,
-            profession: formValues.profession?.trim(),
-            hobbies: formValues.hobbies?.trim() || null
-        }));
 
-        console.log('Submitting data...', documentType);
-
-        const response = await axios.post('http://localhost:5000/api/scan/submit', 
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
+        // Check if we're adding to existing person or creating new
+        if (state?.selectedRecord?.PID) {
+            // Adding document to existing person
+            console.log('Adding document to existing person:', state.selectedRecord.PID);
+            
+            const response = await axios.patch(
+                `http://localhost:5000/api/scan/person/${state.selectedRecord.PID}/documents`,
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
-            }
-        );
+            );
 
-        if (response.data.success) {
-            console.log('Submission successful:', response.data);
-            setSuccessModalOpen(true);
-            // Reset form
-            setFormValues({
-                firstName: '',
-                middleName: '',
-                lastName: '',
-                bloodType: '',
-                profession: '',
-                hobbies: ''
-            });
-            setPreviewUrl(null);
-            setDocumentType('');
-            setError(null);
+            if (response.data.success) {
+                setSuccessModalOpen(true);
+                setTimeout(() => navigate('/records'), 2000);
+            }
+        } else {
+            // Creating new person with document
+            console.log('Creating new person with document');
+
+            // Validate required fields for new person
+            const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+            const missingFields = requiredFields.filter(field => !formValues[field]);
+
+            if (missingFields.length > 0) {
+                setError(`Please fill in required fields: ${missingFields.join(', ')}`);
+                return;
+            }
+
+            // Add form data for new person
+            formData.append('formData', JSON.stringify({
+                firstName: formValues.firstName.trim(),
+                middleName: formValues.middleName?.trim() || null,
+                lastName: formValues.lastName.trim(),
+                bloodType: formValues.bloodType,
+                profession: formValues.profession?.trim(),
+                hobbies: formValues.hobbies?.trim() || null
+            }));
+
+            const response = await axios.post(
+                'http://localhost:5000/api/scan/submit',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                setSuccessModalOpen(true);
+                setFormValues({
+                    firstName: '',
+                    middleName: '',
+                    lastName: '',
+                    bloodType: '',
+                    profession: '',
+                    hobbies: ''
+                });
+                setPreviewUrl(null);
+                setDocumentType('');
+                setTimeout(() => navigate('/records'), 2000);
+            }
         }
 
     } catch (error) {
         console.error('Submit error:', error);
-        setError(
-            error.response?.data?.message || 
-            'Failed to submit form. Please try again.'
-        );
+        setError(error.response?.data?.message || 'Failed to submit document');
     } finally {
         setIsLoading(false);
     }
@@ -295,9 +316,10 @@ const handleSubmit = async (event) => {
         profession: '',
         hobbies: ''
       });
+      setIsPrefilledDisabled(false);
     } else if (location.state?.prefillData) {
       const prefillData = location.state.prefillData;
-      console.log('Updating form values with:', prefillData);
+      console.log('Setting prefilled data:', prefillData);
       
       setFormValues({
         firstName: prefillData.fName || '',
@@ -307,6 +329,9 @@ const handleSubmit = async (event) => {
         profession: prefillData.profession || '',
         hobbies: prefillData.hobbies || ''
       });
+
+      // Set disabled state based on location state
+      setIsPrefilledDisabled(location.state.isPrefilledDisabled || false);
     }
   }, [location.state]);
 
@@ -349,6 +374,26 @@ const PreviewDocument = ({ docId }) => {
         }
     };
   }, [pdfFile]);
+
+  // Update the useEffect for prefillData
+useEffect(() => {
+    if (location.state?.prefillData) {
+        const prefillData = location.state.prefillData;
+        console.log('Setting prefilled data:', prefillData);
+        
+        setFormValues({
+            firstName: prefillData.fName || '',
+            middleName: prefillData.mName || '',
+            lastName: prefillData.lName || '',
+            bloodType: prefillData.bloodType || '',
+            profession: prefillData.profession || '',
+            hobbies: prefillData.hobbies || ''
+        });
+
+        // Also set isPrefilledDisabled from location state
+        setIsPrefilledDisabled(location.state.isPrefilledDisabled || false);
+    }
+}, [location.state]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -699,44 +744,6 @@ const PreviewDocument = ({ docId }) => {
                         fullWidth
                         required={field.required}
                         error={formErrors[field.field]}
-                        sx={{ 
-                          '& .MuiOutlinedInput-root': {
-                            width: '65%',
-                            borderRadius: '15px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                            fontFamily: 'Roboto',
-                            height: '45px',
-                            '& fieldset': {
-                              borderColor: 'rgba(0, 0, 0, 0.23)',
-                            },
-                            '&:hover fieldset': {
-                              borderColor: 'rgba(0, 0, 0, 0.5)',
-                            },
-                            '&.Mui-focused fieldset': {
-                              borderColor: '#1976d2',
-                            },
-                            '&.Mui-error fieldset': {
-                              borderColor: '#d32f2f',
-                            },
-                            '&.Mui-error.Mui-focused fieldset': {
-                              borderColor: '#d32f2f',
-                            }
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: 'rgba(0, 0, 0, 0.6)',
-                            fontFamily: 'Roboto',
-                            transform: 'translate(14px, 12px) scale(1)',
-                            '&.Mui-focused, &.MuiFormLabel-filled': {
-                              transform: 'translate(14px, -9px) scale(0.75)',
-                            },
-                            '&.Mui-focused': {
-                              color: '#1976d2',
-                            },
-                            '&.Mui-error': {
-                              color: '#d32f2f',
-                            }
-                          }
-                        }}
                       >
                         {field.type === 'select' ? (
                           <>
@@ -803,20 +810,6 @@ const PreviewDocument = ({ docId }) => {
                               disabled={isPrefilledDisabled}
                             />
                           </>
-                        )}
-                        {formErrors[field.field] && (
-                          <Typography 
-                            variant="caption" 
-                            color="error"
-                            sx={{ 
-                              position: 'absolute',  // Position error message absolutely
-                              bottom: -20,          // Position below the input
-                              left: 2,              // Align with input padding
-                              fontSize: '0.75rem'
-                            }}
-                          >
-                            This field is required
-                          </Typography>
                         )}
                       </FormControl>
                     </Box>

@@ -250,10 +250,61 @@ const addPersonWithDocument = async (req, res) => {
     }
 };
 
+const updatePersonDocuments = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { PID } = req.params;
+        const { documentType } = req.body;
+        const file = req.file;
+
+        console.log('Updating documents for PID:', PID); // Debug log
+
+        if (!file || !documentType || !PID) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing file, document type, or PID'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // First insert into SALN table and get the ID
+        const insertQuery = 'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"';
+        const insertResult = await client.query(insertQuery, [file.buffer]);
+        const salnID = insertResult.rows[0].salnID;
+
+        console.log('Inserted SALN with ID:', salnID); // Debug log
+
+        // Then update the person's record with the new SALN ID
+        const updateQuery = 'UPDATE person SET "salnID" = $1 WHERE "PID" = $2';
+        await client.query(updateQuery, [salnID, PID]);
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: 'SALN document added successfully',
+            salnID,
+            PID
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Update document error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
     startScan,
     addPerson,
     getScanStatus,
     getPreview,
-    addPersonWithDocument
+    addPersonWithDocument,
+    updatePersonDocuments
 };
