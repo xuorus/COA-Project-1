@@ -1,3 +1,11 @@
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidateSet('PDS', 'SALN')]
+    [string]$documentType,
+    [Parameter(Mandatory=$true)]
+    [string]$outputDir
+)
+
 # Constants for WIA
 $WIA_IMG_FORMAT_PNG = "{B96B3CAF-0728-11D3-9D7B-0000F81EF32E}"
 
@@ -17,7 +25,7 @@ function Test-AdminPrivileges {
 }
 
 if (-not (Test-AdminPrivileges)) {
-    Start-Process powershell -Verb RunAs -ArgumentList "-File `"$PSCommandPath`""
+    Start-Process powershell -Verb RunAs -ArgumentList "-File `"$PSCommandPath`" -documentType `"$documentType`" -outputDir `"$outputDir`""
     exit
 }
 
@@ -37,7 +45,7 @@ function Initialize-Scanner {
         $devices = $deviceManager.DeviceInfos | Where-Object { $_.Type -eq 1 }
         
         Write-Host "Searching for available scanners..." -ForegroundColor Cyan
-        $scanner = $devices | Select-Object -First 1
+        $scanner = $devices | Where-Object { $_.Properties("Name").Value -like "*$($scannerSettings.Model)*" } | Select-Object -First 1
 
         if ($null -eq $scanner) {
             Write-Host "`nScanner not found. Please check:" -ForegroundColor Red
@@ -76,8 +84,8 @@ function Check-FileFormat {
 function Start-DocumentScan {
     param (
         [string]$outputPath,
-        [ValidateSet('PDS', 'SALN', 'Other')]
-        [string]$documentType = "Other"
+        [ValidateSet('PDS', 'SALN')]
+        [string]$documentType
     )
 
     $device = $null
@@ -158,14 +166,6 @@ function Start-DocumentScan {
             New-Item -ItemType Directory -Path $outputPath -Force | Out-Null
         }
 
-        # Check file formats
-        foreach ($tempFile in $tempFiles) {
-            if (-not (Check-FileFormat -filePath $tempFile -expectedFormat "png")) {
-                Write-Host "Error: File $tempFile is not in PNG format" -ForegroundColor Red
-                return $null
-            }
-        }
-
         # Create PDF
         Write-Host "Creating PDF document..." -ForegroundColor Cyan
         $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -184,12 +184,12 @@ function Start-DocumentScan {
             $doc.DefaultPageSettings.Margins = New-Object System.Drawing.Printing.Margins(0, 0, 0, 0)
             $doc.DefaultPageSettings.Color = $true
 
-            # Load images with standard resolution
+            # Load images
             $pages = @()
             foreach ($tempFile in $tempFiles) {
                 $img = [System.Drawing.Image]::FromFile($tempFile)
                 $bitmap = New-Object System.Drawing.Bitmap($img.Width, $img.Height)
-                $bitmap.SetResolution(300, 300)  # Match scanner DPI
+                $bitmap.SetResolution(300, 300)
                 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
                 $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
                 $graphics.DrawImage($img, 0, 0, $img.Width, $img.Height)
@@ -205,13 +205,9 @@ function Start-DocumentScan {
                 
                 if ($script:pageIndex -lt $pages.Count) {
                     $img = $pages[$script:pageIndex]
-                    
-                    # Set paper size to match image
-                    $width = [int]($img.Width * 100 / 300)   # Convert pixels to hundredths of an inch
+                    $width = [int]($img.Width * 100 / 300)
                     $height = [int]($img.Height * 100 / 300)
                     $doc.DefaultPageSettings.PaperSize = New-Object System.Drawing.Printing.PaperSize("Custom", $width, $height)
-                    
-                    # Draw image
                     $e.Graphics.DrawImage($img, 0, 0)
                     $script:pageIndex++
                     $e.HasMorePages = ($script:pageIndex -lt $pages.Count)
@@ -222,13 +218,16 @@ function Start-DocumentScan {
             $doc.Print()
             $doc.Dispose()
 
-            # Clean up images
+            # Clean up
             foreach ($img in $pages) {
                 $img.Dispose()
             }
 
             Write-Host "`nPDF document saved successfully to:" -ForegroundColor Green
             Write-Host $fullPath -ForegroundColor White
+            
+            # Output just the file path for Node.js
+            $fullPath
             return $fullPath
         }
         catch {
@@ -242,7 +241,6 @@ function Start-DocumentScan {
         return $null
     }
     finally {
-        # Clean up COM objects
         if ($null -ne $image) {
             [System.Runtime.Interopservices.Marshal]::ReleaseComObject($image)
         }
@@ -251,7 +249,6 @@ function Start-DocumentScan {
         }
         [System.GC]::Collect()
 
-        # Clean up temp files
         if ($tempFiles) {
             Remove-Item -Path $tempFiles -Force -ErrorAction SilentlyContinue
         }
@@ -261,16 +258,22 @@ function Start-DocumentScan {
     }
 }
 
-# Create output directory
-$outputDir = Join-Path $env:USERPROFILE "Documents\ScannedDocuments"
-if (!(Test-Path $outputDir)) {
-    New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
-}
+# Main execution
+try {
+    if (!(Test-Path $outputDir)) {
+        New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+    }
 
-# Automatically scan PDS document
-$result = Start-DocumentScan -outputPath $outputDir -documentType "PDS"
-if ($result) {
-    Write-Host "`nScan completed successfully!" -ForegroundColor Green
+    $result = Start-DocumentScan -outputPath $outputDir -documentType $documentType
+    if ($result) {
+        # Output just the file path for Node.js
+        Write-Output $result.Trim()
+        exit 0
+    } else {
+        Write-Error "Scanning failed"
+        exit 1
+    }
+} catch {
+    Write-Error $_.Exception.Message
+    exit 1
 }
-
-Write-Host "`nProcess complete!" -ForegroundColor Green

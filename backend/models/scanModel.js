@@ -15,8 +15,7 @@ class ScanModel {
 
             await client.query('BEGIN');
 
-            // Insert person record
-            const insertPersonQuery = `
+            const insertQuery = `
                 INSERT INTO "person" (
                     "pdsID",
                     "salnID",
@@ -31,7 +30,7 @@ class ScanModel {
                 RETURNING "PID"
             `;
 
-            const personResult = await client.query(insertPersonQuery, [
+            const result = await client.query(insertQuery, [
                 null, // pdsID
                 null, // salnID
                 fName,
@@ -42,39 +41,87 @@ class ScanModel {
                 hobbies
             ]);
 
-            const pid = personResult.rows[0].PID;
-
-            // Insert log entry with the correct structure
-            const insertLogQuery = `
-                INSERT INTO "logs" (
-                    "log_id",
-                    "PID",
-                    "status",
-                    "timestamp"
-                )
-                VALUES (
-                    nextval('logs_log_id_seq'),
-                    $1,
-                    $2,
-                    CURRENT_TIMESTAMP
-                )
-                RETURNING "log_id"
-            `;
-
-            const logResult = await client.query(insertLogQuery, [
-                pid,
-                'ACTIVE'  // Set default status
-            ]);
-
             await client.query('COMMIT');
-            return { 
-                success: true, 
-                pid: pid,
-                logId: logResult.rows[0].log_id 
-            };
+            return { success: true, pid: result.rows[0].PID };
 
         } catch (error) {
             await client.query('ROLLBACK');
+            console.error('Error adding person:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    static async addDocument(documentType, base64Data) {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            const insertQuery = `
+                INSERT INTO "${documentType.toLowerCase()}" ("${documentType}file")
+                VALUES (decode($1, 'base64'))
+                RETURNING "${documentType}ID"
+            `;
+
+            const result = await client.query(insertQuery, [base64Data]);
+            const docId = result.rows[0][`${documentType.toLowerCase()}id`];
+
+            await client.query('COMMIT');
+            return { success: true, documentId: docId };
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Error adding document:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    static async linkDocumentToPerson(pid, documentType, documentId) {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            const updateQuery = `
+                UPDATE "person" 
+                SET "${documentType}ID" = $1 
+                WHERE "PID" = $2
+            `;
+
+            await client.query(updateQuery, [documentId, pid]);
+            await client.query('COMMIT');
+
+            return { success: true };
+
+        } catch (error) {
+            await client.query('ROLLBACK');
+            console.error('Error linking document:', error);
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    static async getPersonById(pid) {
+        const client = await pool.connect();
+        try {
+            const query = `
+                SELECT p.*, 
+                       pds."PDSfile" as "pdsDocument",
+                       saln."SALNfile" as "salnDocument"
+                FROM "person" p
+                LEFT JOIN "pds" ON p."pdsID" = pds."PDSID"
+                LEFT JOIN "saln" ON p."salnID" = saln."SALNID"
+                WHERE p."PID" = $1
+            `;
+
+            const result = await client.query(query, [pid]);
+            return result.rows[0] || null;
+
+        } catch (error) {
+            console.error('Error fetching person:', error);
             throw error;
         } finally {
             client.release();
