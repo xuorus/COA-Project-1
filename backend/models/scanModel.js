@@ -15,7 +15,8 @@ class ScanModel {
 
             await client.query('BEGIN');
 
-            const insertQuery = `
+            // Insert person record
+            const insertPersonQuery = `
                 INSERT INTO "person" (
                     "pdsID",
                     "salnID",
@@ -30,7 +31,7 @@ class ScanModel {
                 RETURNING "PID"
             `;
 
-            const result = await client.query(insertQuery, [
+            const personResult = await client.query(insertPersonQuery, [
                 null, // pdsID
                 null, // salnID
                 fName,
@@ -41,8 +42,36 @@ class ScanModel {
                 hobbies
             ]);
 
+            const pid = personResult.rows[0].PID;
+
+            // Insert log entry with the correct structure
+            const insertLogQuery = `
+                INSERT INTO "logs" (
+                    "log_id",
+                    "PID",
+                    "status",
+                    "timestamp"
+                )
+                VALUES (
+                    nextval('logs_log_id_seq'),
+                    $1,
+                    $2,
+                    CURRENT_TIMESTAMP
+                )
+                RETURNING "log_id"
+            `;
+
+            const logResult = await client.query(insertLogQuery, [
+                pid,
+                'ACTIVE'  // Set default status
+            ]);
+
             await client.query('COMMIT');
-            return { success: true, pid: result.rows[0].PID };
+            return { 
+                success: true, 
+                pid: pid,
+                logId: logResult.rows[0].log_id 
+            };
 
         } catch (error) {
             await client.query('ROLLBACK');
