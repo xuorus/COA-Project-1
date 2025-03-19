@@ -17,12 +17,11 @@ import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
 import WindowControl from '../components/WindowControl';
+import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import ScanIcon from '@mui/icons-material/DocumentScanner';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import CloseIcon from '@mui/icons-material/Close';
-
-import axios from 'axios';
   
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -330,59 +329,27 @@ const handleSubmit = async (event) => {
     return () => clearInterval(timer);
   }, []);
 
-//   const handleScanButtonClick = async () => {
-//     try {
-//         if (!documentType) {
-//             alert('Please select a document type');
-//             return;
-//         }
+// Add preview functionality
+const PreviewDocument = ({ docId }) => {
+    const [pdfUrl, setPdfUrl] = useState(null);
 
-//         setIsLoading(true);
-//         console.log('Starting scan...', { documentType });
-        
-//         const response = await fetch('http://localhost:5000/api/scan/start-scan', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify({ documentType })
-//         });
+    useEffect(() => {
+        if (docId) {
+            setPdfUrl(`http://localhost:5000/api/scan/document/${docId}`);
+        }
+    }, [docId]);
 
-//         const data = await response.json();
-//         console.log('Scan response:', data); // Add this log
-        
-//         if (!response.ok) {
-//             throw new Error(data.message || `HTTP error! status: ${response.status}`);
-//         }
+    if (!pdfUrl) return null;
 
-//         if (data.success && data.output) {
-//             try {
-//                 console.log('Processing scan output...');
-//                 const binaryString = window.atob(data.output);
-//                 const bytes = new Uint8Array(binaryString.length);
-//                 for (let i = 0; i < binaryString.length; i++) {
-//                     bytes[i] = binaryString.charCodeAt(i);
-//                 }
-//                 const blob = new Blob([bytes], { type: 'application/pdf' });
-//                 const pdfUrl = URL.createObjectURL(blob);
-                
-//                 console.log('PDF URL created:', pdfUrl);
-//                 setPdfFile(pdfUrl);
-//             } catch (error) {
-//                 console.error('Error processing PDF data:', error);
-//                 throw new Error('Failed to process scanned document');
-//             }
-//         } else {
-//             throw new Error(data.message || 'Scan failed');
-//         }
-//     } catch (error) {
-//         console.error('Scan error:', error);
-//         alert(`Scanning failed: ${error.message}`);
-//     } finally {
-//         setIsLoading(false);
-//     }
-// };
-
+    return (
+        <iframe
+            src={pdfUrl}
+            width="100%"
+            height="600px"
+            title="Document Preview"
+        />
+    );
+};
   useEffect(() => {
     // Cleanup PDF URL when component unmounts or when PDF changes
     return () => {

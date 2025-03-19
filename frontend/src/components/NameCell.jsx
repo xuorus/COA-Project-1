@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Box, IconButton, TextField } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import { useManningContext } from '../context/ManningContext';
+import { NumberingContext } from '../context/NumberingContext';
 
 const NameCell = ({ isEditable = false, cellId }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState('');
   const { manningData, updateManningData } = useManningContext();
+  const { updateName } = useContext(NumberingContext);
 
   const savedName = manningData[cellId] || '';
 
   const handleSave = () => {
-    // Update to handle empty value case
-    updateManningData(cellId, tempName.trim());
+    const trimmedName = tempName.trim();
+    updateManningData(cellId, trimmedName);
+    updateName(cellId, trimmedName);
     setIsEditing(false);
   };
 
