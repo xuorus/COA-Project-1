@@ -220,6 +220,12 @@ const handleSubmit = async (event) => {
             return;
         }
 
+        // Check if trying to add a document type that already exists
+        if (state?.selectedRecord?.existingDocuments?.includes(documentType)) {
+            setError(`This person already has a ${documentType} document`);
+            return;
+        }
+
         setIsLoading(true);
 
         // Create FormData
@@ -228,12 +234,13 @@ const handleSubmit = async (event) => {
         formData.append('file', pdfBlob, 'document.pdf');
         formData.append('documentType', documentType);
 
-        // Check if we're adding to existing person or creating new
+        let response;
+
         if (state?.selectedRecord?.PID) {
             // Adding document to existing person
-            console.log('Adding document to existing person:', state.selectedRecord.PID);
+            console.log('Adding document to person:', state.selectedRecord.PID);
             
-            const response = await axios.patch(
+            response = await axios.patch(
                 `http://localhost:5000/api/scan/person/${state.selectedRecord.PID}/documents`,
                 formData,
                 {
@@ -242,11 +249,6 @@ const handleSubmit = async (event) => {
                     }
                 }
             );
-
-            if (response.data.success) {
-                setSuccessModalOpen(true);
-                setTimeout(() => navigate('/records'), 2000);
-            }
         } else {
             // Creating new person with document
             console.log('Creating new person with document');
@@ -270,7 +272,7 @@ const handleSubmit = async (event) => {
                 hobbies: formValues.hobbies?.trim() || null
             }));
 
-            const response = await axios.post(
+            response = await axios.post(
                 'http://localhost:5000/api/scan/submit',
                 formData,
                 {
@@ -279,21 +281,21 @@ const handleSubmit = async (event) => {
                     }
                 }
             );
+        }
 
-            if (response.data.success) {
-                setSuccessModalOpen(true);
-                setFormValues({
-                    firstName: '',
-                    middleName: '',
-                    lastName: '',
-                    bloodType: '',
-                    profession: '',
-                    hobbies: ''
-                });
-                setPreviewUrl(null);
-                setDocumentType('');
-                setTimeout(() => navigate('/records'), 2000);
-            }
+        if (response?.data?.success) {
+            setSuccessModalOpen(true);
+            setFormValues({
+                firstName: '',
+                middleName: '',
+                lastName: '',
+                bloodType: '',
+                profession: '',
+                hobbies: ''
+            });
+            setPreviewUrl(null);
+            setDocumentType('');
+            setTimeout(() => navigate('/records'), 2000);
         }
 
     } catch (error) {

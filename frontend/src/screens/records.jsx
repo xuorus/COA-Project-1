@@ -650,10 +650,17 @@ const handleAddDocument = (record) => {
         return;
     }
 
+    // Get existing documents for the person
+    const existingDocs = [];
+    if (record.pdsID) existingDocs.push('PDS');
+    if (record.salnID) existingDocs.push('SALN');
+
+    // Navigate to scan page with document info
     navigate('/scan', {
         state: {
             selectedRecord: {
-                PID: record.PID
+                PID: record.PID,
+                existingDocuments: existingDocs // Pass existing documents info
             },
             prefillData: {
                 fName: record.fName,
@@ -663,7 +670,7 @@ const handleAddDocument = (record) => {
                 profession: record.profession,
                 hobbies: record.hobbies
             },
-            isPrefilledDisabled: true // This will make fields non-editable
+            isPrefilledDisabled: true
         }
     });
 };
