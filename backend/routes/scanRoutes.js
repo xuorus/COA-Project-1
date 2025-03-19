@@ -18,4 +18,10 @@ router.post('/submit', upload.single('file'), scanController.addPersonWithDocume
 // New route for updating person's documents
 router.patch('/person/:PID/documents', upload.single('file'), scanController.updatePersonDocuments);
 
+// Update document file
+router.patch('/:docType/:docId/file', 
+    upload.single('file'),
+    scanController.updateDocumentFile
+);
+
 module.exports = router;

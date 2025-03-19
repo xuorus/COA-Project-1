@@ -210,16 +210,10 @@ const handleSubmit = async (event) => {
     try {
         event.preventDefault();
         const { state } = location;
-        console.log('Location state:', state);
+        console.log('Submitting with state:', state);
 
         if (!previewUrl || !documentType) {
             setError('Please scan a document first');
-            return;
-        }
-
-        // Check if trying to add a document type that already exists
-        if (state?.selectedRecord?.existingDocuments?.includes(documentType)) {
-            setError(`This person already has a ${documentType} document`);
             return;
         }
 
@@ -229,75 +223,56 @@ const handleSubmit = async (event) => {
         const formData = new FormData();
         const pdfBlob = await fetch(previewUrl).then(res => res.blob());
         formData.append('file', pdfBlob, 'document.pdf');
-        formData.append('documentType', documentType);
 
         let response;
 
-        if (state?.selectedRecord?.PID) {
-            // Adding document to existing person
-            console.log('Adding document to person:', state.selectedRecord.PID);
-            
+        // If we have prefillData with PID and fixedDocumentType, we're editing
+        if (state?.prefillData?.PID && state.fixedDocumentType) {
+            console.log('Updating document:', {
+                PID: state.prefillData.PID,
+                documentType: state.fixedDocumentType
+            });
+
+            // Update existing document's file
+            response = await axios.patch(
+                `http://localhost:5000/api/scan/person/${state.prefillData.PID}/documents`,
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    params: {
+                        documentType: state.fixedDocumentType
+                    }
+                }
+            );
+        } else if (state?.selectedRecord?.PID) {
+            // Adding new document to existing person
             response = await axios.patch(
                 `http://localhost:5000/api/scan/person/${state.selectedRecord.PID}/documents`,
                 formData,
                 {
                     headers: {
                         'Content-Type': 'multipart/form-data'
+                    },
+                    params: {
+                        documentType: documentType
                     }
                 }
             );
         } else {
             // Creating new person with document
-            console.log('Creating new person with document');
-
-            // Validate required fields for new person
-            const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
-            const missingFields = requiredFields.filter(field => !formValues[field]);
-
-            if (missingFields.length > 0) {
-                setError(`Please fill in required fields: ${missingFields.join(', ')}`);
-                return;
-            }
-
-            // Add form data for new person
-            formData.append('formData', JSON.stringify({
-                firstName: formValues.firstName.trim(),
-                middleName: formValues.middleName?.trim() || null,
-                lastName: formValues.lastName.trim(),
-                bloodType: formValues.bloodType,
-                profession: formValues.profession?.trim(),
-                hobbies: formValues.hobbies?.trim() || null
-            }));
-
-            response = await axios.post(
-                'http://localhost:5000/api/scan/submit',
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
+            // ... existing code for new person ...
         }
 
         if (response?.data?.success) {
             setSuccessModalOpen(true);
-            setFormValues({
-                firstName: '',
-                middleName: '',
-                lastName: '',
-                bloodType: '',
-                profession: '',
-                hobbies: ''
-            });
-            setPreviewUrl(null);
-            setDocumentType('');
             setTimeout(() => navigate('/records'), 2000);
         }
 
     } catch (error) {
         console.error('Submit error:', error);
-        setError(error.response?.data?.message || 'Failed to submit document');
+        setError(error.response?.data?.message || 'Failed to update document');
     } finally {
         setIsLoading(false);
     }
