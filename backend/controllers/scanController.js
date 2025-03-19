@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
+const pool = require('../config/db');
 
 // Track scanning status
 const scanStatus = new Map();
@@ -34,9 +35,7 @@ const getScanStatus = async (req, res) => {
 
     res.json({
         success: true,
-        completed: status.completed,
-        tempId: status.tempId,
-        error: status.error
+        status
     });
 };
 
@@ -68,56 +67,43 @@ const getPreview = async (req, res) => {
 const startScan = async (req, res) => {
     try {
         const { documentType } = req.body;
-        if (!documentType || !VALID_DOCUMENT_TYPES.includes(documentType.toUpperCase())) {
+        const file = req.file;
+
+        if (!file || !documentType) {
             return res.status(400).json({
                 success: false,
-                message: `Invalid document type. Must be one of: ${VALID_DOCUMENT_TYPES.join(', ')}`
+                message: 'Missing file or document type'
             });
         }
 
-        const scanId = uuidv4();
-        const outputFile = path.join(TEMP_DIR, `${documentType}.pdf`);
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+            
+            const query = documentType === 'PDS' 
+                ? 'INSERT INTO pds ("filePath") VALUES ($1) RETURNING "pdsID"'
+                : 'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"';
 
-        // For testing, create a sample PDF
-        const samplePdf = `%PDF-1.7
-1 0 obj
-<</Type/Catalog/Pages 2 0 R>>
-endobj
-2 0 obj
-<</Type/Pages/Kids[3 0 R]/Count 1>>
-endobj
-3 0 obj
-<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]>>
-endobj
-xref
-0 4
-0000000000 65535 f
-0000000009 00000 n
-0000000052 00000 n
-0000000101 00000 n
-trailer
-<</Size 4/Root 1 0 R>>
-startxref
-164
-%%EOF`;
+            const result = await client.query(query, [file.buffer]);
+            const documentId = result.rows[0][documentType.toLowerCase() + 'ID'];
 
-        await fs.writeFile(outputFile, samplePdf);
+            await client.query('COMMIT');
 
-        scanStatus.set(scanId, {
-            completed: true,
-            tempId: documentType,
-            filePath: outputFile
-        });
+            res.json({
+                success: true,
+                documentId,
+                documentType
+            });
 
-        res.json({
-            success: true,
-            message: `Document scanned successfully`,
-            scanId,
-            tempId: documentType
-        });
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw err;
+        } finally {
+            client.release();
+        }
 
     } catch (error) {
-        logger.error('Scan error:', error);
+        console.error('Scan error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -125,8 +111,149 @@ startxref
     }
 };
 
+const addPerson = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        console.log('Received request body:', req.body); // Debug log
+
+        const { documentType, formData } = req.body;
+
+        // Validate all required fields
+        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const missingFields = requiredFields.filter(field => !formData?.[field]);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing required fields: ${missingFields.join(', ')}`
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // Insert into person table
+        const insertQuery = `
+            INSERT INTO person (
+                "fName", "mName", "lName",
+                "bloodType", profession, hobbies
+            ) VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING "PID"
+        `;
+
+        const result = await client.query(insertQuery, [
+            formData.firstName,
+            formData.middleName || null,
+            formData.lastName,
+            formData.bloodType,
+            formData.profession,
+            formData.hobbies || null
+        ]);
+
+        await client.query('COMMIT');
+
+        console.log('Person added successfully:', result.rows[0]);
+
+        res.json({
+            success: true,
+            personId: result.rows[0].PID,
+            message: 'Person added successfully'
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Person add error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to add person'
+        });
+    } finally {
+        client.release();
+    }
+};
+
+const addPersonWithDocument = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const file = req.file;
+        const documentType = req.body.documentType;
+        const formData = JSON.parse(req.body.formData); // Parse the JSON string
+
+        console.log('Received data:', {
+            file: file?.originalname,
+            documentType,
+            formData
+        });
+
+        if (!file || !documentType || !formData) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing file, document type, or person data'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // First: Store document and get ID
+        const docQuery = documentType === 'PDS' 
+            ? 'INSERT INTO pds ("filePath") VALUES ($1) RETURNING "pdsID"'
+            : 'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"';
+
+        const docResult = await client.query(docQuery, [file.buffer]);
+        const documentId = docResult.rows[0][documentType.toLowerCase() + 'ID'];
+        
+        console.log(`${documentType} stored with ID:`, documentId);
+
+        // Second: Store person data with document ID
+        const personQuery = documentType === 'PDS'
+            ? `INSERT INTO person (
+                "fName", "mName", "lName",
+                "bloodType", profession, hobbies,
+                "pdsID"
+               ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+               RETURNING "PID"`
+            : `INSERT INTO person (
+                "fName", "mName", "lName",
+                "bloodType", profession, hobbies,
+                "salnID"
+               ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+               RETURNING "PID"`;
+
+        const personResult = await client.query(personQuery, [
+            formData.firstName,
+            formData.middleName || null,
+            formData.lastName,
+            formData.bloodType,
+            formData.profession,
+            formData.hobbies,
+            documentId
+        ]);
+
+        await client.query('COMMIT');
+        console.log('Transaction completed successfully');
+
+        res.json({
+            success: true,
+            documentId,
+            personId: personResult.rows[0].PID,
+            message: 'Document and person data added successfully'
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Transaction error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to process request'
+        });
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
     startScan,
+    addPerson,
     getScanStatus,
-    getPreview
+    getPreview,
+    addPersonWithDocument
 };
