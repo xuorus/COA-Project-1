@@ -223,7 +223,7 @@ const uploadScannedDocument = async (req, res) => {
     }
 };
 
-const addPerson = async (req, res) => {
+const addPerson = async (req, res) => { //Add New Person in Scan Input
     try {
         const {
             fName,
