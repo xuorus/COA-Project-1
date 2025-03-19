@@ -117,6 +117,7 @@ const Main = () => {
   const [error, setError] = useState(null);
   const [scanning, setScanning] = useState(false);
   const [scannedDocument, setScannedDocument] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   // Initialize form state with empty strings instead of undefined
   const [formValues, setFormValues] = useState({
@@ -150,33 +151,35 @@ const Main = () => {
     setDocumentType(event.target.value);
   };
 
-  const handleScanButtonClick = async () => {
+const handleScanButtonClick = async () => {
     if (!documentType) {
         setError('Please select a document type');
         return;
     }
 
     try {
+        setIsLoading(true);
         setError(null);
-        setScanning(true);
 
-        // First, initiate the scan
-        const scanResponse = await axios.post('http://localhost:5000/api/scan/start-scan', {
-            documentType
+        // Mock scan operation with a sample PDF
+        // This simulates a successful scan after 1.5 seconds
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Sample base64 PDF data (you can replace this with your own sample PDF)
+        const samplePdfBase64 = 'data:application/pdf;base64,JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9udAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2JqCgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G';
+
+        setPreviewUrl(samplePdfBase64);
+        setScannedDocument({
+            id: Date.now(),
+            type: documentType,
+            scanDate: new Date().toISOString()
         });
 
-        if (!scanResponse.data.success) {
-            throw new Error(scanResponse.data.message);
-        }
-
-        // Get the document ID from scan response
-        setScannedDocument(scanResponse.data.docId);
-        
     } catch (error) {
         console.error('Scan error:', error);
-        setError(error.response?.data?.message || 'Failed to scan document');
+        setError('Failed to scan document. Please try again.');
     } finally {
-        setScanning(false);
+        setIsLoading(false);
     }
 };
 
@@ -452,101 +455,100 @@ const PreviewDocument = ({ docId }) => {
 
                 {/* PDF Upload Box */}
                 <Box
-                  id="dwtcontrolContainer"
-                  sx={{
-                    width: '100%',
-                    flex: 1,
-                    maxWidth: '300px',
-                    aspectRatio: '1 / 1.4142', // A4 aspect ratio
-                    margin: '0 auto',
-                    border: '1px solid rgba(0, 0, 0, 0.2)',
-                    borderRadius: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    cursor: 'pointer',
-                    overflow: 'hidden',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                    position: 'relative'
-                  }}
-                >
-                  {isLoading ? (
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center',
-                      gap: 2 
-                    }}>
-                      <CircularProgress />
-                      <Typography>Scanning...</Typography>
-                    </Box>
-                  ) : pdfFile ? (
-                    <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
-                      <Document
-                        file={pdfFile}
-                        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                        loading={
-                          <Box sx={{ 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            alignItems: 'center',
-                            height: '100%' 
-                          }}>
-                            <CircularProgress />
-                          </Box>
-                        }
-                      >
-                        <Page
-                          pageNumber={pageNumber}
-                          width={280} // Adjust based on your box size
-                          renderTextLayer={false}
-                          renderAnnotationLayer={false}
-                        />
-                      </Document>
-                      {numPages > 0 && (
-                        <Typography
-                          sx={{
-                            position: 'absolute',
-                            bottom: 8,
-                            right: 8,
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            color: 'white',
-                            padding: '2px 6px',
-                            borderRadius: 1,
-                            fontSize: '0.75rem'
-                          }}
-                        >
-                          Page {pageNumber} of {numPages}
-                        </Typography>
-                      )}
-                    </Box>
-                  ) : (
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'center',
-                      gap: 2 
-                    }}>
-                      <Typography>Click to scan a document</Typography>
-                      <IconButton
-                      variant="contained"
-                        color="primary"
-                        onClick={handleScanButtonClick}
-                        disabled={isLoading}
-                        sx={{ 
-                          backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                          '&:hover': {
-                            backgroundColor: 'rgba(25, 118, 210, 0.2)'
-                          }
-                        }}
-                      >
-                        <ScanIcon sx={{ fontSize: 40 }} />
-                      </IconButton>
-                    </Box>
-                  )}
-                </Box>
+  id="dwtcontrolContainer"
+  sx={{
+    width: '100%',
+    flex: 1,
+    maxWidth: '300px',
+    aspectRatio: '1 / 1.4142', // A4 aspect ratio
+    margin: '0 auto',
+    border: '1px solid rgba(0, 0, 0, 0.2)',
+    borderRadius: 2,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    overflow: 'hidden',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    position: 'relative'
+  }}
+>
+  {isLoading ? (
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center',
+      gap: 2 
+    }}>
+      <CircularProgress />
+      <Typography>Scanning...</Typography>
+    </Box>
+  ) : (
+    <>
+      {error ? (
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          gap: 2,
+          p: 2,
+          textAlign: 'center'
+        }}>
+          <Typography color="error">{error}</Typography>
+          <IconButton
+            color="primary"
+            onClick={() => {
+              setError(null);
+              handleScanButtonClick();
+            }}
+            sx={{ 
+              backgroundColor: 'rgba(25, 118, 210, 0.1)',
+              '&:hover': {
+                backgroundColor: 'rgba(25, 118, 210, 0.2)'
+              }
+            }}
+          >
+            <ScanIcon sx={{ fontSize: 40 }} />
+          </IconButton>
+        </Box>
+      ) : previewUrl ? (
+        <iframe
+          src={previewUrl}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+          }}
+          title="Scanned Document Preview"
+        />
+      ) : (
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          gap: 2 
+        }}>
+          <Typography>Click to scan a document</Typography>
+          <IconButton
+            color="primary"
+            onClick={handleScanButtonClick}
+            disabled={isLoading || !documentType}
+            sx={{ 
+              backgroundColor: 'rgba(25, 118, 210, 0.1)',
+              '&:hover': {
+                backgroundColor: 'rgba(25, 118, 210, 0.2)'
+              }
+            }}
+          >
+            <ScanIcon sx={{ fontSize: 40 }} />
+          </IconButton>
+        </Box>
+      )}
+    </>
+  )}
+</Box>
+
               </Box>
 
               {/* Right Column - Information Fields */}
