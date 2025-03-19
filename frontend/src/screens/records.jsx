@@ -645,29 +645,28 @@ const handleDocumentClick = useCallback((documentData) => {
 
 // In your records component where you handle "Add Document" click
 const handleAddDocument = (record) => {
-  console.log('Record data from database:', record); // Debug log
-  
-  // Get the data from personDetails if it exists, otherwise use record
-  const dataToPass = {
-    PID: record.PID,
-    fName: record.fName || personDetails?.fName || '',
-    mName: record.mName || personDetails?.mName || '',
-    lName: record.lName || personDetails?.lName || '',
-    bloodType: record.bloodType || personDetails?.bloodType || '',
-    profession: record.profession || personDetails?.profession || '',
-    hobbies: record.hobbies || personDetails?.hobbies || ''
-  };
-
-  console.log('Data being passed to scan:', dataToPass); // Debug log
-
-  navigate('/scan', {
-    state: {
-      prefillData: dataToPass,
-      isPrefilledDisabled: true
+    if (!record?.PID) {
+        console.error('No PID found');
+        return;
     }
-  });
-};
 
+    navigate('/scan', {
+        state: {
+            selectedRecord: {
+                PID: record.PID
+            },
+            prefillData: {
+                fName: record.fName,
+                mName: record.mName,
+                lName: record.lName,
+                bloodType: record.bloodType,
+                profession: record.profession,
+                hobbies: record.hobbies
+            },
+            isPrefilledDisabled: true // This will make fields non-editable
+        }
+    });
+};
 const handleEditClick = () => {
    setEditMode(true); 
   setEditedDetails({
