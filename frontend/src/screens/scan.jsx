@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput } from '@mui/material';
 import { Document, Page, pdfjs } from 'react-pdf';
+import PrintIcon from '@mui/icons-material/Print';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import backgroundImage from '../assets/bldg.jpg';
@@ -718,21 +719,68 @@ useEffect(() => {
                     textAlign: 'center'
                 }}>
                     <Typography>
-                        {isDragging ? 'Drop PDF here' : 'Click to browse or drag PDF here'}
+                        {isDragging ? 'Drop PDF here' : 'Click to browse, drag a PDF file, or use scan button'}
                     </Typography>
-                    <IconButton
-                        color="primary"
-                        onClick={handleScanButtonClick}
-                        disabled={isLoading || !documentType}
-                        sx={{ 
-                            backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                            '&:hover': {
-                                backgroundColor: 'rgba(25, 118, 210, 0.2)'
-                            }
-                        }}
-                    >
-                        <ScanIcon sx={{ fontSize: 40 }} />
-                    </IconButton>
+                    <Box sx={{ 
+                        display: 'flex',
+                        flexDirection: 'row', // Changed from 'column' to 'row'
+                        gap: 2,
+                        justifyContent: 'center' // Center the buttons horizontally
+                    }}>
+                        <IconButton
+                            color="primary"
+                            onClick={handleScanButtonClick}
+                            disabled={isLoading || !documentType}
+                            sx={{ 
+                                backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                                }
+                            }}
+                        >
+                            <ScanIcon sx={{ fontSize: 40 }} />
+                        </IconButton>
+                        <IconButton
+                          color="primary"
+                          onClick={async () => {
+                              try {
+                                  setIsLoading(true);
+                                  const response = await axios.post('http://localhost:5000/api/scanner/execute-scan', {
+                                      scriptPath: '../backend/scripts/scan.ps1',
+                                  });
+                                  
+                                  if (response.data.success) {
+                                      const pdfBase64 = response.data.pdfData;
+                                      const pdfBlob = new Blob(
+                                          [Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))],
+                                          { type: 'application/pdf' }
+                                      );
+                                      setPreviewUrl(URL.createObjectURL(pdfBlob));
+                                  } else {
+                                      setError('Scanning failed: ' + response.data.message);
+                                  }
+                              } catch (error) {
+                                  console.error('Scan error:', error);
+                                  setError('Drop the PDF file here.');
+                              } finally {
+                                  setIsLoading(false);
+                              }
+                          }}
+                          disabled={isLoading || !documentType}
+                          sx={{ 
+                              backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                              '&:hover': {
+                                  backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                              },
+                              '&.Mui-disabled': {
+                                  backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                                  color: 'rgba(0, 0, 0, 0.26)'
+                              }
+                          }}
+                      >
+                          <PrintIcon sx={{ fontSize: 40 }} />
+                      </IconButton>
+                    </Box>
                 </Box>
             )}
         </>

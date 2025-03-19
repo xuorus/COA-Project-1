@@ -1008,3 +1008,19 @@
 {"ip":"::1","level":"info","message":"GET /api/records?search=&sortBy=name_asc&bloodType=all","timestamp":"2025-03-18T03:05:38.129Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
 {"ip":"::1","level":"info","message":"GET /api/records?search=&sortBy=name_asc&bloodType=all","timestamp":"2025-03-18T03:45:37.564Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
 {"ip":"::1","level":"info","message":"GET /api/records?search=&sortBy=name_asc&bloodType=all","timestamp":"2025-03-18T03:45:37.741Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"level":"info","message":"Temp directory initialized:","timestamp":"2025-03-19T04:38:19.703Z"}
+{"ip":"::1","level":"info","message":"POST /api/scan/execute-scan","timestamp":"2025-03-19T05:44:28.435Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/scan/execute-scan","timestamp":"2025-03-19T05:45:11.852Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/scan/execute-scan","timestamp":"2025-03-19T05:45:27.829Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"level":"info","message":"Temp directory initialized:","timestamp":"2025-03-19T05:50:02.606Z"}
+{"level":"info","message":"Temp directory initialized:","timestamp":"2025-03-19T05:50:07.777Z"}
+{"level":"info","message":"Temp directory initialized:","timestamp":"2025-03-19T05:50:22.454Z"}
+{"level":"info","message":"Temp directory initialized:","timestamp":"2025-03-19T05:50:28.393Z"}
+{"level":"info","message":"Temp directory initialized:","timestamp":"2025-03-19T05:51:04.843Z"}
+{"level":"info","message":"Temp directory initialized:","timestamp":"2025-03-19T05:51:25.667Z"}
+{"ip":"::1","level":"info","message":"POST /api/scanner/execute-scan","timestamp":"2025-03-19T05:52:18.045Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/scanner/execute-scan","timestamp":"2025-03-19T05:54:48.916Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/scanner/execute-scan","timestamp":"2025-03-19T05:55:51.014Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/scanner/execute-scan","timestamp":"2025-03-19T06:10:00.767Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/scanner/execute-scan","timestamp":"2025-03-19T06:10:28.373Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
+{"ip":"::1","level":"info","message":"POST /api/scanner/execute-scan","timestamp":"2025-03-19T06:15:56.930Z","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.6834.194 Electron/34.1.1 Safari/537.36"}
