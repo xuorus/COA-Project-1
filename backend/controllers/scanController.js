@@ -257,7 +257,7 @@ const updatePersonDocuments = async (req, res) => {
         const { documentType } = req.body;
         const file = req.file;
 
-        console.log('Updating documents for PID:', PID); // Debug log
+        console.log('Updating documents for PID:', PID, 'Document Type:', documentType); // Debug log
 
         if (!file || !documentType || !PID) {
             return res.status(400).json({
@@ -268,23 +268,42 @@ const updatePersonDocuments = async (req, res) => {
 
         await client.query('BEGIN');
 
-        // First insert into SALN table and get the ID
-        const insertQuery = 'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"';
-        const insertResult = await client.query(insertQuery, [file.buffer]);
-        const salnID = insertResult.rows[0].salnID;
+        let documentId;
+        let updateQuery;
 
-        console.log('Inserted SALN with ID:', salnID); // Debug log
+        switch (documentType) {
+            case 'PDS':
+                const pdsResult = await client.query(
+                    'INSERT INTO pds ("filePath") VALUES ($1) RETURNING "pdsID"',
+                    [file.buffer]
+                );
+                documentId = pdsResult.rows[0].pdsID;
+                updateQuery = 'UPDATE person SET "pdsID" = $1 WHERE "PID" = $2';
+                break;
 
-        // Then update the person's record with the new SALN ID
-        const updateQuery = 'UPDATE person SET "salnID" = $1 WHERE "PID" = $2';
-        await client.query(updateQuery, [salnID, PID]);
+            case 'SALN':
+                const salnResult = await client.query(
+                    'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"',
+                    [file.buffer]
+                );
+                documentId = salnResult.rows[0].salnID;
+                updateQuery = 'UPDATE person SET "salnID" = $1 WHERE "PID" = $2';
+                break;
+
+            default:
+                // Handle other document types if needed
+                throw new Error(`Unsupported document type: ${documentType}`);
+        }
+
+        // Update person record with new document ID
+        await client.query(updateQuery, [documentId, PID]);
 
         await client.query('COMMIT');
 
         res.json({
             success: true,
-            message: 'SALN document added successfully',
-            salnID,
+            message: `${documentType} document added successfully`,
+            documentId,
             PID
         });
 
@@ -300,11 +319,77 @@ const updatePersonDocuments = async (req, res) => {
     }
 };
 
+const addDocumentToExistingPerson = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { PID } = req.params;
+        const file = req.file;
+        const { documentType } = req.body;
+
+        console.log('Adding document:', { PID, documentType }); // Debug log
+
+        if (!file || !documentType || !PID) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing file, document type, or person ID'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        let documentId;
+        let updateQuery;
+
+        // Handle different document types
+        if (documentType === 'PDS') {
+            // Insert into PDS table
+            const pdsResult = await client.query(
+                'INSERT INTO pds ("filePath") VALUES ($1) RETURNING "pdsID"',
+                [file.buffer]
+            );
+            documentId = pdsResult.rows[0].pdsID;
+            updateQuery = 'UPDATE person SET "pdsID" = $1 WHERE "PID" = $2';
+        } else if (documentType === 'SALN') {
+            // Insert into SALN table
+            const salnResult = await client.query(
+                'INSERT INTO saln ("filePath") VALUES ($1) RETURNING "salnID"',
+                [file.buffer]
+            );
+            documentId = salnResult.rows[0].salnID;
+            updateQuery = 'UPDATE person SET "salnID" = $1 WHERE "PID" = $2';
+        } else {
+            throw new Error(`Invalid document type: ${documentType}`);
+        }
+
+        // Update person record with new document ID
+        await client.query(updateQuery, [documentId, PID]);
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `${documentType} added successfully`,
+            documentId
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Add document error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to add document'
+        });
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
     startScan,
     addPerson,
     getScanStatus,
     getPreview,
     addPersonWithDocument,
-    updatePersonDocuments
+    updatePersonDocuments,
+    addDocumentToExistingPerson
 };
