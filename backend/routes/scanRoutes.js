@@ -15,4 +15,7 @@ router.get('/preview/:tempId', scanController.getPreview);
 // Single endpoint to handle both document and person data
 router.post('/submit', upload.single('file'), scanController.addPersonWithDocument);
 
+// New route for updating person's documents
+router.patch('/person/:PID/documents', upload.single('file'), scanController.updatePersonDocuments);
+
 module.exports = router;
