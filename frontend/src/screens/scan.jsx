@@ -775,6 +775,44 @@ useEffect(() => {
                         fullWidth
                         required={field.required}
                         error={formErrors[field.field]}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            width: '65%',
+                            borderRadius: '15px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                            fontFamily: 'Roboto',
+                            height: '45px',
+                            '& fieldset': {
+                              borderColor: 'rgba(0, 0, 0, 0.23)',
+                            },
+                            '&:hover fieldset': {
+                              borderColor: 'rgba(0, 0, 0, 0.5)',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#1976d2',
+                            },
+                            '&.Mui-error fieldset': {
+                              borderColor: '#d32f2f',
+                            },
+                            '&.Mui-error.Mui-focused fieldset': {
+                              borderColor: '#d32f2f',
+                            }
+                          },
+                          '& .MuiInputLabel-root': {
+                            color: 'rgba(0, 0, 0, 0.6)',
+                            fontFamily: 'Roboto',
+                            transform: 'translate(14px, 12px) scale(1)',
+                            '&.Mui-focused, &.MuiFormLabel-filled': {
+                              transform: 'translate(14px, -9px) scale(0.75)',
+                            },
+                            '&.Mui-focused': {
+                              color: '#1976d2',
+                            },
+                            '&.Mui-error': {
+                              color: '#d32f2f',
+                            }
+                          }
+                        }}
                       >
                         {field.type === 'select' ? (
                           <>
@@ -804,16 +842,21 @@ useEffect(() => {
                                   borderColor: '#d32f2f',
                                 },
                                 '& .MuiSelect-select': {
-                                  padding: '0 14px',
+                                  padding: '0',  // Remove padding
                                   height: '45px',
                                   display: 'flex',
                                   alignItems: 'center',
+                                  justifyContent: 'center',
+                                  '& .MuiTypography-root': {  // Add this block
+                                    width: '100%',
+                                    textAlign: 'center',
+                                  }
                                 }
                               }}
                               MenuProps={{
                                 PaperProps: {
                                   sx: {
-                                    maxHeight: 300,
+                                    maxHeight: 300, 
                                     borderRadius: 2,
                                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                     boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
@@ -863,9 +906,18 @@ useEffect(() => {
                                 width: '65%',
                                 '& .MuiOutlinedInput-input': {
                                   height: '45px',
-                                  padding: '0 14px',
+                                  padding: '0 14px',  // Add horizontal padding
                                   backgroundColor: 'rgba(255, 255, 255, 0.7)',
                                   borderRadius: '15px',
+                                  display: 'flex',
+                                  alignItems: 'center', // Center vertically
+                                  lineHeight: '45px', // Match height for vertical centering
+                                  textAlign: 'left', // Center horizontally
+                                },
+                                '& input': {  // Add this block
+                                  textAlign: 'left',
+                                  width: '100%',
+                                  padding: '0 14px',  // Add padding to input
                                 },
                                 '& .MuiOutlinedInput-notchedOutline': {
                                   borderRadius: '15px',
