@@ -171,6 +171,18 @@ const addPerson = async (req, res) => {
     }
 };
 
+// Helper function for activity logging
+const addActivityLog = async (client, PID, activity) => {
+    // Truncate activity message to fit varchar(50)
+    const truncatedActivity = activity.length > 50 ? activity.substring(0, 47) + '...' : activity;
+    const logQuery = `
+        INSERT INTO logs ("PID", status, timestamp)
+        VALUES ($1, $2, CURRENT_TIMESTAMP)
+    `;
+    await client.query(logQuery, [PID, truncatedActivity]);
+};
+
+// Update addPersonWithDocument
 const addPersonWithDocument = async (req, res) => {
     const client = await pool.connect();
     try {
@@ -219,6 +231,13 @@ const addPersonWithDocument = async (req, res) => {
             documentId
         ]);
 
+        // Add activity log with proper document type text
+        await addActivityLog(
+            client, 
+            personResult.rows[0].PID, 
+            `Created Person Details with ${documentType} Document` // Using PDS or SALN directly
+        );
+
         await client.query('COMMIT');
         res.json({ success: true, PID: personResult.rows[0].PID });
 
@@ -231,67 +250,7 @@ const addPersonWithDocument = async (req, res) => {
     }
 };
 
-const updatePersonDocuments = async (req, res) => {
-    const client = await pool.connect();
-    try {
-        const { PID } = req.params;
-        const { documentType } = req.query;
-        const file = req.file;
-
-        console.log('Updating document:', { PID, documentType, hasFile: !!file });
-
-        if (!file || !documentType || !PID) {
-            return res.status(400).json({
-                success: false,
-                message: 'Missing required data'
-            });
-        }
-
-        await client.query('BEGIN');
-
-        // Get document ID from person
-        const docIdQuery = `
-            SELECT "${documentType.toLowerCase()}ID" 
-            FROM person 
-            WHERE "PID" = $1
-        `;
-        const docIdResult = await client.query(docIdQuery, [PID]);
-        
-        if (!docIdResult.rows[0]) {
-            throw new Error('Person not found');
-        }
-
-        const docId = docIdResult.rows[0][`${documentType.toLowerCase()}ID`];
-
-        // Update document file
-        const updateQuery = `
-            UPDATE ${documentType.toLowerCase()}
-            SET "filePath" = $1
-            WHERE "${documentType.toLowerCase()}ID" = $2
-            RETURNING "${documentType.toLowerCase()}ID"
-        `;
-
-        await client.query(updateQuery, [file.buffer, docId]);
-        await client.query('COMMIT');
-
-        res.json({
-            success: true,
-            message: `${documentType} updated successfully`
-        });
-
-    } catch (error) {
-        await client.query('ROLLBACK');
-        console.error('Update document error:', error);
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    } finally {
-        client.release();
-    }
-};
-
-// Add document to existing person
+// Update addDocumentToExistingPerson
 const addDocumentToExistingPerson = async (req, res) => {
     const client = await pool.connect();
     try {
@@ -340,6 +299,14 @@ const addDocumentToExistingPerson = async (req, res) => {
         `;
         
         await client.query(updateQuery, [docId, PID]);
+
+        // Add activity log with proper document type text
+        await addActivityLog(
+            client, 
+            PID, 
+            `Added ${documentType} Document` // Using PDS or SALN directly
+        );
+
         await client.query('COMMIT');
 
         res.json({
@@ -350,6 +317,75 @@ const addDocumentToExistingPerson = async (req, res) => {
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Add document error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    } finally {
+        client.release();
+    }
+};
+
+// Update updatePersonDocuments
+const updatePersonDocuments = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const { PID } = req.params;
+        const { documentType } = req.query;
+        const file = req.file;
+
+        console.log('Updating document:', { PID, documentType, hasFile: !!file });
+
+        if (!file || !documentType || !PID) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required data'
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // Get document ID from person
+        const docIdQuery = `
+            SELECT "${documentType.toLowerCase()}ID" 
+            FROM person 
+            WHERE "PID" = $1
+        `;
+        const docIdResult = await client.query(docIdQuery, [PID]);
+        
+        if (!docIdResult.rows[0]) {
+            throw new Error('Person not found');
+        }
+
+        const docId = docIdResult.rows[0][`${documentType.toLowerCase()}ID`];
+
+        // Update document file
+        const updateQuery = `
+            UPDATE ${documentType.toLowerCase()}
+            SET "filePath" = $1
+            WHERE "${documentType.toLowerCase()}ID" = $2
+            RETURNING "${documentType.toLowerCase()}ID"
+        `;
+
+        await client.query(updateQuery, [file.buffer, docId]);
+
+        // Add activity log with proper document type text
+        await addActivityLog(
+            client, 
+            PID, 
+            `Updated ${documentType} Document` // Using PDS or SALN directly
+        );
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: `${documentType} updated successfully`
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Update document error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -401,6 +437,7 @@ const updateDocument = async (req, res) => {
     }
 };
 
+// Update updateDocument and updateDocumentFile
 const updateDocumentFile = async (req, res) => {
     const client = await pool.connect();
     try {
@@ -427,6 +464,22 @@ const updateDocumentFile = async (req, res) => {
 
         if (result.rowCount === 0) {
             throw new Error('Document not found');
+        }
+
+        // Get PID from document reference
+        const getPIDQuery = `
+            SELECT "PID" 
+            FROM person 
+            WHERE "${documentType.toLowerCase()}ID" = $1
+        `;
+        const pidResult = await client.query(getPIDQuery, [docId]);
+        
+        if (pidResult.rows[0]) {
+            await addActivityLog(
+                client,
+                pidResult.rows[0].PID,
+                `Updated ${documentType} Document` // Using PDS or SALN directly
+            );
         }
 
         await client.query('COMMIT');
