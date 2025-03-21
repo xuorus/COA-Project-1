@@ -122,6 +122,7 @@ const Main = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [fullPreview, setFullPreview] = useState(false);
+  const [scanningStatus, setScanningStatus] = useState(''); 
 
   // Initialize form state with empty strings instead of undefined
   const [formValues, setFormValues] = useState({
@@ -182,11 +183,11 @@ const handleFileUpload = (file) => {
 };
 
 const handleScanButtonClick = () => {
-    if (!documentType) {
-        setError('Please select a document type');
-        return;
-    }
-    fileInputRef.current?.click();
+  if (!documentType) {
+      setError('Please select a document type');
+      return;
+  }
+  fileInputRef.current?.click();
 };
 
 const handleDragOver = (e) => {
@@ -199,11 +200,14 @@ const handleDragLeave = () => {
 };
 
 const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    handleFileUpload(file);
+  e.preventDefault();
+  setIsDragging(false);
+  
+  const file = e.dataTransfer.files[0];
+  if (file) {
+      setError(null); // Clear any existing error
+      handleFileUpload(file);
+  }
 };
 
 const handleSubmit = async (event) => {
@@ -699,23 +703,27 @@ useEffect(() => {
                           onClick={async () => {
                               try {
                                   setIsLoading(true);
+                                  setScanningStatus('Initializing scanner...');
+                                  
                                   const response = await axios.post('http://localhost:5000/api/scanner/execute-scan', {
                                       scriptPath: '../backend/scripts/scan.ps1',
                                   });
                                   
                                   if (response.data.success) {
+                                      setScanningStatus('Scan complete! Drop PDF file here or scan again.');
                                       const pdfBase64 = response.data.pdfData;
                                       const pdfBlob = new Blob(
                                           [Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))],
                                           { type: 'application/pdf' }
                                       );
+                                      setError(null);
                                       setPreviewUrl(URL.createObjectURL(pdfBlob));
                                   } else {
-                                      setError('Scanning failed: ' + response.data.message);
+                                      setScanningStatus('Scanner ready. Drop PDF file here or try scanning again.');
                                   }
                               } catch (error) {
                                   console.error('Scan error:', error);
-                                  setError('Drop the PDF file here.');
+                                  setScanningStatus('Scanner ready. Drop PDF file here or try scanning again.');
                               } finally {
                                   setIsLoading(false);
                               }
