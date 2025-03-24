@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput } from '@mui/material';
+import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput, Paper } from '@mui/material';
 import { Document, Page, pdfjs } from 'react-pdf';
 import PrintIcon from '@mui/icons-material/Print';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
@@ -22,6 +22,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import ScanIcon from '@mui/icons-material/DocumentScanner';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+
+import axios from 'axios';
   
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -122,6 +125,7 @@ const Main = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [fullPreview, setFullPreview] = useState(false);
+  const [savedDocuments, setSavedDocuments] = useState([]);
   const [scanningStatus, setScanningStatus] = useState(''); 
 
   // Initialize form state with empty strings instead of undefined
@@ -211,85 +215,101 @@ const handleDrop = (e) => {
 };
 
 const handleSubmit = async (event) => {
-    try {
-        event.preventDefault();
-        const { state } = location;
-        console.log('Submitting with state:', state);
+  try {
+    event.preventDefault();
+    setIsLoading(true);
+    let response;
 
-        if (!previewUrl || !documentType) {
-            setError('Please scan a document first');
-            return;
-        }
+    // Create FormData
+    const formData = new FormData();
 
-        setIsLoading(true);
-        let response;
-
-        // Create FormData
-        const formData = new FormData();
-        const pdfBlob = await fetch(previewUrl).then(res => res.blob());
-        formData.append('file', pdfBlob, 'document.pdf');
-        formData.append('documentType', documentType);
-
-        // Check if we're updating an existing document
-        if (state?.prefillData?.PID && state.fixedDocumentType) {
-            console.log('Updating document:', {
-                PID: state.prefillData.PID,
-                documentType: state.fixedDocumentType
-            });
-
-            // Update existing document's file
-            response = await axios.patch(
-                `http://localhost:5000/api/scan/person/${state.prefillData.PID}/documents`,
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    },
-                    params: {
-                        documentType: state.fixedDocumentType
-                    }
-                }
-            );
-        } else if (state?.selectedRecord?.PID) {
-            // Add new document to existing person (keep existing working code)
-            response = await axios.patch(
-                `http://localhost:5000/api/scan/person/${state.selectedRecord.PID}/document`,
-                formData,
-                {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                }
-            );
-        } else if (state?.from === 'sidebar') {
-            // Creating new person with document (keep existing working code)
-            formData.append('formData', JSON.stringify({
-                firstName: formValues.firstName.trim(),
-                middleName: formValues.middleName?.trim() || null,
-                lastName: formValues.lastName.trim(),
-                bloodType: formValues.bloodType,
-                profession: formValues.profession?.trim(),
-                hobbies: formValues.hobbies?.trim() || null
-            }));
-
-            response = await axios.post(
-                'http://localhost:5000/api/scan/submit',
-                formData,
-                {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                }
-            );
-        }
-
-        if (response?.data?.success) {
-            setSuccessModalOpen(true);
-            setTimeout(() => navigate('/records'), 2000);
-        }
-
-    } catch (error) {
-        console.error('Submit error:', error);
-        setError(error.response?.data?.message || 'Failed to process request');
-    } finally {
-        setIsLoading(false);
+    // Collect documents
+    const allDocuments = [...savedDocuments];
+    if (previewUrl && documentType) {
+      allDocuments.push({
+        type: documentType,
+        preview: previewUrl,
+        file: pdfFile
+      });
     }
+
+    // Check if we have any documents
+    if (allDocuments.length === 0) {
+      setError('Please add at least one document');
+      return;
+    }
+
+    // Handle update document case
+    if (location.state?.prefillData?.PID && location.state.fixedDocumentType) {
+      // For updating specific document type, use only the current document
+      const pdfBlob = await fetch(previewUrl).then(res => res.blob());
+      formData.append('file', pdfBlob);
+      
+      response = await axios.patch(
+        `http://localhost:5000/api/scan/person/${location.state.prefillData.PID}/documents`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          params: { documentType: location.state.fixedDocumentType }
+        }
+      );
+    } 
+    // Handle add document to existing person case
+    else if (location.state?.selectedRecord?.PID) {
+      // For adding single document to existing person
+      const pdfBlob = await fetch(previewUrl).then(res => res.blob());
+      formData.append('file', pdfBlob);
+      formData.append('documentType', documentType);
+
+      response = await axios.patch(
+        `http://localhost:5000/api/scan/person/${location.state.selectedRecord.PID}/document`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
+    } 
+    // Handle new person with multiple documents case
+    else if (location.state?.from === 'sidebar') {
+      // Add all documents and their types
+      formData.append('documentTypes', JSON.stringify(allDocuments.map(doc => doc.type)));
+
+      // Add all files
+      for (const doc of allDocuments) {
+        const pdfBlob = await fetch(doc.preview).then(res => res.blob());
+        formData.append('files', pdfBlob);
+      }
+
+      // Add person data
+      formData.append('formData', JSON.stringify({
+        firstName: formValues.firstName.trim(),
+        middleName: formValues.middleName?.trim() || null,
+        lastName: formValues.lastName.trim(),
+        bloodType: formValues.bloodType,
+        profession: formValues.profession?.trim(),
+        hobbies: formValues.hobbies?.trim() || null
+      }));
+
+      response = await axios.post(
+        'http://localhost:5000/api/scan/submit-multiple',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
+    }
+
+    if (response?.data?.success) {
+      setSuccessModalOpen(true);
+      setTimeout(() => navigate('/records'), 2000);
+    }
+
+  } catch (error) {
+    console.error('Submit error:', error);
+    setError(error.response?.data?.message || 'Failed to process request');
+  } finally {
+    setIsLoading(false);
+  }
 };
 
   // Update the useEffect for prefillData to check source
@@ -383,6 +403,47 @@ useEffect(() => {
     }
 }, [location.state]);
 
+// Update the handleAddDocument function
+const handleAddDocument = () => {
+  if (previewUrl && documentType) {
+    // Create blob URL for the PDF file
+    const pdfBlob = pdfFile instanceof Blob ? pdfFile : new Blob([pdfFile], { type: 'application/pdf' });
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    setSavedDocuments(prev => [...prev, {
+      id: Date.now(),
+      type: documentType,
+      preview: previewUrl,
+      file: blobUrl
+    }]);
+
+    // Reset states after adding document
+    setDocumentType('');
+    setPreviewUrl(null);
+    setPdfFile(null);
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+};
+
+// Add cleanup for blob URLs
+useEffect(() => {
+  // Cleanup function to revoke blob URLs when component unmounts
+  return () => {
+    savedDocuments.forEach(doc => {
+      if (doc.file && doc.file.startsWith('blob:')) {
+        URL.revokeObjectURL(doc.file);
+      }
+      if (doc.preview && doc.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(doc.preview);
+      }
+    });
+  };
+}, [savedDocuments]);
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -466,288 +527,316 @@ useEffect(() => {
                   Scan Document
                 </Typography>
 
-                {/* Document Type Dropdown - Centered */}
-                <FormControl 
-                  sx={{ 
-                    width: '300px', // Match the width of the scan box
-                    alignSelf: 'center', // Center horizontally
-                    mb: 1, // Add margin bottom for spacing
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '15px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      fontFamily: 'Roboto',
-                      height: '45px',
-                      '& fieldset': {
-                        borderColor: 'rgba(0, 0, 0, 0.23)',
-                      },
-                      '&:hover fieldset': {
-                        borderColor: 'rgba(0, 0, 0, 0.5)',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#1976d2',
-                      }
-                    },
-                    '& .MuiInputLabel-root': {
-                      color: 'rgba(0, 0, 0, 0.6)',
-                      fontFamily: 'Roboto',
-                      transform: 'translate(14px, 12px) scale(1)',
-                      '&.Mui-focused, &.MuiFormLabel-filled': {
-                        transform: 'translate(14px, -9px) scale(0.75)',
-                      },
-                      '&.Mui-focused': {
-                        color: '#1976d2',
-                      }
-                    },
-                    '& .MuiSelect-select': {
-                      fontFamily: 'Roboto',
-                      padding: '8px 14px',
-                    }
-                  }}
-                >
-                  <InputLabel id="document-type-label">Document Type</InputLabel>
-                  <Select
-                    labelId="document-type-label"
-                    id="document-type"
-                    value={documentType}
-                    label="Document Type"
-                    onChange={handleDocumentTypeChange}
-                    required
-                    disabled={location.state?.fixedDocumentType} // Disable if fixed type
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          maxHeight: 300,
-                          borderRadius: 2,
-                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                          '& .MuiMenuItem-root': {
-                            padding: '8px 16px',
-                            '&:hover': {
-                              backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                            },
-                            '&.Mui-selected': {
-                              backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                {/* Document Type and Add Button */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 1,
+                  justifyContent: 'center' 
+                }}>
+                  <FormControl 
+                    sx={{ 
+                      width: '300px',
+                      // ... existing FormControl styles
+                    }}
+                  >
+                    <InputLabel id="document-type-label">Document Type</InputLabel>
+                    <Select
+                      labelId="document-type-label"
+                      id="document-type"
+                      value={documentType}
+                      label="Document Type"
+                      onChange={handleDocumentTypeChange}
+                      required
+                      disabled={location.state?.fixedDocumentType} // Disable if fixed type
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            maxHeight: 300,
+                            borderRadius: 2,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                            '& .MuiMenuItem-root': {
+                              padding: '8px 16px',
                               '&:hover': {
-                                backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                                backgroundColor: 'rgba(25, 118, 210, 0.04)',
+                              },
+                              '&.Mui-selected': {
+                                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                                }
                               }
                             }
                           }
                         }
+                      }}
+                    >
+                      <MenuItem value="PDS">Personal Data Sheet</MenuItem>
+                      <MenuItem value="SALN">Statement of Assets, Liabilities and Net Worth</MenuItem>
+                      {[...Array(13)].map((_, index) => (
+                        <MenuItem key={index + 3} value={`DOC${index + 3}`}>
+                          DOC{index + 3}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {previewUrl && (
+                    <IconButton
+                      onClick={handleAddDocument}
+                      sx={{
+                        backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                        },
+                        width: '40px',
+                        height: '40px'
+                      }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                  )}
+                </Box>
+
+                {/* Saved Documents List */}
+                {savedDocuments.length > 0 && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      left: '24px',
+                      top: '120px',
+                      width: '100px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 1,
+                      maxHeight: 'calc(100vh - 240px)',
+                      overflowY: 'auto',
+                      '&::-webkit-scrollbar': {
+                        width: '4px'
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        borderRadius: '4px'
                       }
                     }}
                   >
-                    <MenuItem value="PDS">Personal Data Sheet</MenuItem>
-                    <MenuItem value="SALN">Statement of Assets, Liabilities and Net Worth</MenuItem>
-                    {[...Array(13)].map((_, index) => (
-                      <MenuItem key={index + 3} value={`DOC${index + 3}`}>
-                        DOC{index + 3}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                {/* PDF Upload Box */}
-                <Box
-    id="dwtcontrolContainer"
-    onDragOver={handleDragOver}
-    onDragLeave={handleDragLeave}
-    onDrop={handleDrop}
-    sx={{
-        width: '100%',
-        flex: 1,
-        maxWidth: '300px',
-        aspectRatio: '1 / 1.4142',
-        margin: '0 auto',
-        border: `2px dashed ${isDragging ? '#1976d2' : 'rgba(0, 0, 0, 0.2)'}`,
-        borderRadius: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: isDragging ? 'rgba(25, 118, 210, 0.08)' : 'rgba(255, 255, 255, 0.95)',
-        overflow: 'hidden',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        position: 'relative',
-        transition: 'all 0.2s ease'
-    }}
->
-    <input
-        type="file"
-        ref={fileInputRef}
-        accept=".pdf"
-        style={{ display: 'none' }}
-        onChange={(e) => handleFileUpload(e.target.files[0])}
-    />
-    
-    {isLoading ? (
-        <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            gap: 2 
-        }}>
-            <CircularProgress />
-            <Typography>Processing...</Typography>
-        </Box>
-    ) : (
-        <>
-            {error ? (
-                <Box sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center',
-                    gap: 2,
-                    p: 2,
-                    textAlign: 'center'
-                }}>
-                    <Typography color="error">{error}</Typography>
-                    <IconButton
-                        color="primary"
-                        onClick={handleScanButtonClick}
-                        sx={{ 
-                            backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                            '&:hover': {
-                                backgroundColor: 'rgba(25, 118, 210, 0.2)'
-                            }
-                        }}
-                    >
-                        <ScanIcon sx={{ fontSize: 40 }} />
-                    </IconButton>
-                </Box>
-            ) : previewUrl ? (
-                <Box 
-                    sx={{ 
-                        position: 'relative', 
-                        width: '100%', 
-                        height: '100%',
-                        cursor: 'pointer',
-                        '&:hover .fullscreen-overlay': {
-                            opacity: 1
-                        }
-                    }}
-                    onClick={() => setFullPreview(true)}
-                >
-                    {/* Fullscreen overlay */}
-                    <Box 
-                        className="fullscreen-overlay"
+                    {savedDocuments.map((doc) => (
+                      <Paper
+                        key={doc.id}
+                        elevation={3}
                         sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                            opacity: 0,
-                            transition: 'opacity 0.2s ease-in-out',
-                            zIndex: 1
+                          width: '85px',
+                          height: '110px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          position: 'relative',
+                          borderRadius: 2,
+                          overflow: 'hidden'
                         }}
-                    >
-                        <FullscreenIcon 
-                            sx={{ 
-                                fontSize: 48,
-                                color: 'white',
-                                transition: 'transform 0.2s ease-in-out',
-                                '&:hover': {
-                                    transform: 'scale(1.1)'
-                                }
-                            }} 
-                        />
-                    </Box>
-                    <iframe
-                        src={previewUrl}
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            border: 'none',
-                            pointerEvents: 'none' // Prevent iframe from capturing clicks
-                        }}
-                        title="Document Preview"
-                    />
-                </Box>
-            ) : (
-                <Box sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center',
-                    gap: 2,
-                    p: 2,
-                    textAlign: 'center'
-                }}>
-                    <Typography>
-                        {isDragging ? 'Drop PDF here' : 'Click to browse, drag a PDF file, or use scan button'}
-                    </Typography>
-                    <Box sx={{ 
-                        display: 'flex',
-                        flexDirection: 'row', // Changed from 'column' to 'row'
-                        gap: 2,
-                        justifyContent: 'center' // Center the buttons horizontally
-                    }}>
-                        <IconButton
-                            color="primary"
-                            onClick={handleScanButtonClick}
-                            disabled={isLoading || !documentType}
-                            sx={{ 
-                                backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(25, 118, 210, 0.2)'
-                                }
-                            }}
-                        >
-                            <ScanIcon sx={{ fontSize: 40 }} />
-                        </IconButton>
-                        <IconButton
-                          color="primary"
-                          onClick={async () => {
-                              try {
-                                  setIsLoading(true);
-                                  setScanningStatus('Initializing scanner...');
-                                  
-                                  const response = await axios.post('http://localhost:5000/api/scanner/execute-scan', {
-                                      scriptPath: '../backend/scripts/scan.ps1',
-                                  });
-                                  
-                                  if (response.data.success) {
-                                      setScanningStatus('Scan complete! Drop PDF file here or scan again.');
-                                      const pdfBase64 = response.data.pdfData;
-                                      const pdfBlob = new Blob(
-                                          [Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0))],
-                                          { type: 'application/pdf' }
-                                      );
-                                      setError(null);
-                                      setPreviewUrl(URL.createObjectURL(pdfBlob));
-                                  } else {
-                                      setScanningStatus('Scanner ready. Drop PDF file here or try scanning again.');
-                                  }
-                              } catch (error) {
-                                  console.error('Scan error:', error);
-                                  setScanningStatus('Scanner ready. Drop PDF file here or try scanning again.');
-                              } finally {
-                                  setIsLoading(false);
-                              }
-                          }}
-                          disabled={isLoading || !documentType}
-                          sx={{ 
-                              backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                              '&:hover': {
-                                  backgroundColor: 'rgba(25, 118, 210, 0.2)'
-                              },
-                              '&.Mui-disabled': {
-                                  backgroundColor: 'rgba(0, 0, 0, 0.12)',
-                                  color: 'rgba(0, 0, 0, 0.26)'
-                              }
-                          }}
                       >
-                          <PrintIcon sx={{ fontSize: 40 }} />
-                      </IconButton>
-                    </Box>
-                </Box>
-            )}
-        </>
-    )}
-</Box>
+                        <Box sx={{ 
+                          p: 0.5, 
+                          backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
+                        }}>
+                          <Typography variant="caption" noWrap>
+                            {doc.type}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <iframe
+                            src={doc.preview}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              border: 'none',
+                              pointerEvents: 'none'
+                            }}
+                            title={`Saved document ${doc.id}`}
+                          />
+                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            // Revoke blob URL when removing document
+                            if (doc.file && doc.file.startsWith('blob:')) {
+                              URL.revokeObjectURL(doc.file);
+                            }
+                            if (doc.preview && doc.preview.startsWith('blob:')) {
+                              URL.revokeObjectURL(doc.preview);
+                            }
+                            setSavedDocuments(prev => prev.filter(d => d.id !== doc.id));
+                          }}
+                          sx={{
+                            position: 'absolute',
+                            top: 2,
+                            right: 2,
+                            padding: '2px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)'
+                            }
+                          }}
+                        >
+                          <CloseIcon sx={{ fontSize: '0.8rem' }} />
+                        </IconButton>
+                      </Paper>
+                    ))}
+                  </Box>
+                )}
+
+                {/* Main Preview Box */}
+                <Box
+                  id="dwtcontrolContainer"
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  sx={{
+                      width: '100%',
+                      flex: 1,
+                      maxWidth: '300px',
+                      aspectRatio: '1 / 1.4142',
+                      margin: '0 auto',
+                      border: `2px dashed ${isDragging ? '#1976d2' : 'rgba(0, 0, 0, 0.2)'}`,
+                      borderRadius: 2,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: isDragging ? 'rgba(25, 118, 210, 0.08)' : 'rgba(255, 255, 255, 0.95)',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                      position: 'relative',
+                      transition: 'all 0.2s ease'
+                  }}
+              >
+                  <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept=".pdf"
+                      style={{ display: 'none' }}
+                      onChange={(e) => handleFileUpload(e.target.files[0])}
+                  />
+                  
+                  {isLoading ? (
+                      <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          alignItems: 'center',
+                          gap: 2 
+                      }}>
+                          <CircularProgress />
+                          <Typography>Processing...</Typography>
+                      </Box>
+                  ) : (
+                      <>
+                          {error ? (
+                              <Box sx={{ 
+                                  display: 'flex', 
+                                  flexDirection: 'column', 
+                                  alignItems: 'center',
+                                  gap: 2,
+                                  p: 2,
+                                  textAlign: 'center'
+                              }}>
+                                  <Typography color="error">{error}</Typography>
+                                  <IconButton
+                                      color="primary"
+                                      onClick={handleScanButtonClick}
+                                      sx={{ 
+                                          backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                                          '&:hover': {
+                                              backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                                          }
+                                      }}
+                                  >
+                                      <ScanIcon sx={{ fontSize: 40 }} />
+                                  </IconButton>
+                              </Box>
+                          ) : previewUrl ? (
+                              <Box 
+                                  sx={{ 
+                                      position: 'relative', 
+                                      width: '100%', 
+                                      height: '100%',
+                                      cursor: 'pointer',
+                                      '&:hover .fullscreen-overlay': {
+                                          opacity: 1
+                                      }
+                                  }}
+                                  onClick={() => setFullPreview(true)}
+                              >
+                                  {/* Fullscreen overlay */}
+                                  <Box 
+                                      className="fullscreen-overlay"
+                                      sx={{
+                                          position: 'absolute',
+                                          top: 0,
+                                          left: 0,
+                                          right: 0,
+                                          bottom: 0,
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                                          opacity: 0,
+                                          transition: 'opacity 0.2s ease-in-out',
+                                          zIndex: 1
+                                      }}
+                                  >
+                                      <FullscreenIcon 
+                                          sx={{ 
+                                              fontSize: 48,
+                                              color: 'white',
+                                              transition: 'transform 0.2s ease-in-out',
+                                              '&:hover': {
+                                                  transform: 'scale(1.1)'
+                                              }
+                                          }} 
+                                      />
+                                  </Box>
+                                  <iframe
+                                      src={previewUrl}
+                                      style={{
+                                          width: '100%',
+                                          height: '100%',
+                                          border: 'none',
+                                          pointerEvents: 'none' // Prevent iframe from capturing clicks
+                                      }}
+                                      title="Document Preview"
+                                  />
+                              </Box>
+                          ) : (
+                              <Box sx={{ 
+                                  display: 'flex', 
+                                  flexDirection: 'column', 
+                                  alignItems: 'center',
+                                  gap: 2,
+                                  p: 2,
+                                  textAlign: 'center'
+                              }}>
+                                  <Typography>
+                                      {isDragging ? 'Drop PDF here' : 'Click to browse or drag PDF here'}
+                                  </Typography>
+                                  <IconButton
+                                      color="primary"
+                                      onClick={handleScanButtonClick}
+                                      disabled={isLoading || !documentType}
+                                      sx={{ 
+                                          backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                                          '&:hover': {
+                                              backgroundColor: 'rgba(25, 118, 210, 0.2)'
+                                          }
+                                      }}
+                                  >
+                                      <ScanIcon sx={{ fontSize: 40 }} />
+                                  </IconButton>
+                              </Box>
+                          )}
+                      </>
+                  )}
+              </Box>
 
               </Box>
 

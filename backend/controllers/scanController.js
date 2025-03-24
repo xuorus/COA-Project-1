@@ -501,6 +501,107 @@ const updateDocumentFile = async (req, res) => {
     }
 };
 
+// Add this new function for multiple documents
+const addPersonWithMultipleDocuments = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const files = req.files;
+        const formData = JSON.parse(req.body.formData);
+        const documentTypes = JSON.parse(req.body.documentTypes);
+
+        // Validate required fields (keep same validation as addPerson)
+        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const missingFields = requiredFields.filter(field => !formData[field]);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing required fields: ${missingFields.join(', ')}`
+            });
+        }
+
+        await client.query('BEGIN');
+
+        // Insert person first
+        const personQuery = `
+            INSERT INTO person (
+                "fName", "mName", "lName",
+                "bloodType", profession, hobbies
+            ) VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING "PID"
+        `;
+
+        const personResult = await client.query(personQuery, [
+            formData.firstName,
+            formData.middleName || null,
+            formData.lastName,
+            formData.bloodType,
+            formData.profession,
+            formData.hobbies || null
+        ]);
+
+        const PID = personResult.rows[0].PID;
+
+        // Add initial log for person creation with multiple documents
+        await addActivityLog(
+            client,
+            PID,
+            'Created Personal Details with Multiple Documents'
+        );
+
+        // Process each document
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const documentType = documentTypes[i];
+
+            // Insert document
+            const docQuery = `
+                INSERT INTO ${documentType.toLowerCase()} ("filePath")
+                VALUES ($1)
+                RETURNING "${documentType.toLowerCase()}ID"
+            `;
+            
+            const docResult = await client.query(docQuery, [file.buffer]);
+            const docId = docResult.rows[0][`${documentType.toLowerCase()}ID`];
+
+            // Update person with document reference
+            const updateQuery = `
+                UPDATE person
+                SET "${documentType.toLowerCase()}ID" = $1
+                WHERE "PID" = $2
+            `;
+            
+            await client.query(updateQuery, [docId, PID]);
+
+            // Add individual document logs
+            await addActivityLog(
+                client,
+                PID,
+                `Added ${documentType} Document`
+            );
+        }
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            PID: PID,
+            message: 'Person created with multiple documents'
+        });
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Add person with multiple documents error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to create person with documents'
+        });
+    } finally {
+        client.release();
+    }
+};
+
+// Add to module.exports
 module.exports = {
     startScan,
     addPerson,
@@ -510,5 +611,6 @@ module.exports = {
     updatePersonDocuments,
     addDocumentToExistingPerson,
     updateDocumentFile,
-    updateDocument
+    updateDocument,
+    addPersonWithMultipleDocuments
 };

@@ -15,6 +15,12 @@ router.get('/preview/:tempId', scanController.getPreview);
 // Single endpoint to handle both document and person data
 router.post('/submit', upload.single('file'), scanController.addPersonWithDocument);
 
+// Add this new route for multiple documents
+router.post('/submit-multiple', 
+    upload.array('files'), // Handle multiple files
+    scanController.addPersonWithMultipleDocuments
+);
+
 // Update document for person
 router.patch('/person/:PID/documents', 
     upload.single('file'),
