@@ -357,7 +357,7 @@ const Records = () => {
   const [records, setRecords] = useState([]);
   const [originalRecords, setOriginalRecords] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage] = useState(20);
+  const [rowsPerPage] = useState(15); // Changed from default to 15
   const [searchQuery, setSearchQuery] = useState('');
   const [sortType, setSortType] = useState(null);
   const [personDetails, setPersonDetails] = useState(null);
@@ -931,7 +931,7 @@ const handleDeleteConfirm = async () => {
             left: 0,
             right: 0,
             bottom: '40px',
-            overflow: 'hidden', // Changed from 'auto' to 'hidden'
+            overflowY: 'hidden', // Changed from 'auto' to 'hidden'
             padding: 3,
             backgroundColor: 'rgba(255, 255, 255, 0.2)',
           }}
@@ -972,29 +972,16 @@ const handleDeleteConfirm = async () => {
 
               {/* Table */}
               <TableContainer 
-                component={Paper} 
-                sx={{ 
-                  borderRadius: 2, 
-                  overflow: 'hidden',
-                  boxShadow: 3,
-                  flex: '1 1 auto', // Changed to flex grow and shrink
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                    height: '8px'
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                    borderRadius: '4px'
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.25)'
-                    }
-                  }
-                }}
-              >
+        component={Paper} 
+        sx={{ 
+          flex: 1,
+          borderRadius: 2,
+          overflow: 'hidden',
+          boxShadow: 3,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
@@ -1221,28 +1208,26 @@ const handleDeleteConfirm = async () => {
     </IconButton>
   </Box>
 
-                    {/* Scrollable content area */}
-                    <Box 
-                      sx={{ 
-                        flex: 1,
-                        overflow: 'auto',
-                        // Custom scrollbar styling
-                        '&::-webkit-scrollbar': {
-                          width: '8px'
-                        },
-                        '&::-webkit-scrollbar-track': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                          borderRadius: '4px'
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                          borderRadius: '4px',
-                          '&:hover': {
-                            backgroundColor: 'rgba(0, 0, 0, 0.25)'
-                          }
-                        }
-                      }}
-                    >
+                    {/* Scrollable body */}
+        <Box sx={{ 
+          overflow: 'auto',
+          flex: 1,
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px'
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'rgba(0, 0, 0, 0.05)',
+            borderRadius: '4px'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(0, 0, 0, 0.15)',
+            borderRadius: '4px',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.25)'
+            }
+          }
+        }}>
                       {activeTab === 0 && (
   <PersonalDetails
     personDetails={personDetails}
