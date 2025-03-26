@@ -510,7 +510,7 @@ const addPersonWithMultipleDocuments = async (req, res) => {
         const documentTypes = JSON.parse(req.body.documentTypes);
 
         // Validate required fields (keep same validation as addPerson)
-        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const requiredFields = ['firstName', 'lastName']; // Remove bloodType and profession from required fields
         const missingFields = requiredFields.filter(field => !formData[field]);
 
         if (missingFields.length > 0) {
@@ -535,8 +535,8 @@ const addPersonWithMultipleDocuments = async (req, res) => {
             formData.firstName,
             formData.middleName || null,
             formData.lastName,
-            formData.bloodType,
-            formData.profession,
+            formData.bloodType === 'Unknown' ? null : formData.bloodType || null,
+            formData.profession || null,
             formData.hobbies || null
         ]);
 

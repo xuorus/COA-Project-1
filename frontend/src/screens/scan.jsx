@@ -136,7 +136,7 @@ const Main = () => {
     hobbies: ''
   });
 
-  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  const bloodTypes = ['Unknown', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   const [formErrors, setFormErrors] = useState({
     firstName: false,
@@ -283,8 +283,8 @@ const handleSubmit = async (event) => {
         firstName: formValues.firstName.trim(),
         middleName: formValues.middleName?.trim() || null,
         lastName: formValues.lastName.trim(),
-        bloodType: formValues.bloodType,
-        profession: formValues.profession?.trim(),
+        bloodType: formValues.bloodType === 'Unknown' ? null : formValues.bloodType || null,
+        profession: formValues.profession?.trim() || null,
         hobbies: formValues.hobbies?.trim() || null
       }));
 
@@ -527,162 +527,188 @@ useEffect(() => {
 
                 {/* Document Type and Add Button */}
                 <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: 1,
-                  justifyContent: 'center' 
-                }}>
-                  <FormControl 
-                    sx={{ 
-                      width: '300px',
-                      // ... existing FormControl styles
-                    }}
-                  >
-                    <InputLabel id="document-type-label">Document Type</InputLabel>
-                    <Select
-                      labelId="document-type-label"
-                      id="document-type"
-                      value={documentType}
-                      label="Document Type"
-                      onChange={handleDocumentTypeChange}
-                      required
-                      disabled={location.state?.fixedDocumentType} // Disable if fixed type
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            maxHeight: 300,
-                            borderRadius: 2,
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                            '& .MuiMenuItem-root': {
-                              padding: '8px 16px',
-                              '&:hover': {
-                                backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                              },
-                              '&.Mui-selected': {
-                                backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                                '&:hover': {
-                                  backgroundColor: 'rgba(25, 118, 210, 0.12)',
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }}
-                    >
-                      <MenuItem value="PDS">Personal Data Sheet</MenuItem>
-                      <MenuItem value="SALN">Statement of Assets, Liabilities and Net Worth</MenuItem>
-                      {[...Array(13)].map((_, index) => (
-                        <MenuItem key={index + 3} value={`DOC${index + 3}`}>
-                          DOC{index + 3}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+  display: 'flex', 
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+  width: '300px', // Fixed width container
+  margin: '0 auto' // Center the container
+}}>
+  <FormControl 
+    sx={{ 
+      width: '100%' // Take full width of container
+    }}
+  >
+    <InputLabel id="document-type-label">Document Type</InputLabel>
+    <Select
+      labelId="document-type-label"
+      id="document-type"
+      value={documentType}
+      label="Document Type"
+      onChange={handleDocumentTypeChange}
+      required
+      disabled={location.state?.fixedDocumentType}
+      sx={{
+    borderRadius: '15px',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+  }}
+      MenuProps={{
+        PaperProps: {
+          sx: {
+            maxHeight: 300,
+            borderRadius: 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+            '& .MuiMenuItem-root': {
+              padding: '8px 16px',
+              '&:hover': {
+                backgroundColor: 'rgba(25, 118, 210, 0.04)',
+              },
+              '&.Mui-selected': {
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                '&:hover': {
+                  backgroundColor: 'rgba(25, 118, 210, 0.12)',
+                }
+              }
+            }
+          }
+        }
+      }}
+    >
+      <MenuItem value="PDS">Personal Data Sheet</MenuItem>
+      <MenuItem value="SALN">Statement of Assets, Liabilities and Net Worth</MenuItem>
+      {[...Array(13)].map((_, index) => (
+        <MenuItem key={index + 3} value={`DOC${index + 3}`}>
+          DOC{index + 3}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
 
-                  {previewUrl && (
-                    <IconButton
-                      onClick={handleAddDocument}
-                      sx={{
-                        backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(25, 118, 210, 0.2)'
-                        },
-                        width: '40px',
-                        height: '40px'
-                      }}
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  )}
-                </Box>
+  {previewUrl && (
+    <IconButton
+      onClick={handleAddDocument}
+      sx={{
+        position: 'absolute',
+        right: '-45px', // Position button to the right of dropdown
+        backgroundColor: 'rgba(25, 118, 210, 0.1)',
+        '&:hover': {
+          backgroundColor: 'rgba(25, 118, 210, 0.2)'
+        },
+        width: '40px',
+        height: '40px'
+      }}
+    >
+      <AddIcon />
+    </IconButton>
+  )}
+</Box>
 
                 {/* Saved Documents List */}
                 {savedDocuments.length > 0 && (
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      left: '24px',
-                      top: '120px',
-                      width: '100px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 1,
-                      maxHeight: 'calc(100vh - 240px)',
-                      overflowY: 'auto',
-                      '&::-webkit-scrollbar': {
-                        width: '4px'
-                      },
-                      '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                        borderRadius: '4px'
-                      }
-                    }}
-                  >
-                    {savedDocuments.map((doc) => (
-                      <Paper
-                        key={doc.id}
-                        elevation={3}
-                        sx={{
-                          width: '85px',
-                          height: '110px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          position: 'relative',
-                          borderRadius: 2,
-                          overflow: 'hidden'
-                        }}
-                      >
-                        <Box sx={{ 
-                          p: 0.5, 
-                          backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                          borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
-                        }}>
-                          <Typography variant="caption" noWrap>
-                            {doc.type}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ flex: 1 }}>
-                          <iframe
-                            src={doc.preview}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              border: 'none',
-                              pointerEvents: 'none'
-                            }}
-                            title={`Saved document ${doc.id}`}
-                          />
-                        </Box>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            // Revoke blob URL when removing document
-                            if (doc.file && doc.file.startsWith('blob:')) {
-                              URL.revokeObjectURL(doc.file);
-                            }
-                            if (doc.preview && doc.preview.startsWith('blob:')) {
-                              URL.revokeObjectURL(doc.preview);
-                            }
-                            setSavedDocuments(prev => prev.filter(d => d.id !== doc.id));
-                          }}
-                          sx={{
-                            position: 'absolute',
-                            top: 2,
-                            right: 2,
-                            padding: '2px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                            '&:hover': {
-                              backgroundColor: 'rgba(255, 255, 255, 0.9)'
-                            }
-                          }}
-                        >
-                          <CloseIcon sx={{ fontSize: '0.8rem' }} />
-                        </IconButton>
-                      </Paper>
-                    ))}
-                  </Box>
-                )}
+  <Box
+    sx={{
+      position: 'absolute',
+      left: '24px',
+      top: '120px',
+      width: '100px',
+      maxHeight: 'calc(100vh - 360px)', // Maximum height
+      minHeight: '200px', // Minimum height to show scrollbar
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2, // Increased gap between items
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      '&::-webkit-scrollbar': {
+        width: '8px', // Increased width
+        backgroundColor: 'rgba(255, 255, 255, 0.1)', // Added background color
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'rgba(0, 0, 0, 0.1)',
+        borderRadius: '8px',
+        margin: '4px', // Added margin
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: 'rgba(0, 0, 0, 0.5)', // Darker color
+        borderRadius: '8px',
+        border: '4px solid transparent', // Added border
+        backgroundClip: 'padding-box', // Makes the thumb more rounded
+        '&:hover': {
+          background: 'rgba(95, 89, 89, 0.7)',
+        },
+      },
+      padding: '8px', // Increased padding
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      borderRadius: '8px',
+      height: 'auto', // Let height adjust based on content
+    }}
+  >
+    {savedDocuments.map((doc) => (
+      <Paper
+        key={doc.id}
+        elevation={3}
+        sx={{
+          width: '85px',
+          height: '110px',
+          flex: '0 0 auto', // Prevent shrinking
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          borderRadius: 2,
+          overflow: 'hidden',
+          mb: 1 // Add margin bottom for spacing
+        }}
+      >
+        <Box sx={{ 
+          p: 0.5, 
+          backgroundColor: 'rgba(25, 118, 210, 0.08)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
+        }}>
+          <Typography variant="caption" noWrap>
+            {doc.type}
+          </Typography>
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <iframe
+            src={doc.preview}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              pointerEvents: 'none'
+            }}
+            title={`Saved document ${doc.id}`}
+          />
+        </Box>
+        <IconButton
+          size="small"
+          onClick={() => {
+            // Revoke blob URL when removing document
+            if (doc.file && doc.file.startsWith('blob:')) {
+              URL.revokeObjectURL(doc.file);
+            }
+            if (doc.preview && doc.preview.startsWith('blob:')) {
+              URL.revokeObjectURL(doc.preview);
+            }
+            setSavedDocuments(prev => prev.filter(d => d.id !== doc.id));
+          }}
+          sx={{
+            position: 'absolute',
+            top: 2,
+            right: 2,
+            padding: '2px',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)'
+            }
+          }}
+        >
+          <CloseIcon sx={{ fontSize: '0.8rem' }} />
+        </IconButton>
+      </Paper>
+    ))}
+  </Box>
+)}
 
                 {/* Main Preview Box */}
                 <Box
@@ -851,13 +877,13 @@ useEffect(() => {
                     { label: 'Last Name', required: true, field: 'lastName' },
                     { 
                       label: 'Blood Type', 
-                      required: true, 
+                      required: false, // Changed from true to false
                       field: 'bloodType',
                       type: 'select',
                       options: bloodTypes
                     },
-                    { label: 'Profession', required: true, field: 'profession' },
-                    { label: 'Hobbies', required: true, field: 'hobbies' }
+                    { label: 'Profession', required: false, field: 'profession' }, // Changed from true to false
+                    { label: 'Hobbies', required: false, field: 'hobbies' } // Changed from true to false
                   ].map((field) => (
                     <Box 
                       key={field.label}
