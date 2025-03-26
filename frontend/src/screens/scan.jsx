@@ -134,7 +134,7 @@ const Main = () => {
     hobbies: ''
   });
 
-  const bloodTypes = ['Unknown', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  const bloodTypes = ['Unknown', 'A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-'];
 
   const [formErrors, setFormErrors] = useState({
     firstName: false,
@@ -872,7 +872,7 @@ useEffect(() => {
                     { label: 'Last Name', required: true, field: 'lastName' },
                     { 
                       label: 'Blood Type', 
-                      required: false, // Changed from true to false
+                      required: false,
                       field: 'bloodType',
                       type: 'select',
                       options: bloodTypes
@@ -944,6 +944,14 @@ useEffect(() => {
                                 height: '45px',
                                 backgroundColor: 'rgba(255, 255, 255, 0.7)',
                                 borderRadius: '15px',
+                                '& .MuiSelect-select': {
+                                  padding: '0 14px',  // Add left padding
+                                  height: '45px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'flex-start',  // Align content to the left
+                                  textAlign: 'left',  // Text align left
+                                },
                                 '& .MuiOutlinedInput-notchedOutline': {
                                   borderRadius: '15px',
                                   borderColor: 'rgba(0, 0, 0, 0.23)',
@@ -956,17 +964,6 @@ useEffect(() => {
                                 },
                                 '&.Mui-error .MuiOutlinedInput-notchedOutline': {
                                   borderColor: '#d32f2f',
-                                },
-                                '& .MuiSelect-select': {
-                                  padding: '0',  // Remove padding
-                                  height: '45px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  '& .MuiTypography-root': {  // Add this block
-                                    width: '100%',
-                                    textAlign: 'center',
-                                  }
                                 }
                               }}
                               MenuProps={{
