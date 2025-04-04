@@ -58,14 +58,24 @@ class ScanModel {
         try {
             await client.query('BEGIN');
 
+            // Handle designation_order special case
+            let tableName, columnName;
+            if (documentType === 'designation_order') {
+                tableName = 'designation_order';
+                columnName = 'designation_orderID';
+            } else {
+                tableName = documentType.toLowerCase();
+                columnName = `${documentType.toLowerCase()}ID`;
+            }
+
             const insertQuery = `
-                INSERT INTO "${documentType.toLowerCase()}" ("${documentType}file")
+                INSERT INTO "${tableName}" ("filePath")
                 VALUES (decode($1, 'base64'))
-                RETURNING "${documentType}ID"
+                RETURNING "${columnName}"
             `;
 
             const result = await client.query(insertQuery, [base64Data]);
-            const docId = result.rows[0][`${documentType.toLowerCase()}id`];
+            const docId = result.rows[0][columnName.toLowerCase()];
 
             await client.query('COMMIT');
             return { success: true, documentId: docId };
@@ -84,9 +94,14 @@ class ScanModel {
         try {
             await client.query('BEGIN');
 
+            // Handle designation_order special case
+            const columnName = documentType === 'designation_order' 
+                ? 'designation_orderID' 
+                : `${documentType.toLowerCase()}ID`;
+
             const updateQuery = `
                 UPDATE "person" 
-                SET "${documentType}ID" = $1 
+                SET "${columnName}" = $1 
                 WHERE "PID" = $2
             `;
 
@@ -109,11 +124,13 @@ class ScanModel {
         try {
             const query = `
                 SELECT p.*, 
-                       pds."PDSfile" as "pdsDocument",
-                       saln."SALNfile" as "salnDocument"
+                       pds."filePath" as "pdsDocument",
+                       saln."filePath" as "salnDocument",
+                       do."filePath" as "designation_orderDocument"
                 FROM "person" p
-                LEFT JOIN "pds" ON p."pdsID" = pds."PDSID"
-                LEFT JOIN "saln" ON p."salnID" = saln."SALNID"
+                LEFT JOIN "pds" ON p."pdsID" = pds."pdsID"
+                LEFT JOIN "saln" ON p."salnID" = saln."salnID"
+                LEFT JOIN "designation_order" do ON p."designation_orderID" = do."designation_orderID"
                 WHERE p."PID" = $1
             `;
 
