@@ -394,7 +394,7 @@ const Records = () => {
       let sortBy;
       if (dateSort === 'newest') sortBy = 'date_desc';
       else if (dateSort === 'oldest') sortBy = 'date_asc';
-      else if (nameSort === 'az') sortBy = 'name_asc';
+      else  if (nameSort === 'az') sortBy = 'name_asc';
       else if (nameSort === 'za') sortBy = 'name_desc';
       
       
@@ -880,6 +880,30 @@ const handleDeleteConfirm = async () => {
   }
 };
 
+// Update formatDocumentType function to properly handle all document types
+const formatDocumentType = (type, isSingleDocument = false) => {
+  const documentTypeMap = {
+    'PDS': 'Personal Data Sheet',
+    'SALN': 'Statement of Assets, Liabilities and Net Worth',
+    'NOSA': 'Notices of Salary Adjustments/Step Increments',
+    'SR': 'Service Records',
+    'CA': 'Certificate of Appointments',
+    'designation_order': 'Designation Order',
+    'NOA': 'Notice of Assumption',
+    'SAT': 'Seminars and Trainings',
+    'COE': 'Certificate of Eligibilities/Licenses',
+    'TOR': 'School Diplomas and Transcript of Records',
+    'MC': 'Marriage Contract/Certificate',
+    'med_cert': 'Medical Certificate',
+    'NBI': 'NBI Clearance',
+    'CCAA': 'Commendations, Cert of Achievement, Awards',
+    'DAD': 'Disciplinary Action Documents'
+  };
+
+  // Return full name if it's the only document, otherwise return abbreviated form
+  return isSingleDocument ? documentTypeMap[type] : type;
+};
+
   return (
     <ThemeProvider theme={theme}>
       <Box
@@ -1069,15 +1093,37 @@ const handleDeleteConfirm = async () => {
             '& > span': {
               display: 'inline-block',
               width: '100%', // Full width of cell
-              textAlign: 'left' // Align text to left
+              textAlign: 'left', // Align text to left
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }
           }}
         >
           <span>
-            {[
-              record.pdsID && `PDS`,
-              record.salnID && `SALN`
-            ].filter(Boolean).join(' | ') || 'No documents'}
+            {(() => {
+              const documentTypes = [
+                record.pdsID && 'PDS',
+                record.salnID && 'SALN',
+                record.nosaID && 'NOSA',
+                record.srID && 'SR',
+                record.caID && 'CA',
+                record.designation_orderID && 'designation_order',
+                record.noaID && 'NOA',
+                record.satID && 'SAT',
+                record.coeID && 'COE',
+                record.torID && 'TOR',
+                record.mcID && 'MC',
+                record.med_certID && 'med_cert',
+                record.nbiID && 'NBI',
+                record.ccaaID && 'CCAA',
+                record.dadID && 'DAD'
+              ].filter(Boolean);
+    
+              return documentTypes.length === 1 
+                ? formatDocumentType(documentTypes[0], true)
+                : documentTypes.map(type => formatDocumentType(type, false)).join(' | ');
+            })() || 'No documents'}
           </span>
         </TableCell>
         <TableCell 
@@ -1244,188 +1290,91 @@ const handleDeleteConfirm = async () => {
       </Box>
     ) : (
       <Grid container spacing={2}>
-        {documents?.pds && (
-          <Grid item xs={12} md={6}>
-            <Paper 
-              elevation={3}
-              sx={{ 
-                p: 2,
-                height: '400px',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: 'rgba(27, 27, 27, 0.95)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                mb: 2
-              }}>
-                <Typography 
-                  variant="subtitle1" 
-                  sx={{
-                    color: 'white',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    fontWeight: 500
-                  }}
-                >
-                  Personal Data Sheet
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditDocument(selectedRecord, 'PDS');
-                    }}
-                    size="small"
-                    sx={{
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                      }
-                    }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    onClick={(e) => handleDeleteClick(e, 'PDS')}
-                    size="small"
-                    sx={{
-                      color: '#ff4444',
-                      '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.1)' }
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-              <Box 
+        {Object.entries(documents || {}).map(([type, doc]) => {
+          if (!doc || !doc.data) return null;
+          
+          return (
+            <Grid item xs={12} md={6} key={type}>
+              <Paper 
+                elevation={3}
                 sx={{ 
-                  flex: 1,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  backgroundColor: '#fff',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  cursor: 'pointer'
-                }}
-                onClick={() => handleDocumentClick(documents.pds.data)}
-              >
-                {documents.pds.data ? (
-                  <StablePDFViewer 
-                    data={documents.pds.data} 
-                    isPreview={true}
-                  />
-                ) : (
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    height: '100%'
-                  }}>
-                    <Typography color="text.secondary">No PDS available</Typography>
-                  </Box>
-                )}
-              </Box>
-            </Paper>
-          </Grid>
-        )}
-        
-        {documents?.saln && (
-          <Grid item xs={12} md={6}>
-            <Paper 
-              elevation={3}
-              sx={{ 
-                p: 2,
-                height: '400px',
-                display: 'flex',
-                flexDirection: 'column',
+                  p: 2,
+                  height: '400px',
+                  display: 'flex',
+                  flexDirection: 'column',
                   backgroundColor: 'rgba(27, 27, 27, 0.95)',
-                position: 'relative',
-                overflow: 'hidden'
-              }}
-            >
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                mb: 2
-              }}>
-                <Typography 
-                  variant="subtitle1" 
-                  sx={{
-                    color: 'white',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    fontWeight: 500
-                  }}
-                >
-                  Statement of Assets, Liabilities and Net Worth
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditDocument(selectedRecord, 'SALN');
-                    }}
-                    size="small"
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  mb: 2
+                }}>
+                  <Typography 
+                    variant="subtitle1" 
                     sx={{
                       color: 'white',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                      }
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      fontWeight: 500
                     }}
                   >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    onClick={(e) => handleDeleteClick(e, 'SALN')}
-                    size="small"
-                    sx={{
-                      color: '#ff4444',
-                      '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.1)' }
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                    {formatDocumentType(type.toUpperCase(), true)}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditDocument(selectedRecord, type.toUpperCase());
+                      }}
+                      size="small"
+                      sx={{
+                        color: 'white',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                        }
+                      }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      onClick={(e) => handleDeleteClick(e, type.toUpperCase())}
+                      size="small"
+                      sx={{
+                        color: '#ff4444',
+                        '&:hover': { backgroundColor: 'rgba(255, 68, 68, 0.1)' }
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
                 </Box>
-              </Box>
-              <Box 
-                sx={{ 
-                  flex: 1,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  backgroundColor: '#fff',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  cursor: 'pointer'
-                }}
-                onClick={() => handleDocumentClick(documents.saln.data)}
-              >
-                {documents.saln.data ? (
+                <Box 
+                  sx={{ 
+                    flex: 1,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    backgroundColor: '#fff',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => handleDocumentClick(doc.data)}
+                >
                   <StablePDFViewer 
-                    data={documents.saln.data} 
+                    data={doc.data} 
                     isPreview={true}
                   />
-                ) : (
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    height: '100%'
-                  }}>
-                    <Typography color="text.secondary">No SALN available</Typography>
-                  </Box>
-                )}
-              </Box>
-            </Paper>
-          </Grid>
-        )}
-
+                </Box>
+              </Paper>
+            </Grid>
+          );
+        })}
+        
+        {/* Add Document button */}
         <Grid item xs={12} md={6}>
           <Paper 
             elevation={3}
@@ -1494,17 +1443,6 @@ const handleDeleteConfirm = async () => {
             </Box>
           </Paper>
         </Grid>
-
-        {(!documents.pds && !documents.saln) && (
-          <Grid item xs={12}>
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              p: 4 
-            }}>  
-            </Box>
-          </Grid>
-        )}
       </Grid>
     )}
   </Box>

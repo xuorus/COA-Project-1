@@ -605,11 +605,19 @@ useEffect(() => {
     >
       <MenuItem value="PDS">Personal Data Sheet</MenuItem>
       <MenuItem value="SALN">Statement of Assets, Liabilities and Net Worth</MenuItem>
-      {[...Array(13)].map((_, index) => (
-        <MenuItem key={index + 3} value={`DOC${index + 3}`}>
-          DOC{index + 3}
-        </MenuItem>
-      ))}
+      <MenuItem value="NOSA">Notices of Salary Adjustments/Step Increments</MenuItem>
+      <MenuItem value="SR">Service Records</MenuItem>
+      <MenuItem value="CA">Certificate of Appoinments</MenuItem>
+      <MenuItem value="DO">Assignments/Designation Orders</MenuItem>
+      <MenuItem value="NOA">Notice of Assumption</MenuItem>
+      <MenuItem value="SAT">Seminars and Trainings</MenuItem>
+      <MenuItem value="COE">Certificate of Eligibilities/Licenses</MenuItem>
+      <MenuItem value="TOR">School Diplomas and Transcript of Records</MenuItem>
+      <MenuItem value="MC">Marriage Contract/Certificate</MenuItem>
+      <MenuItem value="med_cert">Medical Certificate</MenuItem>
+      <MenuItem value="NBI">NBI Clearance</MenuItem>
+      <MenuItem value="CCAA">Commendations, Cert of Achievement, Awards, etc.</MenuItem>
+      <MenuItem value="DAD">Disciplinary Action Documents</MenuItem>
     </Select>
   </FormControl>
 
