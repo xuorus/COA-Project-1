@@ -392,10 +392,11 @@ const Records = () => {
       
       // Create sort parameter based on current sort states
       let sortBy;
-      if (nameSort === 'az') sortBy = 'name_asc';
-      else if (nameSort === 'za') sortBy = 'name_desc';
-      else if (dateSort === 'newest') sortBy = 'date_desc';
+      if (dateSort === 'newest') sortBy = 'date_desc';
       else if (dateSort === 'oldest') sortBy = 'date_asc';
+      else if (nameSort === 'az') sortBy = 'name_asc';
+      else if (nameSort === 'za') sortBy = 'name_desc';
+      
       
       const data = await recordsApi.getRecords({
         search: searchQuery,
