@@ -99,17 +99,29 @@ class RecordModel {
             SELECT 
                 p."filePath" as "pdsPath",
                 s."filePath" as "salnPath",
+                n."filePath" as "nosaPath",
+                sr."filePath" as "srPath",
+                ca."filePath" as "caPath",
                 p."pdsID",
-                s."salnID"
+                s."salnID",
+                n."nosaID",
+                sr."srID",
+                ca."caID"
             FROM "person" AS a
             LEFT JOIN "pds" AS p ON a."pdsID" = p."pdsID"
             LEFT JOIN "saln" AS s ON a."salnID" = s."salnID"
+            LEFT JOIN "nosa" AS n ON a."nosaID" = n."nosaID"
+            LEFT JOIN "sr" AS sr ON a."srID" = sr."srID"
+            LEFT JOIN "ca" AS ca ON a."caID" = ca."caID"
             WHERE a."PID" = $1
         `, [pid]);
 
         console.log('Retrieved document paths:', {
             hasPDS: !!rows[0]?.pdsPath,
-            hasSALN: !!rows[0]?.salnPath
+            hasSALN: !!rows[0]?.salnPath,
+            hasNOSA: !!rows[0]?.nosaPath,
+            hasSR: !!rows[0]?.srPath,
+            hasCA: !!rows[0]?.caPath
         });
 
         if (rows.length === 0) return null;
@@ -117,11 +129,28 @@ class RecordModel {
         return {
             pds: rows[0]?.pdsPath ? {
                 id: rows[0].pdsID,
-                data: Buffer.from(rows[0].pdsPath).toString('base64')
+                data: Buffer.from(rows[0].pdsPath).toString('base64'),
+                displayName: 'Personal Data Sheet'
             } : null,
             saln: rows[0]?.salnPath ? {
                 id: rows[0].salnID,
-                data: Buffer.from(rows[0].salnPath).toString('base64')
+                data: Buffer.from(rows[0].salnPath).toString('base64'),
+                displayName: 'Statement of Assets, Liabilities and Net Worth'
+            } : null,
+            nosa: rows[0]?.nosaPath ? {
+                id: rows[0].nosaID,
+                data: Buffer.from(rows[0].nosaPath).toString('base64'),
+                displayName: 'Notices of Salary Adjustments/Step Increments'
+            } : null,
+            sr: rows[0]?.srPath ? {
+                id: rows[0].srID,
+                data: Buffer.from(rows[0].srPath).toString('base64'),
+                displayName: 'Service Records'
+            } : null,
+            ca: rows[0]?.caPath ? {
+                id: rows[0].caID,
+                data: Buffer.from(rows[0].caPath).toString('base64'),
+                displayName: 'Certificate of Appointments'
             } : null
         };
     } catch (error) {
