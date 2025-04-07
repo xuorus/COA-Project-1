@@ -191,7 +191,7 @@ const addPersonWithDocument = async (req, res) => {
         const { documentType } = req.body;
 
         // Validate required fields
-        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const requiredFields = ['firstName', 'lastName'];
         const missingFields = requiredFields.filter(field => !formData[field]);
 
         if (missingFields.length > 0) {
@@ -225,8 +225,8 @@ const addPersonWithDocument = async (req, res) => {
             formData.firstName,
             formData.middleName || null,
             formData.lastName,
-            formData.bloodType,
-            formData.profession,
+            formData.bloodType || null,
+            formData.profession || null,
             formData.hobbies || null,
             documentId
         ]);
@@ -510,7 +510,7 @@ const addPersonWithMultipleDocuments = async (req, res) => {
         const documentTypes = JSON.parse(req.body.documentTypes);
 
         // Validate required fields (keep same validation as addPerson)
-        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const requiredFields = ['firstName', 'lastName'];
         const missingFields = requiredFields.filter(field => !formData[field]);
 
         if (missingFields.length > 0) {
@@ -522,7 +522,6 @@ const addPersonWithMultipleDocuments = async (req, res) => {
 
         await client.query('BEGIN');
 
-        // Insert person first
         const personQuery = `
             INSERT INTO person (
                 "fName", "mName", "lName",
@@ -535,8 +534,8 @@ const addPersonWithMultipleDocuments = async (req, res) => {
             formData.firstName,
             formData.middleName || null,
             formData.lastName,
-            formData.bloodType,
-            formData.profession,
+            formData.bloodType || null,
+            formData.profession || null,
             formData.hobbies || null
         ]);
 
