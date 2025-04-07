@@ -119,7 +119,7 @@ const addPerson = async (req, res) => {
         const { documentType, formData } = req.body;
 
         // Validate all required fields
-        const requiredFields = ['firstName', 'lastName', 'bloodType', 'profession'];
+        const requiredFields = ['firstName', 'lastName'];
         const missingFields = requiredFields.filter(field => !formData?.[field]);
 
         if (missingFields.length > 0) {
