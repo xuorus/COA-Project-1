@@ -144,8 +144,8 @@ const addPerson = async (req, res) => {
             formData.firstName,
             formData.middleName || null,
             formData.lastName,
-            formData.bloodType,
-            formData.profession,
+            formData.bloodType || null,
+            formData.profession || null,
             formData.hobbies || null
         ]);
 
