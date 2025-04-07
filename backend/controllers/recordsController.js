@@ -40,7 +40,24 @@ const getDocuments = async (req, res) => {
     if (documents) {
       res.json(documents);
     } else {
-      res.json({ pds: null, saln: null });
+      // Return null for all document types
+      res.json({
+        pds: null,
+        saln: null,
+        nosa: null,
+        sr: null,
+        ca: null,
+        designation_order: null,
+        noa: null,
+        sat: null,
+        coe: null,
+        tor: null,
+        mc: null,
+        med_cert: null,
+        nbi: null,
+        ccaa: null,
+        dad: null
+      });
     }
   } catch (error) {
     console.error('Error fetching documents:', error);
@@ -183,6 +200,172 @@ const deleteDocument = async (req, res) => {
   }
 };
 
+// Individual document handlers
+const getPDS = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getPDS(pid);
+    res.json({ pds: doc });
+  } catch (error) {
+    console.error('Error fetching PDS:', error);
+    res.status(500).json({ message: 'Error fetching PDS' });
+  }
+};
+
+const getSALN = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getSALN(pid);
+    res.json({ saln: doc });
+  } catch (error) {
+    console.error('Error fetching SALN:', error);
+    res.status(500).json({ message: 'Error fetching SALN' });
+  }
+};
+
+const getNOSA = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getNOSA(pid);
+    res.json({ nosa: doc });
+  } catch (error) {
+    console.error('Error fetching NOSA:', error);
+    res.status(500).json({ message: 'Error fetching NOSA' });
+  }
+};
+
+const getSR = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getSR(pid);
+    res.json({ sr: doc });
+  } catch (error) {
+    console.error('Error fetching SR:', error);
+    res.status(500).json({ message: 'Error fetching SR' });
+  }
+};
+
+const getCA = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getCA(pid);
+    res.json({ ca: doc });
+  } catch (error) {
+    console.error('Error fetching CA:', error);
+    res.status(500).json({ message: 'Error fetching CA' });
+  }
+};
+
+const getDesignationOrder = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getDesignationOrder(pid);
+    res.json({ designation_order: doc });
+  } catch (error) {
+    console.error('Error fetching Designation Order:', error);
+    res.status(500).json({ message: 'Error fetching Designation Order' });
+  }
+};
+
+const getNOA = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getNOA(pid);
+    res.json({ noa: doc });
+  } catch (error) {
+    console.error('Error fetching NOA:', error);
+    res.status(500).json({ message: 'Error fetching NOA' });
+  }
+};
+
+const getSAT = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getSAT(pid);
+    res.json({ sat: doc });
+  } catch (error) {
+    console.error('Error fetching SAT:', error);
+    res.status(500).json({ message: 'Error fetching SAT' });
+  }
+};
+
+const getCOE = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getCOE(pid);
+    res.json({ coe: doc });
+  } catch (error) {
+    console.error('Error fetching COE:', error);
+    res.status(500).json({ message: 'Error fetching COE' });
+  }
+};
+
+const getTOR = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getTOR(pid);
+    res.json({ tor: doc });
+  } catch (error) {
+    console.error('Error fetching TOR:', error);
+    res.status(500).json({ message: 'Error fetching TOR' });
+  }
+};
+
+const getMC = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getMC(pid);
+    res.json({ mc: doc });
+  } catch (error) {
+    console.error('Error fetching MC:', error);
+    res.status(500).json({ message: 'Error fetching MC' });
+  }
+};
+
+const getMedCert = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getMedCert(pid);
+    res.json({ med_cert: doc });
+  } catch (error) {
+    console.error('Error fetching Medical Certificate:', error);
+    res.status(500).json({ message: 'Error fetching Medical Certificate' });
+  }
+};
+
+const getNBI = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getNBI(pid);
+    res.json({ nbi: doc });
+  } catch (error) {
+    console.error('Error fetching NBI:', error);
+    res.status(500).json({ message: 'Error fetching NBI' });
+  }
+};
+
+const getCCAA = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getCCAA(pid);
+    res.json({ ccaa: doc });
+  } catch (error) {
+    console.error('Error fetching CCAA:', error);
+    res.status(500).json({ message: 'Error fetching CCAA' });
+  }
+};
+
+const getDAD = async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const doc = await RecordModel.getDAD(pid);
+    res.json({ dad: doc });
+  } catch (error) {
+    console.error('Error fetching DAD:', error);
+    res.status(500).json({ message: 'Error fetching DAD' });
+  }
+};
+
 module.exports = {
   getRecords,
   getPersonDetails,
@@ -190,5 +373,20 @@ module.exports = {
   getPersonHistory,
   updatePersonDetails,
   deleteDocument,
-  addHistory
+  addHistory,
+  getPDS,
+  getSALN,
+  getNOSA,
+  getSR,
+  getCA,
+  getDesignationOrder,
+  getNOA,
+  getSAT,
+  getCOE,
+  getTOR,
+  getMC,
+  getMedCert,
+  getNBI,
+  getCCAA,
+  getDAD
 };

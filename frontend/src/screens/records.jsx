@@ -477,14 +477,43 @@ const Records = () => {
   }
 }, [selectedRecord?.PID, activeTab]);
 
-  const fetchDocuments = useCallback(async (pid) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/records/${pid}/documents`);
-      setDocuments(response.data);
-    } catch (error) {
-      console.error('Error fetching documents:', error);
-    }
-  }, []);
+const fetchDocuments = useCallback(async (pid) => {
+  try {
+    // Array of document types to fetch
+    const documentTypes = [
+      'pds', 'saln', 'nosa', 'sr', 'ca', 
+      'designation-order', 'noa', 'sat', 'coe', 
+      'tor', 'mc', 'med-cert', 'nbi', 'ccaa', 'dad'
+    ];
+
+    // Fetch each document type individually
+    const documentPromises = documentTypes.map(type => 
+      axios.get(`http://localhost:5000/api/records/${pid}/documents/${type}`)
+        .then(response => {
+          // Convert hyphenated keys back to underscore
+          const key = type.replace(/-/g, '_');
+          return { [key]: response.data[key] };
+        })
+        .catch(error => {
+          console.error(`Error fetching ${type}:`, error);
+          return { [type.replace(/-/g, '_')]: null };
+        })
+    );
+
+    const results = await Promise.all(documentPromises);
+    
+    // Combine all results into a single object
+    const documents = results.reduce((acc, curr) => ({
+      ...acc,
+      ...curr
+    }), {});
+
+    setDocuments(documents);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    setDocuments(null);
+  }
+}, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -882,26 +911,34 @@ const handleDeleteConfirm = async () => {
 
 // Update formatDocumentType function to properly handle all document types
 const formatDocumentType = (type, isSingleDocument = false) => {
+  // Convert type to lowercase for case-insensitive comparison
+  const normalizedType = type.toLowerCase();
+
+  // Handle all variations of Medical Certificate
+  if (['med-cert', 'med_cert', 'medcert', 'medicalcertificate'].includes(normalizedType)) {
+    return 'Medical Certificate';
+  }
+
   const documentTypeMap = {
-    'PDS': 'Personal Data Sheet',
-    'SALN': 'Statement of Assets, Liabilities and Net Worth',
-    'NOSA': 'Notices of Salary Adjustments/Step Increments',
-    'SR': 'Service Records',
-    'CA': 'Certificate of Appointments',
+    'pds': 'Personal Data Sheet',
+    'saln': 'Statement of Assets, Liabilities and Net Worth',
+    'nosa': 'Notices of Salary Adjustments/Step Increments',
+    'sr': 'Service Records',
+    'ca': 'Certificate of Appointments',
     'designation_order': 'Designation Order',
-    'NOA': 'Notice of Assumption',
-    'SAT': 'Seminars and Trainings',
-    'COE': 'Certificate of Eligibilities/Licenses',
-    'TOR': 'School Diplomas and Transcript of Records',
-    'MC': 'Marriage Contract/Certificate',
-    'med_cert': 'Medical Certificate',
-    'NBI': 'NBI Clearance',
-    'CCAA': 'Commendations, Cert of Achievement, Awards',
-    'DAD': 'Disciplinary Action Documents'
+    'noa': 'Notice of Assumption',
+    'sat': 'Seminars and Trainings',
+    'coe': 'Certificate of Eligibilities/Licenses',
+    'tor': 'School Diplomas and Transcript of Records',
+    'mc': 'Marriage Contract/Certificate',
+    'nbi': 'NBI Clearance',
+    'ccaa': 'Commendations, Cert of Achievement, Awards',
+    'dad': 'Disciplinary Action Documents'
   };
 
-  // Return full name if it's the only document, otherwise return abbreviated form
-  return isSingleDocument ? documentTypeMap[type] : type;
+  // Return full name if single document, otherwise return abbreviated form
+  const docType = normalizedType in documentTypeMap ? documentTypeMap[normalizedType] : type.toUpperCase();
+  return isSingleDocument ? docType : type.toUpperCase();
 };
 
   return (
@@ -939,14 +976,12 @@ const formatDocumentType = (type, isSingleDocument = false) => {
 
         <Sidebar 
           open={sidebarOpen} 
-          onClose={() => setSidebarOpen(false)} 
-        />
+          onClose={() => setSidebarOpen(false)} />
 
         {/* Sidebar */}
         <Sidebar 
           open={sidebarOpen} 
-          onClose={() => setSidebarOpen(false)} 
-        />
+          onClose={() => setSidebarOpen(false)} />
 
         {/* Main Content */}
         <Box
@@ -1005,7 +1040,7 @@ const formatDocumentType = (type, isSingleDocument = false) => {
           boxShadow: 3,
           display: 'flex',
           flexDirection: 'column',
-        }}
+        }}a //ambut unsa ning a
       >
                 <Table stickyHeader>
                   <TableHead>
@@ -1360,7 +1395,10 @@ const formatDocumentType = (type, isSingleDocument = false) => {
                     position: 'relative',
                     backgroundColor: '#fff',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}
                   onClick={() => handleDocumentClick(doc.data)}
                 >
