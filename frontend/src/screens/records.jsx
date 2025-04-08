@@ -1143,7 +1143,7 @@ const formatDocumentType = (type, isSingleDocument = false) => {
                 record.nosaID && 'NOSA',
                 record.srID && 'SR',
                 record.caID && 'CA',
-                record.designation_orderID && 'designation_order',
+                record.designation_orderID ? 'designation_order' : null,
                 record.noaID && 'NOA',
                 record.satID && 'SAT',
                 record.coeID && 'COE',
@@ -1154,6 +1154,21 @@ const formatDocumentType = (type, isSingleDocument = false) => {
                 record.ccaaID && 'CCAA',
                 record.dadID && 'DAD'
               ].filter(Boolean);
+    
+              // const requiredDocs = ['PDS', 'SALN', 'SR', 'CA'];
+              // if (record.designation_orderID) {
+              //   requiredDocs.push('designation_order');
+              // }
+              // const lackingDocs = requiredDocs.filter(doc => !documentTypes.includes(doc));
+    
+              // if (lackingDocs.length > 0) {
+              //   return `Lacking ${lackingDocs.map(type => formatDocumentType(type, true)).join(', ')}`;
+              // }
+    
+              if (documentTypes.length > 4) {
+                const numberInWords = ['Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen'][documentTypes.length - 5] || documentTypes.length;
+                return `${numberInWords} documents attached`;
+              }
     
               return documentTypes.length === 1 
                 ? formatDocumentType(documentTypes[0], true)
