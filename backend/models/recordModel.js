@@ -108,143 +108,143 @@ class RecordModel {
   static async getDocuments(pid) {
     const client = await pool.connect();
     try {
-        const { rows } = await client.query(`
-            SELECT 
-                p."filePath" as "pdsPath",
-                s."filePath" as "salnPath",
-                n."filePath" as "nosaPath",
-                sr."filePath" as "srPath",
-                ca."filePath" as "caPath",
-                do."filePath" as "designation_orderPath",
-                noa."filePath" as "noaPath",
-                sat."filePath" as "satPath",
-                coe."filePath" as "coePath",
-                tor."filePath" as "torPath",
-                mc."filePath" as "mcPath",
-                med."filePath" as "med_certPath",
-                nbi."filePath" as "nbiPath",
-                ccaa."filePath" as "ccaaPath",
-                dad."filePath" as "dadPath",
-                p."pdsID",
-                s."salnID",
-                n."nosaID",
-                sr."srID",
-                ca."caID",
-                do."designation_orderID",
-                noa."noaID",
-                sat."satID",
-                coe."coeID",
-                tor."torID",
-                mc."mcID",
-                med."med_certID",
-                nbi."nbiID",
-                ccaa."ccaaID",
-                dad."dadID"
-            FROM "person" AS a
-            LEFT JOIN "pds" AS p ON a."pdsID" = p."pdsID"
-            LEFT JOIN "saln" AS s ON a."salnID" = s."salnID"
-            LEFT JOIN "nosa" AS n ON a."nosaID" = n."nosaID"
-            LEFT JOIN "sr" AS sr ON a."srID" = sr."srID"
-            LEFT JOIN "ca" AS ca ON a."caID" = ca."caID"
-            LEFT JOIN "designation_order" AS do ON a."designation_orderID" = do."designation_orderID"
-            LEFT JOIN "noa" AS noa ON a."noaID" = noa."noaID"
-            LEFT JOIN "sat" AS sat ON a."satID" = sat."satID"
-            LEFT JOIN "coe" AS coe ON a."coeID" = coe."coeID"
-            LEFT JOIN "tor" AS tor ON a."torID" = tor."torID"
-            LEFT JOIN "mc" AS mc ON a."mcID" = mc."mcID"
-            LEFT JOIN "med_cert" AS med ON a."med_certID" = med."med_certID"
-            LEFT JOIN "nbi" AS nbi ON a."nbiID" = nbi."nbiID"
-            LEFT JOIN "ccaa" AS ccaa ON a."ccaaID" = ccaa."ccaaID"
-            LEFT JOIN "dad" AS dad ON a."dadID" = dad."dadID"
-            WHERE a."PID" = $1
-        `, [pid]);
+      const { rows } = await client.query(`
+        SELECT 
+          pds."filePath" as "pdsPath",
+          s."filePath" as "salnPath",
+          n."filePath" as "nosaPath",
+          sr."filePath" as "srPath",
+          ca."filePath" as "caPath",
+          do."filePath" as "designation_orderPath",
+          noa."filePath" as "noaPath",
+          sat."filePath" as "satPath",
+          coe."filePath" as "coePath",
+          tor."filePath" as "torPath",
+          mc."filePath" as "mcPath",
+          med."filePath" as "med_certPath",
+          nbi."filePath" as "nbiPath",
+          ccaa."filePath" as "ccaaPath",
+          dad."filePath" as "dadPath",
+          pds."pdsID",
+          s."salnID",
+          n."nosaID",
+          sr."srID",
+          ca."caID",
+          do."designation_orderID",
+          noa."noaID",
+          sat."satID",
+          coe."coeID",
+          tor."torID",
+          mc."mcID",
+          med."med_certID",
+          nbi."nbiID",
+          ccaa."ccaaID",
+          dad."dadID"
+        FROM "person" p
+        LEFT JOIN "pds" pds ON p."pdsID" = pds."pdsID"
+        LEFT JOIN "saln" s ON p."salnID" = s."salnID"
+        LEFT JOIN "nosa" n ON p."nosaID" = n."nosaID"
+        LEFT JOIN "sr" sr ON p."srID" = sr."srID"
+        LEFT JOIN "ca" ca ON p."caID" = ca."caID"
+        LEFT JOIN "designation_order" do ON p."designation_orderID" = do."designation_orderID"
+        LEFT JOIN "noa" noa ON p."noaID" = noa."noaID"
+        LEFT JOIN "sat" sat ON p."satID" = sat."satID"
+        LEFT JOIN "coe" coe ON p."coeID" = coe."coeID"
+        LEFT JOIN "tor" tor ON p."torID" = tor."torID"
+        LEFT JOIN "mc" mc ON p."mcID" = mc."mcID"
+        LEFT JOIN "med_cert" med ON p."med_certID" = med."med_certID"
+        LEFT JOIN "nbi" nbi ON p."nbiID" = nbi."nbiID"
+        LEFT JOIN "ccaa" ccaa ON p."ccaaID" = ccaa."ccaaID"
+        LEFT JOIN "dad" dad ON p."dadID" = dad."dadID"
+        WHERE p."PID" = $1
+      `, [pid]);
 
-        if (rows.length === 0) return null;
+      if (rows.length === 0) return null;
 
-        return {
-            pds: rows[0]?.pdsPath ? {
-                id: rows[0].pdsID,
-                data: Buffer.from(rows[0].pdsPath).toString('base64'),
-                displayName: 'Personal Data Sheet'
-            } : null,
-            saln: rows[0]?.salnPath ? {
-                id: rows[0].salnID,
-                data: Buffer.from(rows[0].salnPath).toString('base64'),
-                displayName: 'Statement of Assets, Liabilities and Net Worth'
-            } : null,
-            nosa: rows[0]?.nosaPath ? {
-                id: rows[0].nosaID,
-                data: Buffer.from(rows[0].nosaPath).toString('base64'),
-                displayName: 'Notices of Salary Adjustments/Step Increments'
-            } : null,
-            sr: rows[0]?.srPath ? {
-                id: rows[0].srID,
-                data: Buffer.from(rows[0].srPath).toString('base64'),
-                displayName: 'Service Records'
-            } : null,
-            ca: rows[0]?.caPath ? {
-                id: rows[0].caID,
-                data: Buffer.from(rows[0].caPath).toString('base64'),
-                displayName: 'Certificate of Appointments'
-            } : null,
-            designation_order: rows[0]?.designation_orderPath ? {
-                id: rows[0].designation_orderID,
-                data: Buffer.from(rows[0].designation_orderPath).toString('base64'),
-                displayName: 'Assignments/Designation Orders'
-            } : null,
-            noa: rows[0]?.noaPath ? {
-                id: rows[0].noaID,
-                data: Buffer.from(rows[0].noaPath).toString('base64'),
-                displayName: 'Notice of Assumption'
-            } : null,
-            sat: rows[0]?.satPath ? {
-                id: rows[0].satID,
-                data: Buffer.from(rows[0].satPath).toString('base64'),
-                displayName: 'Seminars and Trainings'
-            } : null,
-            coe: rows[0]?.coePath ? {
-                id: rows[0].coeID,
-                data: Buffer.from(rows[0].coePath).toString('base64'),
-                displayName: 'Certificate of Eligibility'
-            } : null,
-            tor: rows[0]?.torPath ? {
-                id: rows[0].torID,
-                data: Buffer.from(rows[0].torPath).toString('base64'),
-                displayName: 'School Diplomas and Transcript of Records'
-            } : null,
-            mc: rows[0]?.mcPath ? {
-                id: rows[0].mcID,
-                data: Buffer.from(rows[0].mcPath).toString('base64'),
-                displayName: 'Marriage Contract/Certificate'
-            } : null,
-            med_cert: rows[0]?.med_certPath ? {
-                id: rows[0].med_certID,
-                data: Buffer.from(rows[0].med_certPath).toString('base64'),
-                displayName: 'Medical Certificate'
-            } : null,
-            nbi: rows[0]?.nbiPath ? {
-                id: rows[0].nbiID,
-                data: Buffer.from(rows[0].nbiPath).toString('base64'),
-                displayName: 'NBI Clearance'
-            } : null,
-            ccaa: rows[0]?.ccaaPath ? {
-                id: rows[0].ccaaID,
-                data: Buffer.from(rows[0].ccaaPath).toString('base64'),
-                displayName: 'Commendations, Cert of Achievements, Awards'
-            } : null,
-            dad: rows[0]?.dadPath ? {
-                id: rows[0].dadID,
-                data: Buffer.from(rows[0].dadPath).toString('base64'),
-                displayName: 'Disciplinary Action Document'
-            } : null
-        };
+      return {
+        pds: rows[0]?.pdsPath ? {
+          id: rows[0].pdsID,
+          data: Buffer.from(rows[0].pdsPath).toString('base64'),
+          displayName: 'Personal Data Sheet'
+        } : null,
+        saln: rows[0]?.salnPath ? {
+          id: rows[0].salnID,
+          data: Buffer.from(rows[0].salnPath).toString('base64'),
+          displayName: 'Statement of Assets, Liabilities and Net Worth'
+        } : null,
+        nosa: rows[0]?.nosaPath ? {
+          id: rows[0].nosaID,
+          data: Buffer.from(rows[0].nosaPath).toString('base64'),
+          displayName: 'Notices of Salary Adjustments/Step Increments'
+        } : null,
+        sr: rows[0]?.srPath ? {
+          id: rows[0].srID,
+          data: Buffer.from(rows[0].srPath).toString('base64'),
+          displayName: 'Service Records'
+        } : null,
+        ca: rows[0]?.caPath ? {
+          id: rows[0].caID,
+          data: Buffer.from(rows[0].caPath).toString('base64'),
+          displayName: 'Certificate of Appointments'
+        } : null,
+        designation_order: rows[0]?.designation_orderPath ? {
+          id: rows[0].designation_orderID,
+          data: Buffer.from(rows[0].designation_orderPath).toString('base64'),
+          displayName: 'Assignments/Designation Orders'
+        } : null,
+        noa: rows[0]?.noaPath ? {
+          id: rows[0].noaID,
+          data: Buffer.from(rows[0].noaPath).toString('base64'),
+          displayName: 'Notice of Assumption'
+        } : null,
+        sat: rows[0]?.satPath ? {
+          id: rows[0].satID,
+          data: Buffer.from(rows[0].satPath).toString('base64'),
+          displayName: 'Seminars and Trainings'
+        } : null,
+        coe: rows[0]?.coePath ? {
+          id: rows[0].coeID,
+          data: Buffer.from(rows[0].coePath).toString('base64'),
+          displayName: 'Certificate of Eligibility'
+        } : null,
+        tor: rows[0]?.torPath ? {
+          id: rows[0].torID,
+          data: Buffer.from(rows[0].torPath).toString('base64'),
+          displayName: 'School Diplomas and Transcript of Records'
+        } : null,
+        mc: rows[0]?.mcPath ? {
+          id: rows[0].mcID,
+          data: Buffer.from(rows[0].mcPath).toString('base64'),
+          displayName: 'Marriage Contract/Certificate'
+        } : null,
+        med_cert: rows[0]?.med_certPath ? {
+          id: rows[0].med_certID,
+          data: Buffer.from(rows[0].med_certPath).toString('base64'),
+          displayName: 'Medical Certificate'
+        } : null,
+        nbi: rows[0]?.nbiPath ? {
+          id: rows[0].nbiID,
+          data: Buffer.from(rows[0].nbiPath).toString('base64'),
+          displayName: 'NBI Clearance'
+        } : null,
+        ccaa: rows[0]?.ccaaPath ? {
+          id: rows[0].ccaaID,
+          data: Buffer.from(rows[0].ccaaPath).toString('base64'),
+          displayName: 'Commendations, Cert of Achievements, Awards'
+        } : null,
+        dad: rows[0]?.dadPath ? {
+          id: rows[0].dadID,
+          data: Buffer.from(rows[0].dadPath).toString('base64'),
+          displayName: 'Disciplinary Action Document'
+        } : null
+      };
     } catch (error) {
-        console.error('Error retrieving documents:', error);
-        throw error;
+      console.error('Error retrieving documents:', error);
+      throw error;
     } finally {
-        client.release();
+      client.release();
     }
-}
+  }
 
   static async getPersonHistory(pid) {
     const client = await pool.connect();
@@ -489,20 +489,52 @@ class RecordModel {
   static async getDesignationOrder(pid) {
     const client = await pool.connect();
     try {
-      const { rows } = await client.query(`
-        SELECT do."filePath", do."designation_orderID"
-        FROM "person" AS a
-        LEFT JOIN "designation_order" AS do ON a."designation_orderID" = do."designation_orderID"
-        WHERE a."PID" = $1 AND do."filePath" IS NOT NULL
-      `, [pid]);
+      console.log('[Debug] Fetching designation order for PID:', pid);
       
-      return rows[0] ? {
+      // First check if the ID exists
+      const checkQuery = `
+        SELECT "designation_orderID" 
+        FROM "person" 
+        WHERE "PID" = $1 AND "designation_orderID" IS NOT NULL
+      `;
+      
+      const checkResult = await client.query(checkQuery, [pid]);
+      console.log('[Debug] Check result:', checkResult.rows);
+
+      if (checkResult.rows.length === 0) {
+        console.log('[Debug] No designation_orderID found for PID:', pid);
+        return null;
+      }
+
+      // Get the actual document
+      const query = `
+        SELECT d."filePath", d."designation_orderID"
+        FROM "designation_order" d
+        INNER JOIN "person" p ON p."designation_orderID" = d."designation_orderID"
+        WHERE p."PID" = $1
+      `;
+      
+      const { rows } = await client.query(query, [pid]);
+      console.log('[Debug] Query result:', rows[0]);
+
+      if (!rows[0]) {
+        console.log('[Debug] No designation order found');
+        return null;
+      }
+
+      if (!rows[0].filePath) {
+        console.log('[Debug] FilePath is null');
+        return null;
+      }
+
+      return {
         id: rows[0].designation_orderID,
         data: Buffer.from(rows[0].filePath).toString('base64'),
-        displayName: 'Assignments/Designation Orders'
-      } : null;
+        displayName: 'Designation Order'
+      };
+
     } catch (error) {
-      console.error('Error getting Designation Order:', error);
+      console.error('[Error] Getting Designation Order:', error);
       throw error;
     } finally {
       client.release();

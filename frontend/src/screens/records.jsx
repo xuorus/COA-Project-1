@@ -479,30 +479,34 @@ const Records = () => {
 
 const fetchDocuments = useCallback(async (pid) => {
   try {
-    // Array of document types to fetch
     const documentTypes = [
       'pds', 'saln', 'nosa', 'sr', 'ca', 
-      'designation_order', 'noa', 'sat', 'coe', 
-      'tor', 'mc', 'med-cert', 'nbi', 'ccaa', 'dad'
+      'designation-order',  // Keep hyphenated for API request
+      'noa', 'sat', 'coe', 
+      'tor', 'mc', 'med-cert', // Keep hyphenated for API request
+      'nbi', 'ccaa', 'dad'
     ];
 
-    // Fetch each document type individually
+    // Fetch each document type individually with mapping to underscore version
     const documentPromises = documentTypes.map(type => 
       axios.get(`http://localhost:5000/api/records/${pid}/documents/${type}`)
         .then(response => {
-          // Convert hyphenated keys back to underscore
-          const key = type.replace(/-/g, '_');
-          return { [key]: response.data[key] };
+          // Map the hyphenated types to underscore for consistent state management
+          const stateKey = type === 'designation-order' ? 'designation_order' :
+                          type === 'med-cert' ? 'med_cert' : 
+                          type;
+          return { [stateKey]: response.data[stateKey] };
         })
         .catch(error => {
           console.error(`Error fetching ${type}:`, error);
-          return { [type.replace(/-/g, '_')]: null };
+          const stateKey = type === 'designation-order' ? 'designation_order' :
+                          type === 'med-cert' ? 'med_cert' : 
+                          type;
+          return { [stateKey]: null };
         })
     );
 
     const results = await Promise.all(documentPromises);
-    
-    // Combine all results into a single object
     const documents = results.reduce((acc, curr) => ({
       ...acc,
       ...curr
