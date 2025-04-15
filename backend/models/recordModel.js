@@ -15,6 +15,19 @@ class RecordModel {
           a."bloodType",
           a."pdsID",
           a."salnID",
+          a."nosaID",
+          a."srID",
+          a."caID",
+          a."designation_orderID",
+          a."noaID",
+          a."satID",
+          a."coeID",
+          a."torID",
+          a."mcID",
+          a."med_certID",
+          a."nbiID",
+          a."ccaaID",
+          a."dadID",
           l."timestamp" as "date"
         FROM "person" a
         LEFT JOIN "logs" l ON a."PID" = l."PID"
@@ -102,27 +115,49 @@ class RecordModel {
                 n."filePath" as "nosaPath",
                 sr."filePath" as "srPath",
                 ca."filePath" as "caPath",
+                do."filePath" as "designation_orderPath",
+                noa."filePath" as "noaPath",
+                sat."filePath" as "satPath",
+                coe."filePath" as "coePath",
+                tor."filePath" as "torPath",
+                mc."filePath" as "mcPath",
+                med."filePath" as "med_certPath",
+                nbi."filePath" as "nbiPath",
+                ccaa."filePath" as "ccaaPath",
+                dad."filePath" as "dadPath",
                 p."pdsID",
                 s."salnID",
                 n."nosaID",
                 sr."srID",
-                ca."caID"
+                ca."caID",
+                do."designation_orderID",
+                noa."noaID",
+                sat."satID",
+                coe."coeID",
+                tor."torID",
+                mc."mcID",
+                med."med_certID",
+                nbi."nbiID",
+                ccaa."ccaaID",
+                dad."dadID"
             FROM "person" AS a
             LEFT JOIN "pds" AS p ON a."pdsID" = p."pdsID"
             LEFT JOIN "saln" AS s ON a."salnID" = s."salnID"
             LEFT JOIN "nosa" AS n ON a."nosaID" = n."nosaID"
             LEFT JOIN "sr" AS sr ON a."srID" = sr."srID"
             LEFT JOIN "ca" AS ca ON a."caID" = ca."caID"
+            LEFT JOIN "designation_order" AS do ON a."designation_orderID" = do."designation_orderID"
+            LEFT JOIN "noa" AS noa ON a."noaID" = noa."noaID"
+            LEFT JOIN "sat" AS sat ON a."satID" = sat."satID"
+            LEFT JOIN "coe" AS coe ON a."coeID" = coe."coeID"
+            LEFT JOIN "tor" AS tor ON a."torID" = tor."torID"
+            LEFT JOIN "mc" AS mc ON a."mcID" = mc."mcID"
+            LEFT JOIN "med_cert" AS med ON a."med_certID" = med."med_certID"
+            LEFT JOIN "nbi" AS nbi ON a."nbiID" = nbi."nbiID"
+            LEFT JOIN "ccaa" AS ccaa ON a."ccaaID" = ccaa."ccaaID"
+            LEFT JOIN "dad" AS dad ON a."dadID" = dad."dadID"
             WHERE a."PID" = $1
         `, [pid]);
-
-        console.log('Retrieved document paths:', {
-            hasPDS: !!rows[0]?.pdsPath,
-            hasSALN: !!rows[0]?.salnPath,
-            hasNOSA: !!rows[0]?.nosaPath,
-            hasSR: !!rows[0]?.srPath,
-            hasCA: !!rows[0]?.caPath
-        });
 
         if (rows.length === 0) return null;
 
@@ -151,6 +186,56 @@ class RecordModel {
                 id: rows[0].caID,
                 data: Buffer.from(rows[0].caPath).toString('base64'),
                 displayName: 'Certificate of Appointments'
+            } : null,
+            designation_order: rows[0]?.designation_orderPath ? {
+                id: rows[0].designation_orderID,
+                data: Buffer.from(rows[0].designation_orderPath).toString('base64'),
+                displayName: 'Assignments/Designation Orders'
+            } : null,
+            noa: rows[0]?.noaPath ? {
+                id: rows[0].noaID,
+                data: Buffer.from(rows[0].noaPath).toString('base64'),
+                displayName: 'Notice of Assumption'
+            } : null,
+            sat: rows[0]?.satPath ? {
+                id: rows[0].satID,
+                data: Buffer.from(rows[0].satPath).toString('base64'),
+                displayName: 'Seminars and Trainings'
+            } : null,
+            coe: rows[0]?.coePath ? {
+                id: rows[0].coeID,
+                data: Buffer.from(rows[0].coePath).toString('base64'),
+                displayName: 'Certificate of Eligibility'
+            } : null,
+            tor: rows[0]?.torPath ? {
+                id: rows[0].torID,
+                data: Buffer.from(rows[0].torPath).toString('base64'),
+                displayName: 'School Diplomas and Transcript of Records'
+            } : null,
+            mc: rows[0]?.mcPath ? {
+                id: rows[0].mcID,
+                data: Buffer.from(rows[0].mcPath).toString('base64'),
+                displayName: 'Marriage Contract/Certificate'
+            } : null,
+            med_cert: rows[0]?.med_certPath ? {
+                id: rows[0].med_certID,
+                data: Buffer.from(rows[0].med_certPath).toString('base64'),
+                displayName: 'Medical Certificate'
+            } : null,
+            nbi: rows[0]?.nbiPath ? {
+                id: rows[0].nbiID,
+                data: Buffer.from(rows[0].nbiPath).toString('base64'),
+                displayName: 'NBI Clearance'
+            } : null,
+            ccaa: rows[0]?.ccaaPath ? {
+                id: rows[0].ccaaID,
+                data: Buffer.from(rows[0].ccaaPath).toString('base64'),
+                displayName: 'Commendations, Cert of Achievements, Awards'
+            } : null,
+            dad: rows[0]?.dadPath ? {
+                id: rows[0].dadID,
+                data: Buffer.from(rows[0].dadPath).toString('base64'),
+                displayName: 'Disciplinary Action Document'
             } : null
         };
     } catch (error) {
@@ -280,6 +365,351 @@ class RecordModel {
       return true;
     } catch (error) {
       console.error('Error adding history log:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getPDS(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT p."filePath", p."pdsID"
+        FROM "person" AS a
+        LEFT JOIN "pds" AS p ON a."pdsID" = p."pdsID"
+        WHERE a."PID" = $1 AND p."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].pdsID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Personal Data Sheet'
+      } : null;
+    } catch (error) {
+      console.error('Error getting PDS:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getSALN(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT s."filePath", s."salnID"
+        FROM "person" AS a
+        LEFT JOIN "saln" AS s ON a."salnID" = s."salnID"
+        WHERE a."PID" = $1 AND s."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].salnID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Statement of Assets, Liabilities and Net Worth'
+      } : null;
+    } catch (error) {
+      console.error('Error getting SALN:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getNOSA(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT n."filePath", n."nosaID"
+        FROM "person" AS a
+        LEFT JOIN "nosa" AS n ON a."nosaID" = n."nosaID"
+        WHERE a."PID" = $1 AND n."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].nosaID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Notices of Salary Adjustments/Step Increments'
+      } : null;
+    } catch (error) {
+      console.error('Error getting NOSA:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getSR(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT sr."filePath", sr."srID"
+        FROM "person" AS a
+        LEFT JOIN "sr" AS sr ON a."srID" = sr."srID"
+        WHERE a."PID" = $1 AND sr."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].srID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Service Records'
+      } : null;
+    } catch (error) {
+      console.error('Error getting SR:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getCA(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT ca."filePath", ca."caID"
+        FROM "person" AS a
+        LEFT JOIN "ca" AS ca ON a."caID" = ca."caID"
+        WHERE a."PID" = $1 AND ca."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].caID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Certificate of Appointments'
+      } : null;
+    } catch (error) {
+      console.error('Error getting CA:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getDesignationOrder(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT do."filePath", do."designation_orderID"
+        FROM "person" AS a
+        LEFT JOIN "designation_order" AS do ON a."designation_orderID" = do."designation_orderID"
+        WHERE a."PID" = $1 AND do."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].designation_orderID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Assignments/Designation Orders'
+      } : null;
+    } catch (error) {
+      console.error('Error getting Designation Order:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getNOA(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT noa."filePath", noa."noaID"
+        FROM "person" AS a
+        LEFT JOIN "noa" AS noa ON a."noaID" = noa."noaID"
+        WHERE a."PID" = $1 AND noa."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].noaID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Notice of Assumption'
+      } : null;
+    } catch (error) {
+      console.error('Error getting NOA:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getSAT(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT sat."filePath", sat."satID"
+        FROM "person" AS a
+        LEFT JOIN "sat" AS sat ON a."satID" = sat."satID"
+        WHERE a."PID" = $1 AND sat."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].satID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Seminars and Trainings'
+      } : null;
+    } catch (error) {
+      console.error('Error getting SAT:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getCOE(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT coe."filePath", coe."coeID"
+        FROM "person" AS a
+        LEFT JOIN "coe" AS coe ON a."coeID" = coe."coeID"
+        WHERE a."PID" = $1 AND coe."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].coeID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Certificate of Eligibility'
+      } : null;
+    } catch (error) {
+      console.error('Error getting COE:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getTOR(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT tor."filePath", tor."torID"
+        FROM "person" AS a
+        LEFT JOIN "tor" AS tor ON a."torID" = tor."torID"
+        WHERE a."PID" = $1 AND tor."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].torID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'School Diplomas and Transcript of Records'
+      } : null;
+    } catch (error) {
+      console.error('Error getting TOR:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getMC(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT mc."filePath", mc."mcID"
+        FROM "person" AS a
+        LEFT JOIN "mc" AS mc ON a."mcID" = mc."mcID"
+        WHERE a."PID" = $1 AND mc."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].mcID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Marriage Contract/Certificate'
+      } : null;
+    } catch (error) {
+      console.error('Error getting MC:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getMedCert(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT med."filePath", med."med_certID"
+        FROM "person" AS a
+        LEFT JOIN "med_cert" AS med ON a."med_certID" = med."med_certID"
+        WHERE a."PID" = $1 AND med."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].med_certID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Medical Certificate'
+      } : null;
+    } catch (error) {
+      console.error('Error getting Medical Certificate:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getNBI(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT nbi."filePath", nbi."nbiID"
+        FROM "person" AS a
+        LEFT JOIN "nbi" AS nbi ON a."nbiID" = nbi."nbiID"
+        WHERE a."PID" = $1 AND nbi."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].nbiID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'NBI Clearance'
+      } : null;
+    } catch (error) {
+      console.error('Error getting NBI:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getCCAA(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT ccaa."filePath", ccaa."ccaaID"
+        FROM "person" AS a
+        LEFT JOIN "ccaa" AS ccaa ON a."ccaaID" = ccaa."ccaaID"
+        WHERE a."PID" = $1 AND ccaa."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].ccaaID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Commendations, Cert of Achievements, Awards'
+      } : null;
+    } catch (error) {
+      console.error('Error getting CCAA:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async getDAD(pid) {
+    const client = await pool.connect();
+    try {
+      const { rows } = await client.query(`
+        SELECT dad."filePath", dad."dadID"
+        FROM "person" AS a
+        LEFT JOIN "dad" AS dad ON a."dadID" = dad."dadID"
+        WHERE a."PID" = $1 AND dad."filePath" IS NOT NULL
+      `, [pid]);
+      
+      return rows[0] ? {
+        id: rows[0].dadID,
+        data: Buffer.from(rows[0].filePath).toString('base64'),
+        displayName: 'Disciplinary Action Document'
+      } : null;
+    } catch (error) {
+      console.error('Error getting DAD:', error);
       throw error;
     } finally {
       client.release();
