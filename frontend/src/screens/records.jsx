@@ -482,7 +482,7 @@ const fetchDocuments = useCallback(async (pid) => {
     // Array of document types to fetch
     const documentTypes = [
       'pds', 'saln', 'nosa', 'sr', 'ca', 
-      'designation-order', 'noa', 'sat', 'coe', 
+      'designation_order', 'noa', 'sat', 'coe', 
       'tor', 'mc', 'med-cert', 'nbi', 'ccaa', 'dad'
     ];
 
@@ -1040,9 +1040,9 @@ const formatDocumentType = (type, isSingleDocument = false) => {
           boxShadow: 3,
           display: 'flex',
           flexDirection: 'column',
-        }}a //ambut unsa ning a
-      >
-                <Table stickyHeader>
+        }}
+>
+               <Table stickyHeader>
                   <TableHead>
                     <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                       <TableCell 
