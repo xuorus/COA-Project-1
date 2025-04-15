@@ -20,7 +20,7 @@ router.get('/:pid/documents/saln', recordsController.getSALN);
 router.get('/:pid/documents/nosa', recordsController.getNOSA);
 router.get('/:pid/documents/sr', recordsController.getSR);
 router.get('/:pid/documents/ca', recordsController.getCA);
-router.get('/:pid/documents/designation_order', recordsController.getDesignationOrder); // Update this route
+router.get('/:pid/documents/designation-order', recordsController.getDesignationOrder); // Changed to use hyphen
 router.get('/:pid/documents/noa', recordsController.getNOA);
 router.get('/:pid/documents/sat', recordsController.getSAT);
 router.get('/:pid/documents/coe', recordsController.getCOE);

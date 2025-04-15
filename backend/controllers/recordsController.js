@@ -259,8 +259,11 @@ const getCA = async (req, res) => {
 const getDesignationOrder = async (req, res) => {
   try {
     const { pid } = req.params;
+    console.log('Fetching designation order for PID:', pid);
+    
     const doc = await RecordModel.getDesignationOrder(pid);
-    res.json({ designation_order: doc });
+    console.log('Retrieved designation order:', doc);
+    res.json({ designation_order: doc }); // Use underscore in response
   } catch (error) {
     console.error('Error fetching Designation Order:', error);
     res.status(500).json({ message: 'Error fetching Designation Order' });
@@ -326,7 +329,7 @@ const getMedCert = async (req, res) => {
   try {
     const { pid } = req.params;
     const doc = await RecordModel.getMedCert(pid);
-    res.json({ med_cert: doc });
+    res.json({ med_cert: doc }); // Use underscore in response
   } catch (error) {
     console.error('Error fetching Medical Certificate:', error);
     res.status(500).json({ message: 'Error fetching Medical Certificate' });
