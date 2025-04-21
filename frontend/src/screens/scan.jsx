@@ -212,6 +212,7 @@ const handleSubmit = async (event) => {
   try {
     event.preventDefault();
     setIsLoading(true);
+    setError(null); // Clear any previous errors
     let response;
 
     // Create FormData
@@ -300,7 +301,12 @@ const handleSubmit = async (event) => {
 
   } catch (error) {
     console.error('Submit error:', error);
-    setError(error.response?.data?.message || 'Failed to process request');
+    // Check for person exists error
+    if (error.response?.status === 400 && error.response?.data?.message === 'Person already exists') {
+      setError('A person with this name already exists in the system');
+    } else {
+      setError(error.response?.data?.message || 'Failed to process request');
+    }
   } finally {
     setIsLoading(false);
   }

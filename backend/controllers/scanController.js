@@ -182,6 +182,31 @@ const addActivityLog = async (client, PID, activity) => {
     await client.query(logQuery, [PID, truncatedActivity]);
 };
 
+// Add this helper function after the addActivityLog function
+const checkPersonExists = async (client, firstName, middleName, lastName) => {
+    const query = `
+        SELECT "PID" FROM person 
+        WHERE LOWER("fName") = LOWER($1) 
+        AND (
+            CASE 
+                WHEN $2::text IS NULL AND "mName" IS NULL THEN true
+                WHEN $2::text IS NOT NULL AND "mName" IS NOT NULL AND LOWER("mName") = LOWER($2) THEN true
+                ELSE false
+            END
+        )
+        AND LOWER("lName") = LOWER($3)
+    `;
+    
+    const values = [
+        firstName.trim(),
+        middleName?.trim() || null,
+        lastName.trim()
+    ];
+
+    const result = await client.query(query, values);
+    return result.rows.length > 0;
+};
+
 // Update addPersonWithDocument
 const addPersonWithDocument = async (req, res) => {
     const client = await pool.connect();
@@ -190,18 +215,20 @@ const addPersonWithDocument = async (req, res) => {
         const formData = JSON.parse(req.body.formData);
         const { documentType } = req.body;
 
-        // Validate required fields
-        const requiredFields = ['firstName', 'lastName'];
-        const missingFields = requiredFields.filter(field => !formData[field]);
+        // Check for duplicate person
+        const personExists = await checkPersonExists(
+            client,
+            formData.firstName,
+            formData.middleName,
+            formData.lastName
+        );
 
-        if (missingFields.length > 0) {
+        if (personExists) {
             return res.status(400).json({
                 success: false,
-                message: `Missing required fields: ${missingFields.join(', ')}`
+                message: 'Person already exists'
             });
         }
-
-        await client.query('BEGIN');
 
         // Store document first
         const docQuery = documentType === 'PDS' 
@@ -508,6 +535,21 @@ const addPersonWithMultipleDocuments = async (req, res) => {
         const files = req.files;
         const formData = JSON.parse(req.body.formData);
         const documentTypes = JSON.parse(req.body.documentTypes);
+
+        // Check for duplicate person
+        const personExists = await checkPersonExists(
+            client,
+            formData.firstName,
+            formData.middleName,
+            formData.lastName
+        );
+
+        if (personExists) {
+            return res.status(400).json({
+                success: false,
+                message: 'Person already exists'
+            });
+        }
 
         // Validate required fields (keep same validation as addPerson)
         const requiredFields = ['firstName', 'lastName'];
