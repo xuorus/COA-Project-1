@@ -372,7 +372,7 @@ const Records = () => {
   const [editedDetails, setEditedDetails] = useState(null);
   const [editingField, setEditingField] = useState(null); // Keep only this one
   const [editMode, setEditMode] = useState(false);
-  const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+  const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'unknown'];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
