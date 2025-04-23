@@ -1,10 +1,10 @@
 const pool = require('../config/db');
 
 class RecordModel {
-  static async getRecords({ search, sortBy, bloodType }) {
+  static async getRecords({ search, sortBy, bloodType, documentType }) {
     const client = await pool.connect();
     try {
-      console.log('Executing query with params:', { search, sortBy, bloodType });
+      console.log('Executing query with params:', { search, sortBy, bloodType, documentType });
       
       let query = `
         SELECT DISTINCT ON (a."PID")
@@ -37,10 +37,52 @@ class RecordModel {
       const params = [];
       let paramCount = 1;
 
-      if (bloodType && bloodType !== 'all') {
-        query += ` AND a."bloodType" = $${paramCount}`;
-        params.push(bloodType);
-        paramCount++;
+      // Document type filtering
+      if (documentType && documentType !== 'all') {
+        // Convert from hyphenated format if needed
+        const dbDocType = documentType.replace('-', '_');
+        const idColumn = `"${dbDocType}ID"`;
+        
+        // Join with the specific document table to ensure file exists
+        query = `
+          SELECT DISTINCT ON (a."PID")
+            a."PID",
+            a."fName",
+            a."mName",
+            a."lName",
+            a."bloodType",
+            a."pdsID",
+            a."salnID",
+            a."nosaID",
+            a."srID",
+            a."caID",
+            a."designation_orderID",
+            a."noaID",
+            a."satID",
+            a."coeID",
+            a."torID",
+            a."mcID",
+            a."med_certID",
+            a."nbiID",
+            a."ccaaID",
+            a."dadID",
+            l."timestamp" as "date"
+          FROM "person" a
+          LEFT JOIN "logs" l ON a."PID" = l."PID"
+          INNER JOIN "${dbDocType}" doc ON a.${idColumn} = doc."${dbDocType}ID"
+          WHERE doc."filePath" IS NOT NULL
+        `;
+      }
+
+      if (bloodType) {
+        if (bloodType === 'unknown') {
+          query += ` AND a."bloodType" IS NULL`;
+        } else if (bloodType !== 'all') {
+          query += ` AND a."bloodType" = $${paramCount}`;
+          params.push(bloodType);
+          paramCount++;
+        }
+        // For 'all', we don't add any condition - show everything
       }
 
       if (search) {
