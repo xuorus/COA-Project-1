@@ -354,6 +354,7 @@ const Records = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [bloodTypeAnchorEl, setBloodTypeAnchorEl] = useState(null);
   const [selectedBloodType, setSelectedBloodType] = useState('all');
+  const [selectedDocType, setSelectedDocType] = useState('all');
   const [records, setRecords] = useState([]);
   const [originalRecords, setOriginalRecords] = useState([]);
   const [page, setPage] = useState(0);
@@ -401,7 +402,8 @@ const Records = () => {
       const data = await recordsApi.getRecords({
         search: searchQuery,
         sortBy,
-        bloodType: selectedBloodType
+        bloodType: selectedBloodType,
+        documentType: selectedDocType
       });
       
       setRecords(data);
@@ -411,7 +413,7 @@ const Records = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, nameSort, dateSort, selectedBloodType]);
+  }, [searchQuery, nameSort, dateSort, selectedBloodType, selectedDocType]);
 
   useEffect(() => {
     fetchRecords();
@@ -651,6 +653,25 @@ const handleSearch = (value) => {
       }
     } catch (error) {
       console.error('Blood type filter error:', error);
+    }
+  };
+
+  const handleDocTypeSelect = async (type) => {
+    setSelectedDocType(type);
+    
+    try {
+      const response = await axios.get(`http://localhost:5000/api/records`, {
+        params: {
+          documentType: type
+        }
+      });
+      
+      if (response.status === 200) {
+        setRecords(response.data);
+        setPage(0);
+      }
+    } catch (error) {
+      console.error('Document type filter error:', error);
     }
   };
 
@@ -1024,10 +1045,12 @@ const formatDocumentType = (type, isSingleDocument = false) => {
         nameSort={nameSort}
         dateSort={dateSort}
         selectedBloodType={selectedBloodType}
+        selectedDocType={selectedDocType}
         searchQuery={searchQuery}
         onNameSortChange={handleNameSort}
         onDateSortChange={handleDateSort}
         onBloodTypeSelect={handleBloodTypeSelect}
+        onDocTypeSelect={handleDocTypeSelect}
         onSearchChange={handleSearch}
         bloodTypes={bloodTypes}
       />
