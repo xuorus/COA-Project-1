@@ -55,7 +55,7 @@ const DisplayField = ({ label, value, icon }) => (
   </Box>
 );
 
-const StyledTextField = ({ label, value, onChange, icon, ...props }) => (
+const StyledTextField = ({ label, value, onChange, icon, onKeyPress, ...props }) => (
   <Box sx={{ mb: 2 }}>
     <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
       {label}
@@ -74,6 +74,7 @@ const StyledTextField = ({ label, value, onChange, icon, ...props }) => (
         fullWidth
         value={value}
         onChange={onChange}
+        onKeyPress={onKeyPress}
         variant="outlined"
         size="small"
         sx={{
@@ -131,6 +132,12 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
       ...prev,
       [field]: event.target.value
     }));
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSave();
+    }
   };
 
   const bloodTypes = ['', 'A', 'A+', 'A-', 'B', 'B+', 'B-', 'O', 'O+', 'O-', 'AB', 'AB+', 'AB-'];
@@ -209,18 +216,21 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
                   label="First Name"
                   value={editedDetails.fName}
                   onChange={handleChange('fName')}
+                  onKeyPress={handleKeyPress}
                   icon={<PersonIcon sx={{ color: 'primary.main' }} />}
                 />
                 <StyledTextField
                   label="Middle Name"
                   value={editedDetails.mName}
                   onChange={handleChange('mName')}
+                  onKeyPress={handleKeyPress}
                   icon={<PersonIcon sx={{ color: 'primary.main' }} />}
                 />
                 <StyledTextField
                   label="Surname"
                   value={editedDetails.lName}
                   onChange={handleChange('lName')}
+                  onKeyPress={handleKeyPress}
                   icon={<PersonIcon sx={{ color: 'primary.main' }} />}
                 />
               </>
@@ -256,6 +266,7 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
                   label="Blood Type"
                   value={bloodTypeValue}
                   onChange={handleChange('bloodType')}
+                  onKeyPress={handleKeyPress}
                   icon={<LocalHospitalIcon sx={{ color: 'error.main' }} />}
                 >
                   <MenuItem value="">
@@ -285,6 +296,7 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
                   label="Profession"
                   value={editedDetails.profession}
                   onChange={handleChange('profession')}
+                  onKeyPress={handleKeyPress}
                   icon={<WorkIcon sx={{ color: 'primary.main' }} />}
                 />
               ) : (
@@ -305,6 +317,7 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
                   label="Hobbies"
                   value={editedDetails.hobbies}
                   onChange={handleChange('hobbies')}
+                  onKeyPress={handleKeyPress}
                   multiline
                   rows={2}
                   icon={<SportsSoccerIcon sx={{ color: 'success.main' }} />}
