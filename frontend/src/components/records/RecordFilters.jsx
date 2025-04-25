@@ -228,7 +228,7 @@ const RecordFilters = ({
               }
             }}
           >
-            {type === 'all' ? 'Unknown Blood Types' : 
+            {type === 'all' ? 'All Blood Types' : 
              type === 'unknown' ? 'No Blood Type' : type}
           </MenuItem>
         ))}

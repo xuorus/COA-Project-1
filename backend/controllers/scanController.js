@@ -642,6 +642,34 @@ const addPersonWithMultipleDocuments = async (req, res) => {
     }
 };
 
+// Update the records fetch route to handle array of blood types
+const getRecords = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    let query = `SELECT * FROM person`;
+    const params = [];
+    
+    if (req.query.bloodType) {
+      // Handle array of blood types
+      if (Array.isArray(req.query.bloodType)) {
+        query += ` WHERE "bloodType" = ANY($1)`;
+        params.push(req.query.bloodType);
+      } else if (req.query.bloodType !== 'all') {
+        query += ` WHERE "bloodType" = $1`;
+        params.push(req.query.bloodType);
+      }
+    }
+    
+    const result = await client.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching records:', error);
+    res.status(500).json({ error: 'Failed to fetch records' });
+  } finally {
+    client.release();
+  }
+};
+
 // Add to module.exports
 module.exports = {
     startScan,
@@ -653,5 +681,6 @@ module.exports = {
     addDocumentToExistingPerson,
     updateDocumentFile,
     updateDocument,
-    addPersonWithMultipleDocuments
+    addPersonWithMultipleDocuments,
+    getRecords
 };
