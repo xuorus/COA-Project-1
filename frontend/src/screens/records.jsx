@@ -372,7 +372,7 @@ const Records = () => {
   const [editedDetails, setEditedDetails] = useState(null);
   const [editingField, setEditingField] = useState(null); // Keep only this one
   const [editMode, setEditMode] = useState(false);
-  const bloodTypes = ['all', 'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', 'unknown'];
+  const bloodTypes = ['all', 'unknown', 'A', 'A+', 'A-', 'B', 'B+', 'B-', 'O', 'O+', 'O-', 'AB', 'AB+', 'AB-'];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -634,27 +634,48 @@ const handleSearch = (value) => {
   setRecords(filteredRecords);
 };
 
-  const handleBloodTypeSelect = async (type) => {
+const handleBloodTypeSelect = async (type) => {
+  try {
     setSelectedBloodType(type);
     setBloodTypeAnchorEl(null);
     
-    try {
-      const response = await axios.get(`http://localhost:5000/api/records`, {
-        params: {
-          bloodType: type
-        }
-      });
-      
-      if (response.status === 200) {
-        setRecords(response.data);
-        setPage(0); // Reset to first page
-      } else {
-        throw new Error('Filter failed');
+    // Map basic blood types to include their variants
+    let bloodTypeFilter = type;
+    if (['A', 'B', 'AB', 'O'].includes(type)) {
+      switch(type) {
+        case 'A':
+          bloodTypeFilter = ['A', 'A+', 'A-'];
+          break;
+        case 'B':
+          bloodTypeFilter = ['B', 'B+', 'B-'];
+          break;
+        case 'AB':
+          bloodTypeFilter = ['AB', 'AB+', 'AB-'];
+          break;
+        case 'O':
+          bloodTypeFilter = ['O', 'O+', 'O-'];
+          break;
+        default:
+          bloodTypeFilter = type;
       }
-    } catch (error) {
-      console.error('Blood type filter error:', error);
     }
-  };
+    
+    const response = await axios.get(`http://localhost:5000/api/records`, {
+      params: {
+        bloodType: bloodTypeFilter
+      }
+    });
+    
+    if (response.status === 200) {
+      setRecords(response.data);
+      setPage(0);
+    } else {
+      throw new Error('Filter failed');
+    }
+  } catch (error) {
+    console.error('Blood type filter error:', error);
+  }
+};
 
   const handleDocTypeSelect = async (type) => {
     setSelectedDocType(type);
