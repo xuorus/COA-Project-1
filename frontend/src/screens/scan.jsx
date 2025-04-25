@@ -135,7 +135,7 @@ const Main = () => {
     hobbies: ''
   });
 
-  const bloodTypes = ['Unknown', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  const bloodTypes = ['Unknown', 'A', 'A+', 'A-', 'B', 'B+', 'B-', 'AB', 'AB+', 'AB-', 'O', 'O+', 'O-'];
 
   const [formErrors, setFormErrors] = useState({
     firstName: false,
