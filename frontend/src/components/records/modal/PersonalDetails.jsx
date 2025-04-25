@@ -133,7 +133,7 @@ const PersonalDetails = ({ personDetails, onUpdate }) => {
     }));
   };
 
-  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  const bloodTypes = ['', 'A', 'A+', 'A-', 'B', 'B+', 'B-', 'O', 'O+', 'O-', 'AB', 'AB+', 'AB-'];
 
   const bloodTypeValue = editMode 
     ? (editedDetails.bloodType || '') 
