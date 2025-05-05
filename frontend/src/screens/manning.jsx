@@ -37,6 +37,12 @@ import NgasCluster7 from '../components/manning_table/NGAS_Cluster_1-8/NgasClust
 import NgasSUCsSAAs from '../components/manning_table/NGAS_SUCs_SAAs/NgasSUCsSAAs';
 import CgasMain from '../components/manning_table/CGAS_Clusters_1-6/CgasMain';
 import CgasCluster1 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster1';
+import CgasCluster2 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster2';
+import CgasCluster4 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster4';
+import CgasCluster356 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster356';
+import CgasCluster3 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster3';
+import CgasCluster5 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster5';
+import CgasCluster6 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster6';
 
 const theme = createTheme({
   palette: {
@@ -528,12 +534,12 @@ const EditModal = ({ open, onClose }) => {
               pt: 2
             }}
           >
-            {(selectedSection === 'LGAS A-I' || 
-  selectedSection === 'NGAS Cluster 1-8' || 
-  selectedSection === 'NGAS SUCs & Other SAAs' || 
-  selectedSection === 'CGAS Cluster 1-6' || 
-  selectedSection === 'CGAS WD & Other SAAs' ||
-  selectedSection === 'TECHNICAL AUDIT GROUP A-D') && (
+           {(selectedSection === 'LGAS A-I' || 
+           selectedSection === 'NGAS Cluster 1-8' || 
+           selectedSection === 'NGAS SUCs & Other SAAs' || 
+           selectedSection === 'CGAS Cluster 1-6' || 
+           selectedSection === 'CGAS WD & Other SAAs' ||
+           selectedSection === 'TECHNICAL AUDIT GROUP A-D') && (
   <Grid container spacing={2}>
     {filterItems(lgasItems, searchQuery).map((item, index) => (
       <Grid item xs={12} key={index}>
@@ -541,7 +547,13 @@ const EditModal = ({ open, onClose }) => {
           fullWidth
           onClick={() => {
             if (item === 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 1, 2, & 4' ||
-                item === 'CGAS Cluster 1 - Banking & Credit'
+                item === 'CGAS Cluster 1 - Banking & Credit' ||
+                item === 'CGAS Cluster 2 - Social Security & Housing' ||
+                item === 'CGAS Cluster 4 - Industrial & Area Development' ||
+                item === 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6' ||
+                item === 'CGAS Cluster 3 - Public Utilities' ||
+                item === 'CGAS Cluster 5 - Agricultural & Natural Resources' ||
+                item === 'CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services'
             ) {
               setSelectedCgas(item);
               setThirdModalOpen(true);
@@ -661,7 +673,7 @@ const EditModal = ({ open, onClose }) => {
                 <ArrowBackIcon />
               </IconButton>
               <Typography variant="h6">
-                {selectedNgas || selectedLgas}
+              {selectedNgas || selectedCgas || selectedNgasSUCsSAAs || selectedLgas}
               </Typography>
             </Box>
             <IconButton
@@ -725,6 +737,18 @@ const EditModal = ({ open, onClose }) => {
                   <CgasMain isEditable={true} />
                 ) : selectedCgas === 'CGAS Cluster 1 - Banking & Credit' ? (
                   <CgasCluster1 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 2 - Social Security & Housing' ? (
+                  <CgasCluster2 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 4 - Industrial & Area Development' ? (
+                  <CgasCluster4 isEditable={true} />
+                ) : selectedCgas === 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6' ? (
+                  <CgasCluster356 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 3 - Public Utilities' ? (
+                  <CgasCluster3 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 5 - Agricultural & Natural Resources' ? (
+                  <CgasCluster5 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services' ? (
+                  <CgasCluster6 isEditable={true} />
   
                 ) : selectedNgas === 'Reg X - National Government Audit Section (NGAS) Clusters 1, 2, 3 & 4' ? (
                   <NgasMain isEditable={true} />
@@ -920,13 +944,31 @@ useEffect(() => {
           case 'cgas-cluster1':
             setCurrentSection('CGAS Cluster 1 - Banking & Credit');
             break;
+          case 'cgas-cluster2':
+            setCurrentSection('CGAS Cluster 2 - Social Security & Housing');
+            break;
+          case 'cgas-cluster4':
+            setCurrentSection('CGAS Cluster 4 - Industrial & Area Development');
+            break;
+          case 'cgas-cluster356':
+            setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6');
+            break;
+          case 'cgas-cluster3':
+            setCurrentSection('CGAS Cluster 3 - Public Utilities');
+            break;
+          case 'cgas-cluster5':
+            setCurrentSection('CGAS Cluster 5 - Agricultural & Natural Resources');
+            break;
+          case 'cgas-cluster6':
+            setCurrentSection('CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services');
+            break;
         }
       }
     });
   }, options);
 
   // Observe all section elements
-  const sections = document.querySelectorAll('[data-testid^="lgas-"], [data-testid^="ngas-"]');
+  const sections = document.querySelectorAll('[data-testid^="lgas-"], [data-testid^="ngas-"], [data-testid^="cgas-"]');
   sections.forEach(section => {
     sectionObserver.observe(section);
   });
@@ -1104,7 +1146,8 @@ useEffect(() => {
                         <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
                           {selectedFilter === 'LGAS A-I' && 'Local Government Audit Sectors A-I'}
                           {selectedFilter === 'NGAS Cluster 1-8' && 'National Government Audit Section Clusters 1-8'}
-                          {/* Add other sector subtitles here */}
+                          {selectedFilter === 'CGAS Cluster 1-6' && 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 1 - 6'}
+                          {selectedFilter === 'NGAS SUCs & Other SAAs' && 'Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)'}
                         </Typography>
                       )}
                     </Box>
@@ -1179,7 +1222,7 @@ useEffect(() => {
                               },
                             }}
                             sx={{
-                              width: '175px',
+                              width: '170px',
                               height: '32px',
                               '& .MuiSelect-select': {
                                 py: 0.5,
@@ -1190,7 +1233,6 @@ useEffect(() => {
                             }}
                           >
                             <MenuItem value="" disabled>
-                              Filter
                             </MenuItem>
                             <MenuItem value="all">Default</MenuItem>
                             <MenuItem 
@@ -1247,7 +1289,7 @@ useEffect(() => {
                           },
                         }}
                           >
-                            <GetAppRoundedIcon sx={{ fontSize: 22 }} />
+                            <GetAppRoundedIcon sx={{mt:0.5  , fontSize: 27 }} />
                           </IconButton>
                         </Box>
                       </Box>
@@ -1378,13 +1420,19 @@ useEffect(() => {
                             <NgasCluster3 isEditable={false} />
                             <NgasCluster4 isEditable={false} />
                             <NgasCluster5 isEditable={false} />
-                            <NgasCluster68 isEditable={false}/>
-                            <NgasCluster6 isEditable={false}/>
-                            <NgasCluster8 isEditable={false}/>
-                            <NgasCluster7 isEditable={false}/>
+                            <NgasCluster68 isEditable={false} />
+                            <NgasCluster6 isEditable={false} />
+                            <NgasCluster8 isEditable={false} />
+                            <NgasCluster7 isEditable={false} />
                             <NgasSUCsSAAs isEditable={false} />
                             <CgasMain isEditable={false} />
                             <CgasCluster1 isEditable={false} />
+                            <CgasCluster2 isEditable={false} />
+                            <CgasCluster4 isEditable={false} />
+                            <CgasCluster356 isEditable={false} />
+                            <CgasCluster3 isEditable={false} />
+                            <CgasCluster5 isEditable={false} />
+                            <CgasCluster6 isEditable={false} />
                           </>
                         ) : selectedFilter === 'LGAS A-I' ? (
                           <>
@@ -1417,6 +1465,12 @@ useEffect(() => {
                           <>
                           <CgasMain isEditable={false} />
                           <CgasCluster1 isEditable={false} />
+                          <CgasCluster2 isEditable={false} />
+                          <CgasCluster4 isEditable={false} />
+                          <CgasCluster356 isEditable={false} />
+                          <CgasCluster3 isEditable={false} />
+                          <CgasCluster5 isEditable={false} />
+                          <CgasCluster6 isEditable={false} />
                           </>
                         ) : null}
                       </TableBody>

@@ -32,6 +32,7 @@ const CgasCluster1 = ({ isEditable = false }) => {
     <>
       {[
        {
+        id: 'cgas1-team01',
         team: "01",
         station: "BSP, Cagayan de Oro City",
         auditees: [
@@ -46,6 +47,7 @@ const CgasCluster1 = ({ isEditable = false }) => {
         ]
       },
       {
+        id: 'cgas1-team02',
         team: "02",
         station: "DBP, Cagayan de Oro City",
         auditees: [
@@ -64,6 +66,7 @@ const CgasCluster1 = ({ isEditable = false }) => {
         ]
       },
       {
+        id: 'cgas1-team03',
         team: "03",
         station: "DBP, Malaybalay City",
         auditees: [
@@ -83,6 +86,7 @@ const CgasCluster1 = ({ isEditable = false }) => {
         ]
       },
       {
+        id: 'cgas1-team04',
         team: "04",
         station: "LBP, Velez, Cagayan de Oro City",
         auditees: [
@@ -111,28 +115,34 @@ const CgasCluster1 = ({ isEditable = false }) => {
         ]
       }
       ].map((team) => (
-        <React.Fragment key={team.team || 'empty'}>
-          <TableRow data-testid="cgas-main">
+        <React.Fragment key={team.id}>
+          <TableRow data-testid="cgas-cluster1">
             <TableCell rowSpan={team.auditees.length}>CGAS</TableCell>
             <TableCell rowSpan={team.auditees.length}>Cluster 1</TableCell>
             <TableCell>{team.team === "-" ? "-" : `Team ${team.team}`}</TableCell>
             <TableCell>{team.station}</TableCell>
             <TableCell>{renderAuditee(team.auditees[0])}</TableCell>
-            <TableCell><NameCell isEditable={isEditable} cellId={`CgasCluster1-${team.team || '0'}-1`} /></TableCell>
+            <TableCell><NameCell isEditable={isEditable} cellId={`${team.id}-1`}/>
+            </TableCell>
             <TableCell>-</TableCell>
             <TableCell>-</TableCell>
-            <TableCell>{getNumber(`CgasCluster1-${team.team || '0'}-1`)}</TableCell>
+            <TableCell>{getNumber(`${team.id}-1`)}</TableCell>
             <TableCell>-</TableCell>
           </TableRow>
           {team.auditees.slice(1).map((auditee, index) => (
-            <TableRow key={`${team.team}-${index}`}>
+              <TableRow key={`${team.id}-c1-${index + 2}`}>
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
               <TableCell>{renderAuditee(auditee)}</TableCell>
-              <TableCell><NameCell isEditable={isEditable} cellId={`CgasCluster1-${team.team}-${index + 2}`} /></TableCell>
+              <TableCell>
+                <NameCell 
+                  isEditable={isEditable} 
+                  cellId={`${team.id}-${index + 2}`} 
+                />
+              </TableCell>
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
-              <TableCell>{getNumber(`CgasCluster1-${team.team}-${index + 2}`)}</TableCell>
+              <TableCell>{getNumber(`${team.id}-${index + 2}`)}</TableCell>
               <TableCell>-</TableCell>
             </TableRow>
           ))}
