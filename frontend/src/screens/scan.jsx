@@ -1208,8 +1208,8 @@ useEffect(() => {
         </Box>
     </Fade>
 </Modal>
-                      </ThemeProvider>
-                    );
-                  };
+</ThemeProvider>
+  );
+};
 
 export default Main;

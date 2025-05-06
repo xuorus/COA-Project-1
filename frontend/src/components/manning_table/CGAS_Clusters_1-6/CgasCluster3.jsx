@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import NameCell from '../../NameCell';
 import { NumberingContext } from '../../../context/NumberingContext';
 
-const CgasMain = ({ isEditable = false }) => {
+const CgasCluster3 = ({ isEditable = false }) => {
   const { getNumber } = useContext(NumberingContext);
 
   const renderAuditee = (auditee) => {
@@ -31,26 +31,57 @@ const CgasMain = ({ isEditable = false }) => {
   return (
     <>
       {[
-        {
-          id: 'cgas-main',
-          team: "-",
-          station: "Regional Office No. X, Cagayan de Oro City",
-          auditees:[
-            {
-              title: "Agencies Under:",
-              details: [ 
-                "Cluster 1 - Banking and Credit",
-                "Cluster 2 - Social Services and Housing",
-                "Cluster 4 - Industrial and Area Development"
-              ]
-            },
-          ]
-        }
+       {
+        id: 'cgas3-team01',
+        team: "01",
+        station: "NPC (MinGen), Iligan City",
+        auditees: [
+          "1. National Power Corporation Mindanao Generation",
+          "2. Agus 6/7",
+          "3. Agus 4/5",
+          "4. Agus 1/2 ",
+          "5. Pulangi IV",
+          "6.  PICC"
+        ]
+      },
+      {
+        id: 'cgas3-team02',
+        team: "02",
+        station: "PPA/PMO, Cagayan de Oro City",
+        auditees: [
+          "1. Philippine Ports Authority, Port Management Office Regional Office No. 10",
+          "2. Terminal Management Office, Balingoan",
+          "3. Terminal Management Office, Camiguin",
+          "4. Terminal Management Office, Opol"
+        ]
+      },
+      {
+        id: 'cgas3-team03',
+        team: "03",
+        station: "PPA/PMO, Iligan City",
+        auditees: [
+          "1. Philippine Ports Authority, Port Management Office, Lanao del Norte/ Iligan City",
+          "2. Terminal Management Office, Kolambugan",
+          "3. Terminal Management Office, Tubod",
+          "4. Philippine Ports Authority, Port Management Office, Misamis Occidental/ Ozamiz City",
+          "5. Terminal Management Office, Plaridel",
+          "6. Terminal Management Office, Jimenez"
+        ]
+      },
+      {
+        id: 'cgas3-team04',
+        team: "04",
+        station: "PPC Area 8, Cagayan de Oro City",
+        auditees: [
+          "1. Phil. Postal Corp. (PPC) - Area 8 - Central Mindanao Admin Center",
+          "-"
+        ]
+      }
       ].map((team) => (
         <React.Fragment key={team.id}>
-          <TableRow data-testid="cgas-main">
+          <TableRow data-testid="cgas-cluster3">
             <TableCell rowSpan={team.auditees.length}>CGAS</TableCell>
-            <TableCell rowSpan={team.auditees.length}>Clusters 1, 2 and 4</TableCell>
+            <TableCell rowSpan={team.auditees.length}>Cluster 3</TableCell>
             <TableCell>{team.team === "-" ? "-" : `Team ${team.team}`}</TableCell>
             <TableCell>{team.station}</TableCell>
             <TableCell>{renderAuditee(team.auditees[0])}</TableCell>
@@ -61,7 +92,7 @@ const CgasMain = ({ isEditable = false }) => {
             <TableCell>-</TableCell>
           </TableRow>
           {team.auditees.slice(1).map((auditee, index) => (
-            <TableRow key={`${team.team}-${index}`}>
+              <TableRow key={`${team.id}-c3-${index + 2}`}>
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
               <TableCell>{renderAuditee(auditee)}</TableCell>
@@ -78,12 +109,12 @@ const CgasMain = ({ isEditable = false }) => {
   );
 };
 
-CgasMain.propTypes = {
+CgasCluster3.propTypes = {
   isEditable: PropTypes.bool
 };
 
-CgasMain.defaultProps = {
+CgasCluster3.defaultProps = {
   isEditable: false
 };
 
-export default CgasMain;
+export default CgasCluster3;

@@ -37,6 +37,19 @@ import NgasCluster7 from '../components/manning_table/NGAS_Cluster_1-8/NgasClust
 import NgasSUCsSAAs from '../components/manning_table/NGAS_SUCs_SAAs/NgasSUCsSAAs';
 import CgasMain from '../components/manning_table/CGAS_Clusters_1-6/CgasMain';
 import CgasCluster1 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster1';
+import CgasCluster2 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster2';
+import CgasCluster4 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster4';
+import CgasCluster356 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster356';
+import CgasCluster3 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster3';
+import CgasCluster5 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster5';
+import CgasCluster6 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster6';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import EditableNameCell from '../components/EditableNameCell';
+import AutocompleteNameCell from '../components/AutocompleteNameCell';
+import { RecordsProvider } from '../context/RecordsContext';
+import NameCell from '../components/NameCell';
+import { useNumbering } from '../context/NumberingContext';
 
 const theme = createTheme({
   palette: {
@@ -528,12 +541,12 @@ const EditModal = ({ open, onClose }) => {
               pt: 2
             }}
           >
-            {(selectedSection === 'LGAS A-I' || 
-  selectedSection === 'NGAS Cluster 1-8' || 
-  selectedSection === 'NGAS SUCs & Other SAAs' || 
-  selectedSection === 'CGAS Cluster 1-6' || 
-  selectedSection === 'CGAS WD & Other SAAs' ||
-  selectedSection === 'TECHNICAL AUDIT GROUP A-D') && (
+           {(selectedSection === 'LGAS A-I' || 
+           selectedSection === 'NGAS Cluster 1-8' || 
+           selectedSection === 'NGAS SUCs & Other SAAs' || 
+           selectedSection === 'CGAS Cluster 1-6' || 
+           selectedSection === 'CGAS WD & Other SAAs' ||
+           selectedSection === 'TECHNICAL AUDIT GROUP A-D') && (
   <Grid container spacing={2}>
     {filterItems(lgasItems, searchQuery).map((item, index) => (
       <Grid item xs={12} key={index}>
@@ -541,7 +554,13 @@ const EditModal = ({ open, onClose }) => {
           fullWidth
           onClick={() => {
             if (item === 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 1, 2, & 4' ||
-                item === 'CGAS Cluster 1 - Banking & Credit'
+                item === 'CGAS Cluster 1 - Banking & Credit' ||
+                item === 'CGAS Cluster 2 - Social Security & Housing' ||
+                item === 'CGAS Cluster 4 - Industrial & Area Development' ||
+                item === 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6' ||
+                item === 'CGAS Cluster 3 - Public Utilities' ||
+                item === 'CGAS Cluster 5 - Agricultural & Natural Resources' ||
+                item === 'CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services'
             ) {
               setSelectedCgas(item);
               setThirdModalOpen(true);
@@ -661,7 +680,7 @@ const EditModal = ({ open, onClose }) => {
                 <ArrowBackIcon />
               </IconButton>
               <Typography variant="h6">
-                {selectedNgas || selectedLgas}
+              {selectedNgas || selectedCgas || selectedNgasSUCsSAAs || selectedLgas}
               </Typography>
             </Box>
             <IconButton
@@ -713,7 +732,19 @@ const EditModal = ({ open, onClose }) => {
                   <TableCell sx={{ width: '8%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Team No.</TableCell>
                   <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Official Station</TableCell>
                   <TableCell sx={{ width: '24%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Auditees</TableCell>
-                  <TableCell sx={{ width: '12%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
+                  <TableCell sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    width: '12%',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '& .MuiIconButton-root': {
+                      position: 'absolute',
+                      right: 2,
+                      top: 2,
+                      zIndex: 1
+                    }
+                  }}>Name</TableCell>
                   <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Position</TableCell>
                   <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Designation</TableCell>
                   <TableCell sx={{ width: '6%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>No.</TableCell>
@@ -725,6 +756,18 @@ const EditModal = ({ open, onClose }) => {
                   <CgasMain isEditable={true} />
                 ) : selectedCgas === 'CGAS Cluster 1 - Banking & Credit' ? (
                   <CgasCluster1 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 2 - Social Security & Housing' ? (
+                  <CgasCluster2 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 4 - Industrial & Area Development' ? (
+                  <CgasCluster4 isEditable={true} />
+                ) : selectedCgas === 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6' ? (
+                  <CgasCluster356 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 3 - Public Utilities' ? (
+                  <CgasCluster3 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 5 - Agricultural & Natural Resources' ? (
+                  <CgasCluster5 isEditable={true} />
+                ) : selectedCgas === 'CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services' ? (
+                  <CgasCluster6 isEditable={true} />
   
                 ) : selectedNgas === 'Reg X - National Government Audit Section (NGAS) Clusters 1, 2, 3 & 4' ? (
                   <NgasMain isEditable={true} />
@@ -805,10 +848,11 @@ const Manning = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1');
   const tableContainerRef = useRef(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false); // Add this state
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -823,7 +867,18 @@ const Manning = () => {
   };
 
   const handleEditClick = () => {
-    setEditModalOpen(true);
+    if (isEditMode) {
+      // Save changes here
+      handleSaveChanges();
+    }
+    setIsEditMode(prev => !prev);
+  };
+
+  // Add the save changes function
+  const handleSaveChanges = () => {
+    // Implement your save logic here
+    console.log('Saving changes...');
+    setHasChanges(false);
   };
 
   // Add the debounce function at the top level
@@ -843,98 +898,136 @@ const debounce = (func, wait) => {
 useEffect(() => {
   if (!tableContainerRef.current) return;
 
+  // Reset scroll position when filter changes
+  tableContainerRef.current.scrollTop = 0;
+
+  // Updated Intersection Observer configuration
   const options = {
     root: tableContainerRef.current,
-    threshold: 0.5, // Increased threshold for more stable detection
-    rootMargin: '-20px 0px'
+    threshold: [0.1, 0.5], // Lower threshold to catch elements at the bottom
+    rootMargin: '-20px 0px 0px 0px' // Adjusted rootMargin to better detect bottom elements
   };
 
   const sectionObserver = new IntersectionObserver((entries) => {
+    // Find the most visible section that is at least 10% visible
+    let maxVisibility = 0;
+    let mostVisibleSection = null;
+
     entries.forEach(entry => {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-        const sectionType = entry.target.getAttribute('data-testid');
-        switch (sectionType) {
-          case 'lgas-a':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1');
-            break;
-          case 'lgas-b':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) B - Misamis Oriental 2');
-            break;
-          case 'lgas-c':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) C - Cities of Cagayan de Oro, Gingoog & El Salvador');
-            break;
-          case 'lgas-d':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) D - Bukidnon 1');
-            break;
-          case 'lgas-e':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) E - Bukidnon 2');
-            break;
-          case 'lgas-f':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) F - Misamis Occidental 1');
-            break;
-          case 'lgas-g':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) G - Cities of Oroquita, Ozamiz and Tangub');
-            break;
-          case 'lgas-h':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) H - Lanao del Norte 1');
-            break;
-          case 'lgas-i':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) I - Lanao del Norte 2');
-            break;
-          case 'ngas-main':
-            setCurrentSection('Reg X - National Government Audit Section (NGAS) Clusters 1, 2, 3 & 4');
-            break;
-          case 'ngas-cluster1':
-            setCurrentSection('NGAS Cluster 1 - Executive Offices');
-            break;
-          case 'ngas-cluster2':
-            setCurrentSection('NGAS Cluster 2 - Oversight & Public Debt. Management Agencies');
-            break;
-          case 'ngas-cluster3':
-            setCurrentSection('NGAS Cluster 3 - Legislative, Judiciary & Constitutional Offices');
-            break;
-          case 'ngas-cluster4':
-            setCurrentSection('NGAS Cluster 4 - Defense & Security');
-            break;
-          case 'ngas-cluster5':
-            setCurrentSection('Reg X - National Government Audit Section(NGAS) Cluster 5');
-            break;
-          case 'ngas-cluster68':
-            setCurrentSection('Reg X - National Government Audit Sector (NGAS) Clusters 6 & 8');
-            break;
-          case 'ngas-cluster6':
-            setCurrentSection('NGAS Cluster 6 - Health & Science');
-            break;
-          case 'ngas-cluster8':
-            setCurrentSection('NGAS Cluster 8 - Agricultural & Environment');
-            break;
-          case 'ngas-cluster7':
-            setCurrentSection('Reg X - National Government Audit Sector (NGAS) Cluster 7');
-            break;
-          case 'ngas-sucs-saas':
-            setCurrentSection('Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)');
-            break;
-          case 'cgas-main':
-            setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 1, 2, & 4');
-            break;
-          case 'cgas-cluster1':
-            setCurrentSection('CGAS Cluster 1 - Banking & Credit');
-            break;
+      if (entry.isIntersecting && selectedFilter === 'all') {
+        const visibilityRatio = entry.intersectionRatio;
+        if (visibilityRatio > maxVisibility) {
+          maxVisibility = visibilityRatio;
+          mostVisibleSection = entry.target;
         }
       }
     });
+
+    // Update section title if we found a visible section
+    if (mostVisibleSection && maxVisibility >= 0.1) {
+      const sectionType = mostVisibleSection.getAttribute('data-testid');
+      // Add bottom clusters to the switch case
+      switch (sectionType) {
+        case 'lgas-a':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1');
+          break;
+        case 'lgas-b':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) B - Misamis Oriental 2');
+          break;
+        case 'lgas-c':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) C - Cities of Cagayan de Oro, Gingoog & El Salvador');
+          break;
+        case 'lgas-d':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) D - Bukidnon 1');
+          break;
+        case 'lgas-e':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) E - Bukidnon 2');
+          break;
+        case 'lgas-f':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) F - Misamis Occidental 1');
+          break;
+        case 'lgas-g':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) G - Cities of Oroquita, Ozamiz and Tangub');
+          break;
+        case 'lgas-h':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) H - Lanao del Norte 1');
+          break;
+        case 'lgas-i':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) I - Lanao del Norte 2');
+          break;
+        case 'ngas-main':
+          setCurrentSection('Reg X - National Government Audit Section (NGAS) Clusters 1, 2, 3 & 4');
+          break;
+        case 'ngas-cluster1':
+          setCurrentSection('NGAS Cluster 1 - Executive Offices');
+          break;
+        case 'ngas-cluster2':
+          setCurrentSection('NGAS Cluster 2 - Oversight & Public Debt. Management Agencies');
+          break;
+        case 'ngas-cluster3':
+          setCurrentSection('NGAS Cluster 3 - Legislative, Judiciary & Constitutional Offices');
+          break;
+        case 'ngas-cluster4':
+          setCurrentSection('NGAS Cluster 4 - Defense & Security');
+          break;
+        case 'ngas-cluster5':
+          setCurrentSection('Reg X - National Government Audit Section(NGAS) Cluster 5');
+          break;
+        case 'ngas-cluster68':
+          setCurrentSection('Reg X - National Government Audit Sector (NGAS) Clusters 6 & 8');
+          break;
+        case 'ngas-cluster6':
+          setCurrentSection('NGAS Cluster 6 - Health & Science');
+          break;
+        case 'ngas-cluster8':
+          setCurrentSection('NGAS Cluster 8 - Agricultural & Environment');
+          break;
+        case 'ngas-cluster7':
+          setCurrentSection('Reg X - National Government Audit Sector (NGAS) Cluster 7');
+          break;
+        case 'ngas-sucs-saas':
+          setCurrentSection('Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)');
+          break;
+        case 'cgas-main':
+          setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 1, 2, & 4');
+          break;
+        case 'cgas-cluster1':
+          setCurrentSection('CGAS Cluster 1 - Banking & Credit');
+          break;
+        case 'cgas-cluster2':
+          setCurrentSection('CGAS Cluster 2 - Social Security & Housing');
+          break;
+        case 'cgas-cluster4':
+          setCurrentSection('CGAS Cluster 4 - Industrial & Area Development');
+          break;
+        case 'cgas-cluster356':
+          setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6');
+          break;
+        case 'cgas-cluster3':
+          setCurrentSection('CGAS Cluster 3 - Public Utilities');
+          break;
+        case 'cgas-cluster5':
+          setCurrentSection('CGAS Cluster 5 - Agricultural & Natural Resources');
+          break;
+        case 'cgas-cluster6':
+          setCurrentSection('CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services');
+          break;
+      }
+    }
   }, options);
 
-  // Observe all section elements
-  const sections = document.querySelectorAll('[data-testid^="lgas-"], [data-testid^="ngas-"]');
-  sections.forEach(section => {
-    sectionObserver.observe(section);
-  });
+  // Only observe sections if in default view
+  if (selectedFilter === 'all') {
+    const sections = document.querySelectorAll('[data-testid^="lgas-"], [data-testid^="ngas-"], [data-testid^="cgas-"]');
+    sections.forEach(section => {
+      sectionObserver.observe(section);
+    });
+  }
 
   return () => {
     sectionObserver.disconnect();
   };
-}, []);
+}, [selectedFilter]); // Only depend on selectedFilter
 
   // Add this function before the return statement in the Manning component
   const exportToExcel = () => {
@@ -1021,419 +1114,445 @@ useEffect(() => {
   }, [selectedFilter]);
 
   return (
-    <ManningProvider>
-      <NumberingProvider>
-        <ThemeProvider theme={theme}>
-          <Box
-            sx={{
-              height: '100vh',
-              width: '100vw',
-              margin: 0,
-              padding: 0,
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
+    <RecordsProvider>
+      <ManningProvider>
+        <NumberingProvider>
+          <ThemeProvider theme={theme}>
+            <Box
+              sx={{
+                height: '100vh',
+                width: '100vw',
+                margin: 0,
+                padding: 0,
                 position: 'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundImage: `url(${backgroundImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                opacity: 1,
-                zIndex: -1
-              }
-            }}
-          >
-            <WindowControl />
-            <Header onMenuClick={() => setSidebarOpen(true)} />
-
-            <Sidebar 
-              open={sidebarOpen} 
-              onClose={() => setSidebarOpen(false)} 
-            />
-            
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '80px',
-                left: 0,
-                right: 0,
-                bottom: '40px',
-                padding: 2, // Reduced padding to give more space
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: `url(${backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 1,
+                  zIndex: -1
+                }
               }}
             >
-              <Container maxWidth="lg">
-                <Box 
-                  sx={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(3px)',
-                    borderRadius: 2,
-                    padding: 3, // Reduced padding
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    height: 'calc(100vh - 140px)', // Increased height
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    mb: 3 
-                  }}>
-                    <Box>
-                      <Typography variant="h5" component="h1" fontWeight="bold">
-                        Manning Complement
-                      </Typography>
-                      {(!selectedFilter || selectedFilter === 'all') ? (
-                        <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
-                          {currentSection}
+              <WindowControl />
+              <Header onMenuClick={() => setSidebarOpen(true)} />
+
+              <Sidebar 
+                open={sidebarOpen} 
+                onClose={() => setSidebarOpen(false)} 
+              />
+              
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '80px',
+                  left: 0,
+                  right: 0,
+                  bottom: '40px',
+                  padding: 2, // Reduced padding to give more space
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                }}
+              >
+                <Container maxWidth="lg">
+                  <Box 
+                    sx={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      backdropFilter: 'blur(3px)',
+                      borderRadius: 2,
+                      padding: 3, // Reduced padding
+                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      height: 'calc(100vh - 140px)', // Increased height
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      mb: 3 
+                    }}>
+                      <Box>
+                        <Typography variant="h5" component="h1" fontWeight="bold">
+                          Manning Complement
                         </Typography>
-                      ) : (
-                        <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
-                          {selectedFilter === 'LGAS A-I' && 'Local Government Audit Sectors A-I'}
-                          {selectedFilter === 'NGAS Cluster 1-8' && 'National Government Audit Section Clusters 1-8'}
-                          {/* Add other sector subtitles here */}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        gap: 1,
-                        alignItems: 'flex-end'
-                      }}>
-                        <TextField
-                          variant="outlined"
-                          size="small"
-                          placeholder="Search"
-                          value={searchQuery}
-                          onChange={(e) => handleSearchChange(e.target.value)}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <SearchIcon />
-                              </InputAdornment>
-                            ),
-                            sx: {
-                              borderRadius: '12px',
-                              '& fieldset': {
-                                borderRadius: '12px',
-                              },
-                            }
-                          }}
-                          sx={{
-                            width: '250px',
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '20px',
-                              backgroundColor: 'none',
-                              '&.Mui-focused fieldset': {
-                                borderColor: 'black',
-                              },
-                              '&:hover fieldset': {
-                                borderColor: 'black',
-                              }
-                            }
-                          }}
-                        />
-                        
+                        {(!selectedFilter || selectedFilter === 'all') ? (
+                          <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
+                            {currentSection}
+                          </Typography>
+                        ) : (
+                          <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
+                            {selectedFilter === 'LGAS A-I' && 'Local Government Audit Sectors A-I'}
+                            {selectedFilter === 'NGAS Cluster 1-8' && 'National Government Audit Section Clusters 1-8'}
+                            {selectedFilter === 'CGAS Cluster 1-6' && 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 1 - 6'}
+                            {selectedFilter === 'NGAS SUCs & Other SAAs' && 'Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)'}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
                         <Box sx={{ 
                           display: 'flex', 
+                          flexDirection: 'column', 
                           gap: 1,
-                          alignItems: 'center',
+                          alignItems: 'flex-end'
                         }}>
-                          <Select
-                            value={selectedFilter}
-                            onChange={(e) => setSelectedFilter(e.target.value)}
+                          <TextField
+                            variant="outlined"
                             size="small"
-                            displayEmpty
-                            MenuProps={{
-                              PaperProps: {
-                                style: {
-                                  maxHeight: 250, // Reduced height
-                                },
-                                sx: {
-                                  '&::-webkit-scrollbar': {
-                                    width: '6px', // Reduced scrollbar width
-                                  },
-                                  '&::-webkit-scrollbar-track': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                  },
-                                  '&::-webkit-scrollbar-thumb': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                                    borderRadius: '5px',
-                                  }
-                                }
-                              },
-                            }}
-                            sx={{
-                              width: '175px',
-                              height: '32px',
-                              '& .MuiSelect-select': {
-                                py: 0.5,
-                              },
-                              '&.MuiOutlinedInput-root': {
+                            placeholder="Search"
+                            value={searchQuery}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <SearchIcon />
+                                </InputAdornment>
+                              ),
+                              sx: {
                                 borderRadius: '12px',
+                                '& fieldset': {
+                                  borderRadius: '12px',
+                                },
                               }
                             }}
-                          >
-                            <MenuItem value="" disabled>
-                              Filter
-                            </MenuItem>
-                            <MenuItem value="all">Default</MenuItem>
-                            <MenuItem 
-                              value="LGAS A-I"
-                              sx={{
-                                '&.Mui-selected': {
-                                  backgroundColor: 'transparent',
+                            sx={{
+                              width: '250px',
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '20px',
+                                backgroundColor: 'none',
+                                '&.Mui-focused fieldset': {
+                                  borderColor: 'black',
                                 },
-                                '&.Mui-selected:hover': {
-                                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                '&:hover fieldset': {
+                                  borderColor: 'black',
+                                }
+                              }
+                            }}
+                          />
+                          
+                          <Box sx={{ 
+                            display: 'flex', 
+                            gap: 1,
+                            alignItems: 'center',
+                          }}>
+                            <Select
+                              value={selectedFilter}
+                              onChange={(e) => setSelectedFilter(e.target.value)}
+                              size="small"
+                              displayEmpty
+                              MenuProps={{
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 250, // Reduced height
+                                  },
+                                  sx: {
+                                    '&::-webkit-scrollbar': {
+                                      width: '6px', // Reduced scrollbar width
+                                    },
+                                    '&::-webkit-scrollbar-track': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                                      borderRadius: '5px',
+                                    }
+                                  }
+                                },
+                              }}
+                              sx={{
+                                width: '170px',
+                                height: '32px',
+                                '& .MuiSelect-select': {
+                                  py: 0.5,
+                                },
+                                '&.MuiOutlinedInput-root': {
+                                  borderRadius: '12px',
                                 }
                               }}
                             >
-                              LGAS A-I
-                            </MenuItem>
-                            <MenuItem value="NGAS Cluster 1-8">NGAS Cluster 1-8</MenuItem>
-                            <MenuItem value="NGAS SUCs & Other SAAs">NGAS SUCs & Other SAAs</MenuItem>
-                            <MenuItem value="CGAS Cluster 1-6">CGAS Cluster 1-6</MenuItem>
-                            <MenuItem value="CGAS WD & Other SAAs">CGAS WD & Other SAAs</MenuItem>
-                            <MenuItem value="ORD">ORD</MenuItem>
-                            <MenuItem value="OARD">OARD</MenuItem>
-                            <MenuItem value="ATFD">ATFD</MenuItem>
-                            <MenuItem value="ATFD FS">ATFD FS</MenuItem>
-                            <MenuItem value="ATFD FS/Cashier">ATFD FS/Cashier</MenuItem>
-                            <MenuItem value="ATFD HRMS">ATFD HRMS</MenuItem>
-                            <MenuItem value="ATFD RMS">ATFD RMS</MenuItem>
-                            <MenuItem value="ATFD TS">ATFD TS</MenuItem>
-                            <MenuItem value="ATFD IT">ATFD IT</MenuItem>
-                            <MenuItem value="ATFD GSS">ATFD GSS</MenuItem>
-                            <MenuItem value="FRAUD AUDIT DIVISION">FRAUD AUDIT DIVISION</MenuItem>
-                            <MenuItem value="LEGAL & ADJUCATION">LEGAL & ADJUCATION</MenuItem>
-                            <MenuItem value="AGAD">AGAD</MenuItem>
-                            <MenuItem value="TECHNICAL AUDIT GROUP A-D">TECHNICAL AUDIT GROUP A-D</MenuItem>
-                          </Select>
+                              <MenuItem value="" disabled>
+                              </MenuItem>
+                              <MenuItem value="all">Default</MenuItem>
+                              <MenuItem 
+                                value="LGAS A-I"
+                                sx={{
+                                  '&.Mui-selected': {
+                                    backgroundColor: 'transparent',
+                                  },
+                                  '&.Mui-selected:hover': {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                  }
+                                }}
+                              >
+                                LGAS A-I
+                              </MenuItem>
+                              <MenuItem value="NGAS Cluster 1-8">NGAS Cluster 1-8</MenuItem>
+                              <MenuItem value="NGAS SUCs & Other SAAs">NGAS SUCs & Other SAAs</MenuItem>
+                              <MenuItem value="CGAS Cluster 1-6">CGAS Cluster 1-6</MenuItem>
+                              <MenuItem value="CGAS WD & Other SAAs">CGAS WD & Other SAAs</MenuItem>
+                              <MenuItem value="ORD">ORD</MenuItem>
+                              <MenuItem value="OARD">OARD</MenuItem>
+                              <MenuItem value="ATFD">ATFD</MenuItem>
+                              <MenuItem value="ATFD FS">ATFD FS</MenuItem>
+                              <MenuItem value="ATFD FS/Cashier">ATFD FS/Cashier</MenuItem>
+                              <MenuItem value="ATFD HRMS">ATFD HRMS</MenuItem>
+                              <MenuItem value="ATFD RMS">ATFD RMS</MenuItem>
+                              <MenuItem value="ATFD TS">ATFD TS</MenuItem>
+                              <MenuItem value="ATFD IT">ATFD IT</MenuItem>
+                              <MenuItem value="ATFD GSS">ATFD GSS</MenuItem>
+                              <MenuItem value="FRAUD AUDIT DIVISION">FRAUD AUDIT DIVISION</MenuItem>
+                              <MenuItem value="LEGAL & ADJUCATION">LEGAL & ADJUCATION</MenuItem>
+                              <MenuItem value="AGAD">AGAD</MenuItem>
+                              <MenuItem value="TECHNICAL AUDIT GROUP A-D">TECHNICAL AUDIT GROUP A-D</MenuItem>
+                            </Select>
 
-                          <IconButton
-                            onClick={handleEditClick}
-                            sx={{
-                              padding: '4px',
-                            '&:focus': {
+                            <IconButton
+                              onClick={handleEditClick}
+                              sx={{
+                                padding: '4px',
+                              '&:focus': {
+                                outline: 'none'
+                              },
+                            }}
+                            >
+                              {isEditMode ? (
+                                <CheckIcon sx={{ 
+                                  fontSize: 22,
+                                  color: hasChanges ? '#1976d2' : 'inherit' // Blue when there are changes
+                                }} />
+                              ) : (
+                                <BorderColorRoundedIcon sx={{ fontSize: 22 }} />
+                              )}
+                            </IconButton>
+
+                            <IconButton
+                              onClick={exportToExcel}
+                              sx={{
+                                padding: '4px',
+                              '&:focus': {
                               outline: 'none'
                             },
                           }}
-                          >
-                            <BorderColorRoundedIcon sx={{ fontSize: 22 }} />
-                          </IconButton>
-
-                          <IconButton
-                            onClick={exportToExcel}
-                            sx={{
-                              padding: '4px',
-                            '&:focus': {
-                            outline: 'none'
-                          },
-                        }}
-                          >
-                            <GetAppRoundedIcon sx={{ fontSize: 22 }} />
-                          </IconButton>
+                            >
+                              <GetAppRoundedIcon sx={{mt:0.5  , fontSize: 27 }} />
+                            </IconButton>
+                          </Box>
                         </Box>
                       </Box>
                     </Box>
-                  </Box>
 
-                  <TableContainer 
-                    ref={tableContainerRef}
-                    component={Paper} 
-                    sx={{ 
-                      flexGrow: 1, 
-                      overflow: 'auto',
-                      borderRadius: 2,
-                      boxShadow: 3,
-                      mt: -1,
-                      maxHeight: 'calc(100vh - 280px)',
-                      '& .MuiTableCell-root': {
-                        textAlign: 'center',
-                        verticalAlign: 'middle',
-                        border: '1px solid #ddd',
-                        padding: '8px 16px',
-                        whiteSpace: 'normal',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        minHeight: '48px',
-                        display: 'table-cell',
-                      },
-                      '&::-webkit-scrollbar': {
-                        width: '6px', // Reduced scrollbar width
-                        height: '6px',
-                      },
-                      '&::-webkit-scrollbar-track': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                        borderRadius: '3px',
-                      },
-                      '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                        borderRadius: '4px',
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                        },
-                      },
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: 'rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.05)',
-                    }}
-                  >
-                    <Table 
-                      stickyHeader 
-                      size="small" 
+                    <TableContainer 
+                      ref={tableContainerRef}
+                      component={Paper} 
                       sx={{ 
-                        borderCollapse: 'collapse',
-                        tableLayout: 'fixed',
-                        minWidth: '150%',
-                        '& .MuiTableRow-root': {
-                          height: 'auto',
+                        flexGrow: 1, 
+                        overflow: 'auto',
+                        borderRadius: 2,
+                        boxShadow: 3,
+                        mt: -1,
+                        maxHeight: 'calc(100vh - 280px)',
+                        '& .MuiTableCell-root': {
+                          textAlign: 'center',
+                          verticalAlign: 'middle',
+                          border: '1px solid #ddd',
+                          padding: '8px 16px',
+                          whiteSpace: 'normal',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          minHeight: '48px',
+                          display: 'table-cell',
                         },
+                        '&::-webkit-scrollbar': {
+                          width: '6px', // Reduced scrollbar width
+                          height: '6px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                          borderRadius: '3px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                          borderRadius: '4px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                          },
+                        },
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.05)',
                       }}
                     >
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '8%'
-                          }}>Sector</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '10%'
-                          }}>AG</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '8%'
-                          }}>Team No.</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '16%'
-                          }}>Official Station</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '24%'
-                          }}>Auditees</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '12%'
-                          }}>Name</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '16%'
-                          }}>Position</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '16%'
-                          }}>Designation</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '6%'
-                          }}>No.</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '12%'
-                          }}>Office Order</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {selectedFilter === 'all' ? (
-                          <>
-                            <LgasA isEditable={false} />
-                            <LgasB isEditable={false} />
-                            <LgasC isEditable={false} />
-                            <LgasD isEditable={false} />
-                            <LgasE isEditable={false} />
-                            <LgasF isEditable={false} />
-                            <LgasG isEditable={false} />
-                            <LgasH isEditable={false} />
-                            <LgasI isEditable={false} />
-                            <NgasMain isEditable={false} />
-                            <NgasCluster1 isEditable={false} />
-                            <NgasCluster2 isEditable={false} />
-                            <NgasCluster3 isEditable={false} />
-                            <NgasCluster4 isEditable={false} />
-                            <NgasCluster5 isEditable={false} />
-                            <NgasCluster68 isEditable={false}/>
-                            <NgasCluster6 isEditable={false}/>
-                            <NgasCluster8 isEditable={false}/>
-                            <NgasCluster7 isEditable={false}/>
-                            <NgasSUCsSAAs isEditable={false} />
-                            <CgasMain isEditable={false} />
-                            <CgasCluster1 isEditable={false} />
-                          </>
-                        ) : selectedFilter === 'LGAS A-I' ? (
-                          <>
-                            <LgasA isEditable={false} />
-                            <LgasB isEditable={false} />
-                            <LgasC isEditable={false} />
-                            <LgasD isEditable={false} />
-                            <LgasE isEditable={false} />
-                            <LgasF isEditable={false} />
-                            <LgasG isEditable={false} />
-                            <LgasH isEditable={false} />
-                            <LgasI isEditable={false} />
-                          </>
-                        ) : selectedFilter === 'NGAS Cluster 1-8' ? (
-                          <>
-                            <NgasMain isEditable={false} />
-                            <NgasCluster1 isEditable={false} />
-                            <NgasCluster2 isEditable={false} />
-                            <NgasCluster3 isEditable={false} />
-                            <NgasCluster4 isEditable={false} />
-                            <NgasCluster5 isEditable={false} />
-                            <NgasCluster68 isEditable={false}/>
-                            <NgasCluster6 isEditable={false}/>
-                            <NgasCluster8 isEditable={false}/>
-                            <NgasCluster7 isEditable={false}/>
-                          </>
-                        ) : selectedFilter === 'NGAS SUCs & Other SAAs' ? (
-                          <NgasSUCsSAAs isEditable={false} />
-                        ) : selectedFilter === 'CGAS Cluster 1-6' ? (
-                          <>
-                          <CgasMain isEditable={false} />
-                          <CgasCluster1 isEditable={false} />
-                          </>
-                        ) : null}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              </Container>
+                      <Table 
+                        stickyHeader 
+                        size="small" 
+                        sx={{ 
+                          borderCollapse: 'collapse',
+                          tableLayout: 'fixed',
+                          minWidth: '150%',
+                          '& .MuiTableRow-root': {
+                            height: 'auto',
+                          },
+                        }}
+                      >
+                        <TableHead>
+                          <TableRow>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '8%'
+                            }}>Sector</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '10%'
+                            }}>AG</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '8%'
+                            }}>Team No.</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '16%'
+                            }}>Official Station</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '24%'
+                            }}>Auditees</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '12%',
+                              position: 'relative',
+                              overflow: 'hidden',
+                              '& .MuiIconButton-root': {
+                                position: 'absolute',
+                                right: 2,
+                                top: 2,
+                                zIndex: 1
+                              }
+                            }}>Name</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '16%'
+                            }}>Position</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '16%'
+                            }}>Designation</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold',   
+                              backgroundColor: '#f5f5f5',
+                              width: '6%'
+                            }}>No.</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '12%'
+                            }}>Office Order</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+  {selectedFilter === 'all' || !selectedFilter ? (
+    <>
+      <LgasA isEditable={isEditMode} />
+      <LgasB isEditable={isEditMode} />
+      <LgasC isEditable={isEditMode} />
+      <LgasD isEditable={isEditMode} />
+      <LgasE isEditable={isEditMode} />
+      <LgasF isEditable={isEditMode} />
+      <LgasG isEditable={isEditMode} />
+      <LgasH isEditable={isEditMode} />
+      <LgasI isEditable={isEditMode} />
+      <NgasMain isEditable={isEditMode} />
+      <NgasCluster1 isEditable={isEditMode} />
+      <NgasCluster2 isEditable={isEditMode} />
+      <NgasCluster3 isEditable={isEditMode} />
+      <NgasCluster4 isEditable={isEditMode} />
+      <NgasCluster5 isEditable={isEditMode} />
+      <NgasCluster68 isEditable={isEditMode} />
+      <NgasCluster6 isEditable={isEditMode} />
+      <NgasCluster8 isEditable={isEditMode} />
+      <NgasCluster7 isEditable={isEditMode} />
+      <NgasSUCsSAAs isEditable={isEditMode} />
+      <CgasMain isEditable={isEditMode} />
+      <CgasCluster1 isEditable={isEditMode} />
+      <CgasCluster2 isEditable={isEditMode} />
+      <CgasCluster4 isEditable={isEditMode} />
+      <CgasCluster356 isEditable={isEditMode} />
+      <CgasCluster3 isEditable={isEditMode} />
+      <CgasCluster5 isEditable={isEditMode} />
+      <CgasCluster6 isEditable={isEditMode} />
+    </>
+  ) : selectedFilter === 'LGAS A-I' ? (
+    <>
+      <LgasA isEditable={isEditMode} />
+      <LgasB isEditable={isEditMode} />
+      <LgasC isEditable={isEditMode} />
+      <LgasD isEditable={isEditMode} />
+      <LgasE isEditable={isEditMode} />
+      <LgasF isEditable={isEditMode} />
+      <LgasG isEditable={isEditMode} />
+      <LgasH isEditable={isEditMode} />
+      <LgasI isEditable={isEditMode} />
+    </>
+  ) : selectedFilter === 'NGAS Cluster 1-8' ? (
+    <>
+      <NgasMain isEditable={isEditMode} />
+      <NgasCluster1 isEditable={isEditMode} />
+      <NgasCluster2 isEditable={isEditMode} />
+      <NgasCluster3 isEditable={isEditMode} />
+      <NgasCluster4 isEditable={isEditMode} />
+      <NgasCluster5 isEditable={isEditMode} />
+      <NgasCluster68 isEditable={isEditMode} />
+      <NgasCluster6 isEditable={isEditMode} />
+      <NgasCluster8 isEditable={isEditMode} />
+      <NgasCluster7 isEditable={isEditMode} />
+    </>
+  ) : selectedFilter === 'NGAS SUCs & Other SAAs' ? (
+    <NgasSUCsSAAs isEditable={isEditMode} />
+  ) : selectedFilter === 'CGAS Cluster 1-6' ? (
+    <>
+      <CgasMain isEditable={isEditMode} />
+      <CgasCluster1 isEditable={isEditMode} />
+      <CgasCluster2 isEditable={isEditMode} />
+      <CgasCluster4 isEditable={isEditMode} />
+      <CgasCluster356 isEditable={isEditMode} />
+      <CgasCluster3 isEditable={isEditMode} />
+      <CgasCluster5 isEditable={isEditMode} />
+      <CgasCluster6 isEditable={isEditMode} />
+    </>
+  ) : null}
+</TableBody>
+
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                </Container>
+              </Box>
+              <Footer currentTime={currentTime} />
             </Box>
-            <Footer currentTime={currentTime} />
-            <EditModal 
-              open={editModalOpen} 
-              onClose={() => setEditModalOpen(false)} 
-            />
-          </Box>
-        </ThemeProvider>
-      </NumberingProvider>
-    </ManningProvider>
+          </ThemeProvider>
+        </NumberingProvider>
+      </ManningProvider>
+    </RecordsProvider>
   );
 };
 

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import NameCell from '../../NameCell';
 import { NumberingContext } from '../../../context/NumberingContext';
 
-const CgasMain = ({ isEditable = false }) => {
+const CgasCluster6 = ({ isEditable = false }) => {
   const { getNumber } = useContext(NumberingContext);
 
   const renderAuditee = (auditee) => {
@@ -31,37 +31,35 @@ const CgasMain = ({ isEditable = false }) => {
   return (
     <>
       {[
-        {
-          id: 'cgas-main',
-          team: "-",
-          station: "Regional Office No. X, Cagayan de Oro City",
-          auditees:[
-            {
-              title: "Agencies Under:",
-              details: [ 
-                "Cluster 1 - Banking and Credit",
-                "Cluster 2 - Social Services and Housing",
-                "Cluster 4 - Industrial and Area Development"
-              ]
-            },
-          ]
-        }
+       {
+        id: 'cgas6-team12',
+        team: "12",
+        station: "PHIC, Cagayan de Oro City",
+        auditees: [
+          "1. Philippine Charity Sweepstakes Office (PCSO) Bukidnon Branches",
+          "2. Philippine Charity Sweepstakes Office (PCSO) Misamis Oriental Branches",
+          "3. Philippine Charity Sweepstakes Office (PCSO), Misamis Occidental",
+          "4. Philippine Charity Sweepstakes Office (PCSO), Lanao del Norte",
+          "5. Philippine Health Insurance Corporation (PHILHEALTH) Regional Office",
+          "6. Boy Scouts of the Philippines (BSoP)"
+        ]
+      }
       ].map((team) => (
         <React.Fragment key={team.id}>
-          <TableRow data-testid="cgas-main">
+          <TableRow data-testid="cgas-cluster6">
             <TableCell rowSpan={team.auditees.length}>CGAS</TableCell>
-            <TableCell rowSpan={team.auditees.length}>Clusters 1, 2 and 4</TableCell>
+            <TableCell rowSpan={team.auditees.length}>Cluster 6</TableCell>
             <TableCell>{team.team === "-" ? "-" : `Team ${team.team}`}</TableCell>
             <TableCell>{team.station}</TableCell>
             <TableCell>{renderAuditee(team.auditees[0])}</TableCell>
-            <TableCell><NameCell isEditable={isEditable} cellId={`${team.id}-1`}/></TableCell>
+            <TableCell> <NameCell isEditable={isEditable} cellId={`${team.id}-1`}/></TableCell>
             <TableCell>-</TableCell>
             <TableCell>-</TableCell>
             <TableCell>{getNumber(`${team.id}-1`)}</TableCell>
             <TableCell>-</TableCell>
           </TableRow>
           {team.auditees.slice(1).map((auditee, index) => (
-            <TableRow key={`${team.team}-${index}`}>
+             <TableRow key={`${team.id}-c6-${index + 2}`}>
               <TableCell>-</TableCell>
               <TableCell>-</TableCell>
               <TableCell>{renderAuditee(auditee)}</TableCell>
@@ -78,12 +76,12 @@ const CgasMain = ({ isEditable = false }) => {
   );
 };
 
-CgasMain.propTypes = {
+CgasCluster6.propTypes = {
   isEditable: PropTypes.bool
 };
 
-CgasMain.defaultProps = {
+CgasCluster6.defaultProps = {
   isEditable: false
 };
 
-export default CgasMain;
+export default CgasCluster6;

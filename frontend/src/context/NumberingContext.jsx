@@ -1,54 +1,52 @@
-import React, { createContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 const NumberingContext = createContext();
 
-const NumberingProvider = ({ children }) => {
-  const [nameData, setNameData] = useState(() => {
-    const savedData = localStorage.getItem('numberingData');
-    return savedData ? new Map(JSON.parse(savedData)) : new Map();
-  });
+export function useNumbering() {
+  return useContext(NumberingContext);
+}
 
-  const updateName = useCallback((cellId, value) => {
-    setNameData(prev => {
-      const newMap = new Map(prev);
-      if (value) {
-        // Store both the name and timestamp
-        newMap.set(cellId, { 
-          name: value, 
-          timestamp: Date.now() 
+export function NumberingProvider({ children }) {
+  const [nameEntries, setNameEntries] = useState([]);
+
+  const updateName = (cellId, name) => {
+    setNameEntries(prev => {
+      const filtered = prev.filter(entry => entry.cellId !== cellId);
+      
+      if (name) {
+        const newEntries = [...filtered, {
+          cellId,
+          name
+        }];
+        
+        // Sort by cellId numeric value to maintain row order
+        return newEntries.sort((a, b) => {
+          const rowA = parseInt(a.cellId.split('-')[1]);
+          const rowB = parseInt(b.cellId.split('-')[1]);
+          return rowA - rowB;
         });
-      } else {
-        newMap.delete(cellId);
       }
-      return newMap;
+      return filtered;
     });
-  }, []);
+  };
 
-  // Memoize the nameData entries array
-  const memoizedEntries = useMemo(() => {
-    return Array.from(nameData.entries()).map(([id, data]) => ({
-      id,
-      timestamp: data.timestamp
-    }));
-  }, [nameData]);
+  const getNumber = (cellId) => {
+    // Sort entries by row number before assigning numbers
+    const sortedEntries = [...nameEntries].sort((a, b) => {
+      const rowA = parseInt(a.cellId.split('-')[1]);
+      const rowB = parseInt(b.cellId.split('-')[1]);
+      return rowA - rowB;
+    });
 
-  const getNumber = useCallback((cellId) => {
-    if (!nameData.has(cellId)) return '-';
-    
-    // Use memoized entries
-    const sortedCells = [...memoizedEntries].sort((a, b) => a.timestamp - b.timestamp);
-    return sortedCells.findIndex(cell => cell.id === cellId) + 1;
-  }, [memoizedEntries, nameData]);
-
-  useEffect(() => {
-    localStorage.setItem('numberingData', JSON.stringify(Array.from(nameData.entries())));
-  }, [nameData]);
+    const index = sortedEntries.findIndex(entry => entry.cellId === cellId);
+    return index > -1 ? index + 1 : '';
+  };
 
   return (
-    <NumberingContext.Provider value={{ nameData, updateName, getNumber }}>
+    <NumberingContext.Provider value={{ updateName, getNumber, nameEntries }}>
       {children}
     </NumberingContext.Provider>
   );
-};
+}
 
-export { NumberingContext, NumberingProvider };
+export { NumberingContext };
