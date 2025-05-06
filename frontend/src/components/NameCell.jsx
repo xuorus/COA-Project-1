@@ -1,29 +1,30 @@
 import React, { useState, useContext } from 'react';
-import { Box, IconButton, TextField } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
+import { Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { useManningContext } from '../context/ManningContext';
-import { NumberingContext } from '../context/NumberingContext';
+import { useNumbering } from '../context/NumberingContext';
+import { useRecords } from '../context/RecordsContext';  // Add this import
+import AutocompleteNameCell from './AutocompleteNameCell';
 
-const NameCell = ({ isEditable = false, cellId }) => {
+const NameCell = ({ cellId, isEditable }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [tempName, setTempName] = useState('');
   const { manningData, updateManningData } = useManningContext();
-  const { updateName } = useContext(NumberingContext);
-
+  const { updateName } = useNumbering();
+  const { records } = useRecords();  // Add this line
+  
   const savedName = manningData[cellId] || '';
 
-  const handleSave = () => {
-    const trimmedName = tempName.trim();
-    updateManningData(cellId, trimmedName);
-    updateName(cellId, trimmedName);
+  const handleSave = (newName) => {
+    updateManningData(cellId, newName);
+    updateName(cellId, newName); // This will trigger number update
     setIsEditing(false);
   };
 
-  const handleEdit = () => {
-    setTempName(savedName);
-    setIsEditing(true);
+  const handleNameSelect = (record) => {
+    const formattedName = `${record.lName}, ${record.fName} ${record.mName ? record.mName.charAt(0) + '.' : ''}`;
+    updateManningData(cellId, formattedName);
+    updateName(cellId, formattedName, record.profession);
+    setIsEditing(false);
   };
 
   if (!isEditable) {
@@ -44,79 +45,55 @@ const NameCell = ({ isEditable = false, cellId }) => {
       justifyContent: 'center'
     }}>
       {isEditing ? (
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: 1,
-          width: '100%'
-        }}>
-          <TextField
-            value={tempName}
-            onChange={(e) => setTempName(e.target.value)}
-            size="small"
-            autoFocus
-            fullWidth
-            sx={{ 
-              flex: 1,
-              '& input': {
-                textAlign: 'center'
-              }
-            }}
-          />
-          <IconButton 
-            onClick={handleSave}
-            size="small"
-            sx={{ padding: '2px', '&:focus': {
-                    outline: 'none'
-                  } }}
-          >
-            <CheckIcon sx={{ fontSize: '1rem' }} />
-          </IconButton>
-        </Box>
+        <AutocompleteNameCell
+          value={savedName}
+          onSave={handleSave}
+          records={records}
+          onNameSelect={handleNameSelect} // Add this prop
+          isEditing={isEditing}
+        />
       ) : (
         <Box sx={{ 
           width: '100%',
           position: 'relative',
-          textAlign: 'center'
+          textAlign: 'center',
+          paddingRight: '24px' // Add padding for edit icon
         }}>
           {savedName ? (
             <>
-              <span>{savedName}</span>
+              <span style={{ 
+                display: 'block',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
+                {savedName}
+              </span>
               <IconButton 
-                onClick={handleEdit}
+                onClick={() => setIsEditing(true)}
                 size="small"
                 sx={{ 
-                  padding: 0,
-                  minWidth: '16px',
-                  minHeight: '16px',
-                  width: '16px',
-                  height: '16px',
                   position: 'absolute',
-                  right: -15,
-                  top: -15,
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                  },
-                  '&:focus': {
-                    outline: 'none'
-                  }
+                  top: '50%',
+                  right: 2,
+                  transform: 'translateY(-50%)',
+                  padding: 0,
+                  width: '20px',
+                  height: '20px',
+                  minWidth: 'auto'
                 }}
               >
-                <EditIcon sx={{ fontSize: '0.75rem' }} />
+                <EditIcon sx={{ fontSize: '0.875rem' }} />
               </IconButton>
             </>
           ) : (
             <IconButton 
-              onClick={() => {
-                setTempName('');
-                setIsEditing(true);
+              onClick={() => setIsEditing(true)}
+              sx={{
+                padding: '2px'
               }}
-              size="small"
-              sx={{ padding: '2px', '&:focus': {
-                    outline: 'none'
-                  }}}
             >
-              <AddIcon sx={{ fontSize: '1rem' }} />
+              <EditIcon sx={{ fontSize: '1rem' }} />
             </IconButton>
           )}
         </Box>
