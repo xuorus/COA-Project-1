@@ -43,6 +43,10 @@ import CgasCluster356 from '../components/manning_table/CGAS_Clusters_1-6/CgasCl
 import CgasCluster3 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster3';
 import CgasCluster5 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster5';
 import CgasCluster6 from '../components/manning_table/CGAS_Clusters_1-6/CgasCluster6';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import EditableNameCell from '../components/EditableNameCell';
+import AutocompleteNameCell from '../components/AutocompleteNameCell';
 
 const theme = createTheme({
   palette: {
@@ -829,10 +833,11 @@ const Manning = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [currentSection, setCurrentSection] = useState('Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1');
   const tableContainerRef = useRef(null);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false); // Add this state
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -847,7 +852,18 @@ const Manning = () => {
   };
 
   const handleEditClick = () => {
-    setEditModalOpen(true);
+    if (isEditMode) {
+      // Save changes here
+      handleSaveChanges();
+    }
+    setIsEditMode(prev => !prev);
+  };
+
+  // Add the save changes function
+  const handleSaveChanges = () => {
+    // Implement your save logic here
+    console.log('Saving changes...');
+    setHasChanges(false);
   };
 
   // Add the debounce function at the top level
@@ -867,116 +883,136 @@ const debounce = (func, wait) => {
 useEffect(() => {
   if (!tableContainerRef.current) return;
 
+  // Reset scroll position when filter changes
+  tableContainerRef.current.scrollTop = 0;
+
+  // Updated Intersection Observer configuration
   const options = {
     root: tableContainerRef.current,
-    threshold: 0.5, // Increased threshold for more stable detection
-    rootMargin: '-20px 0px'
+    threshold: [0.1, 0.5], // Lower threshold to catch elements at the bottom
+    rootMargin: '-20px 0px 0px 0px' // Adjusted rootMargin to better detect bottom elements
   };
 
   const sectionObserver = new IntersectionObserver((entries) => {
+    // Find the most visible section that is at least 10% visible
+    let maxVisibility = 0;
+    let mostVisibleSection = null;
+
     entries.forEach(entry => {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-        const sectionType = entry.target.getAttribute('data-testid');
-        switch (sectionType) {
-          case 'lgas-a':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1');
-            break;
-          case 'lgas-b':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) B - Misamis Oriental 2');
-            break;
-          case 'lgas-c':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) C - Cities of Cagayan de Oro, Gingoog & El Salvador');
-            break;
-          case 'lgas-d':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) D - Bukidnon 1');
-            break;
-          case 'lgas-e':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) E - Bukidnon 2');
-            break;
-          case 'lgas-f':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) F - Misamis Occidental 1');
-            break;
-          case 'lgas-g':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) G - Cities of Oroquita, Ozamiz and Tangub');
-            break;
-          case 'lgas-h':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) H - Lanao del Norte 1');
-            break;
-          case 'lgas-i':
-            setCurrentSection('Reg X - Local Government Audit Sector (LGAS) I - Lanao del Norte 2');
-            break;
-          case 'ngas-main':
-            setCurrentSection('Reg X - National Government Audit Section (NGAS) Clusters 1, 2, 3 & 4');
-            break;
-          case 'ngas-cluster1':
-            setCurrentSection('NGAS Cluster 1 - Executive Offices');
-            break;
-          case 'ngas-cluster2':
-            setCurrentSection('NGAS Cluster 2 - Oversight & Public Debt. Management Agencies');
-            break;
-          case 'ngas-cluster3':
-            setCurrentSection('NGAS Cluster 3 - Legislative, Judiciary & Constitutional Offices');
-            break;
-          case 'ngas-cluster4':
-            setCurrentSection('NGAS Cluster 4 - Defense & Security');
-            break;
-          case 'ngas-cluster5':
-            setCurrentSection('Reg X - National Government Audit Section(NGAS) Cluster 5');
-            break;
-          case 'ngas-cluster68':
-            setCurrentSection('Reg X - National Government Audit Sector (NGAS) Clusters 6 & 8');
-            break;
-          case 'ngas-cluster6':
-            setCurrentSection('NGAS Cluster 6 - Health & Science');
-            break;
-          case 'ngas-cluster8':
-            setCurrentSection('NGAS Cluster 8 - Agricultural & Environment');
-            break;
-          case 'ngas-cluster7':
-            setCurrentSection('Reg X - National Government Audit Sector (NGAS) Cluster 7');
-            break;
-          case 'ngas-sucs-saas':
-            setCurrentSection('Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)');
-            break;
-          case 'cgas-main':
-            setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 1, 2, & 4');
-            break;
-          case 'cgas-cluster1':
-            setCurrentSection('CGAS Cluster 1 - Banking & Credit');
-            break;
-          case 'cgas-cluster2':
-            setCurrentSection('CGAS Cluster 2 - Social Security & Housing');
-            break;
-          case 'cgas-cluster4':
-            setCurrentSection('CGAS Cluster 4 - Industrial & Area Development');
-            break;
-          case 'cgas-cluster356':
-            setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6');
-            break;
-          case 'cgas-cluster3':
-            setCurrentSection('CGAS Cluster 3 - Public Utilities');
-            break;
-          case 'cgas-cluster5':
-            setCurrentSection('CGAS Cluster 5 - Agricultural & Natural Resources');
-            break;
-          case 'cgas-cluster6':
-            setCurrentSection('CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services');
-            break;
+      if (entry.isIntersecting && selectedFilter === 'all') {
+        const visibilityRatio = entry.intersectionRatio;
+        if (visibilityRatio > maxVisibility) {
+          maxVisibility = visibilityRatio;
+          mostVisibleSection = entry.target;
         }
       }
     });
+
+    // Update section title if we found a visible section
+    if (mostVisibleSection && maxVisibility >= 0.1) {
+      const sectionType = mostVisibleSection.getAttribute('data-testid');
+      // Add bottom clusters to the switch case
+      switch (sectionType) {
+        case 'lgas-a':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) A - Misamis Oriental 1');
+          break;
+        case 'lgas-b':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) B - Misamis Oriental 2');
+          break;
+        case 'lgas-c':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) C - Cities of Cagayan de Oro, Gingoog & El Salvador');
+          break;
+        case 'lgas-d':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) D - Bukidnon 1');
+          break;
+        case 'lgas-e':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) E - Bukidnon 2');
+          break;
+        case 'lgas-f':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) F - Misamis Occidental 1');
+          break;
+        case 'lgas-g':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) G - Cities of Oroquita, Ozamiz and Tangub');
+          break;
+        case 'lgas-h':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) H - Lanao del Norte 1');
+          break;
+        case 'lgas-i':
+          setCurrentSection('Reg X - Local Government Audit Sector (LGAS) I - Lanao del Norte 2');
+          break;
+        case 'ngas-main':
+          setCurrentSection('Reg X - National Government Audit Section (NGAS) Clusters 1, 2, 3 & 4');
+          break;
+        case 'ngas-cluster1':
+          setCurrentSection('NGAS Cluster 1 - Executive Offices');
+          break;
+        case 'ngas-cluster2':
+          setCurrentSection('NGAS Cluster 2 - Oversight & Public Debt. Management Agencies');
+          break;
+        case 'ngas-cluster3':
+          setCurrentSection('NGAS Cluster 3 - Legislative, Judiciary & Constitutional Offices');
+          break;
+        case 'ngas-cluster4':
+          setCurrentSection('NGAS Cluster 4 - Defense & Security');
+          break;
+        case 'ngas-cluster5':
+          setCurrentSection('Reg X - National Government Audit Section(NGAS) Cluster 5');
+          break;
+        case 'ngas-cluster68':
+          setCurrentSection('Reg X - National Government Audit Sector (NGAS) Clusters 6 & 8');
+          break;
+        case 'ngas-cluster6':
+          setCurrentSection('NGAS Cluster 6 - Health & Science');
+          break;
+        case 'ngas-cluster8':
+          setCurrentSection('NGAS Cluster 8 - Agricultural & Environment');
+          break;
+        case 'ngas-cluster7':
+          setCurrentSection('Reg X - National Government Audit Sector (NGAS) Cluster 7');
+          break;
+        case 'ngas-sucs-saas':
+          setCurrentSection('Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)');
+          break;
+        case 'cgas-main':
+          setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 1, 2, & 4');
+          break;
+        case 'cgas-cluster1':
+          setCurrentSection('CGAS Cluster 1 - Banking & Credit');
+          break;
+        case 'cgas-cluster2':
+          setCurrentSection('CGAS Cluster 2 - Social Security & Housing');
+          break;
+        case 'cgas-cluster4':
+          setCurrentSection('CGAS Cluster 4 - Industrial & Area Development');
+          break;
+        case 'cgas-cluster356':
+          setCurrentSection('Reg X - Corporate Government Audit Sector (CGAS) Clusters 3, 5, & 6');
+          break;
+        case 'cgas-cluster3':
+          setCurrentSection('CGAS Cluster 3 - Public Utilities');
+          break;
+        case 'cgas-cluster5':
+          setCurrentSection('CGAS Cluster 5 - Agricultural & Natural Resources');
+          break;
+        case 'cgas-cluster6':
+          setCurrentSection('CGAS Cluster 6 - Social, Cultural, Trading, Promotional & Other Services');
+          break;
+      }
+    }
   }, options);
 
-  // Observe all section elements
-  const sections = document.querySelectorAll('[data-testid^="lgas-"], [data-testid^="ngas-"], [data-testid^="cgas-"]');
-  sections.forEach(section => {
-    sectionObserver.observe(section);
-  });
+  // Only observe sections if in default view
+  if (selectedFilter === 'all') {
+    const sections = document.querySelectorAll('[data-testid^="lgas-"], [data-testid^="ngas-"], [data-testid^="cgas-"]');
+    sections.forEach(section => {
+      sectionObserver.observe(section);
+    });
+  }
 
   return () => {
     sectionObserver.disconnect();
   };
-}, []);
+}, [selectedFilter]); // Only depend on selectedFilter
 
   // Add this function before the return statement in the Manning component
   const exportToExcel = () => {
@@ -1277,7 +1313,14 @@ useEffect(() => {
                             },
                           }}
                           >
-                            <BorderColorRoundedIcon sx={{ fontSize: 22 }} />
+                            {isEditMode ? (
+                              <CheckIcon sx={{ 
+                                fontSize: 22,
+                                color: hasChanges ? '#1976d2' : 'inherit' // Blue when there are changes
+                              }} />
+                            ) : (
+                              <BorderColorRoundedIcon sx={{ fontSize: 22 }} />
+                            )}
                           </IconButton>
 
                           <IconButton
@@ -1391,7 +1434,7 @@ useEffect(() => {
                             width: '16%'
                           }}>Designation</TableCell>
                           <TableCell sx={{ 
-                            fontWeight: 'bold', 
+                            fontWeight: 'bold',   
                             backgroundColor: '#f5f5f5',
                             width: '6%'
                           }}>No.</TableCell>
@@ -1403,87 +1446,84 @@ useEffect(() => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {selectedFilter === 'all' ? (
-                          <>
-                            <LgasA isEditable={false} />
-                            <LgasB isEditable={false} />
-                            <LgasC isEditable={false} />
-                            <LgasD isEditable={false} />
-                            <LgasE isEditable={false} />
-                            <LgasF isEditable={false} />
-                            <LgasG isEditable={false} />
-                            <LgasH isEditable={false} />
-                            <LgasI isEditable={false} />
-                            <NgasMain isEditable={false} />
-                            <NgasCluster1 isEditable={false} />
-                            <NgasCluster2 isEditable={false} />
-                            <NgasCluster3 isEditable={false} />
-                            <NgasCluster4 isEditable={false} />
-                            <NgasCluster5 isEditable={false} />
-                            <NgasCluster68 isEditable={false} />
-                            <NgasCluster6 isEditable={false} />
-                            <NgasCluster8 isEditable={false} />
-                            <NgasCluster7 isEditable={false} />
-                            <NgasSUCsSAAs isEditable={false} />
-                            <CgasMain isEditable={false} />
-                            <CgasCluster1 isEditable={false} />
-                            <CgasCluster2 isEditable={false} />
-                            <CgasCluster4 isEditable={false} />
-                            <CgasCluster356 isEditable={false} />
-                            <CgasCluster3 isEditable={false} />
-                            <CgasCluster5 isEditable={false} />
-                            <CgasCluster6 isEditable={false} />
-                          </>
-                        ) : selectedFilter === 'LGAS A-I' ? (
-                          <>
-                            <LgasA isEditable={false} />
-                            <LgasB isEditable={false} />
-                            <LgasC isEditable={false} />
-                            <LgasD isEditable={false} />
-                            <LgasE isEditable={false} />
-                            <LgasF isEditable={false} />
-                            <LgasG isEditable={false} />
-                            <LgasH isEditable={false} />
-                            <LgasI isEditable={false} />
-                          </>
-                        ) : selectedFilter === 'NGAS Cluster 1-8' ? (
-                          <>
-                            <NgasMain isEditable={false} />
-                            <NgasCluster1 isEditable={false} />
-                            <NgasCluster2 isEditable={false} />
-                            <NgasCluster3 isEditable={false} />
-                            <NgasCluster4 isEditable={false} />
-                            <NgasCluster5 isEditable={false} />
-                            <NgasCluster68 isEditable={false}/>
-                            <NgasCluster6 isEditable={false}/>
-                            <NgasCluster8 isEditable={false}/>
-                            <NgasCluster7 isEditable={false}/>
-                          </>
-                        ) : selectedFilter === 'NGAS SUCs & Other SAAs' ? (
-                          <NgasSUCsSAAs isEditable={false} />
-                        ) : selectedFilter === 'CGAS Cluster 1-6' ? (
-                          <>
-                          <CgasMain isEditable={false} />
-                          <CgasCluster1 isEditable={false} />
-                          <CgasCluster2 isEditable={false} />
-                          <CgasCluster4 isEditable={false} />
-                          <CgasCluster356 isEditable={false} />
-                          <CgasCluster3 isEditable={false} />
-                          <CgasCluster5 isEditable={false} />
-                          <CgasCluster6 isEditable={false} />
-                          </>
-                        ) : null}
-                      </TableBody>
+  {selectedFilter === 'all' || !selectedFilter ? (
+    <>
+      <LgasA isEditable={isEditMode} />
+      <LgasB isEditable={isEditMode} />
+      <LgasC isEditable={isEditMode} />
+      <LgasD isEditable={isEditMode} />
+      <LgasE isEditable={isEditMode} />
+      <LgasF isEditable={isEditMode} />
+      <LgasG isEditable={isEditMode} />
+      <LgasH isEditable={isEditMode} />
+      <LgasI isEditable={isEditMode} />
+      <NgasMain isEditable={isEditMode} />
+      <NgasCluster1 isEditable={isEditMode} />
+      <NgasCluster2 isEditable={isEditMode} />
+      <NgasCluster3 isEditable={isEditMode} />
+      <NgasCluster4 isEditable={isEditMode} />
+      <NgasCluster5 isEditable={isEditMode} />
+      <NgasCluster68 isEditable={isEditMode} />
+      <NgasCluster6 isEditable={isEditMode} />
+      <NgasCluster8 isEditable={isEditMode} />
+      <NgasCluster7 isEditable={isEditMode} />
+      <NgasSUCsSAAs isEditable={isEditMode} />
+      <CgasMain isEditable={isEditMode} />
+      <CgasCluster1 isEditable={isEditMode} />
+      <CgasCluster2 isEditable={isEditMode} />
+      <CgasCluster4 isEditable={isEditMode} />
+      <CgasCluster356 isEditable={isEditMode} />
+      <CgasCluster3 isEditable={isEditMode} />
+      <CgasCluster5 isEditable={isEditMode} />
+      <CgasCluster6 isEditable={isEditMode} />
+    </>
+  ) : selectedFilter === 'LGAS A-I' ? (
+    <>
+      <LgasA isEditable={isEditMode} />
+      <LgasB isEditable={isEditMode} />
+      <LgasC isEditable={isEditMode} />
+      <LgasD isEditable={isEditMode} />
+      <LgasE isEditable={isEditMode} />
+      <LgasF isEditable={isEditMode} />
+      <LgasG isEditable={isEditMode} />
+      <LgasH isEditable={isEditMode} />
+      <LgasI isEditable={isEditMode} />
+    </>
+  ) : selectedFilter === 'NGAS Cluster 1-8' ? (
+    <>
+      <NgasMain isEditable={isEditMode} />
+      <NgasCluster1 isEditable={isEditMode} />
+      <NgasCluster2 isEditable={isEditMode} />
+      <NgasCluster3 isEditable={isEditMode} />
+      <NgasCluster4 isEditable={isEditMode} />
+      <NgasCluster5 isEditable={isEditMode} />
+      <NgasCluster68 isEditable={isEditMode} />
+      <NgasCluster6 isEditable={isEditMode} />
+      <NgasCluster8 isEditable={isEditMode} />
+      <NgasCluster7 isEditable={isEditMode} />
+    </>
+  ) : selectedFilter === 'NGAS SUCs & Other SAAs' ? (
+    <NgasSUCsSAAs isEditable={isEditMode} />
+  ) : selectedFilter === 'CGAS Cluster 1-6' ? (
+    <>
+      <CgasMain isEditable={isEditMode} />
+      <CgasCluster1 isEditable={isEditMode} />
+      <CgasCluster2 isEditable={isEditMode} />
+      <CgasCluster4 isEditable={isEditMode} />
+      <CgasCluster356 isEditable={isEditMode} />
+      <CgasCluster3 isEditable={isEditMode} />
+      <CgasCluster5 isEditable={isEditMode} />
+      <CgasCluster6 isEditable={isEditMode} />
+    </>
+  ) : null}
+</TableBody>
+
                     </Table>
                   </TableContainer>
                 </Box>
               </Container>
             </Box>
             <Footer currentTime={currentTime} />
-            <EditModal 
-              open={editModalOpen} 
-              onClose={() => setEditModalOpen(false)} 
-            />
           </Box>
         </ThemeProvider>
       </NumberingProvider>
