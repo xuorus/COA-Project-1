@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Container, Typography, Box, ThemeProvider, createTheme, IconButton, FormControl, InputLabel, Select, MenuItem, TextField, OutlinedInput, Paper } from '@mui/material';
 import { Document, Page, pdfjs } from 'react-pdf';
+import PrintIcon from '@mui/icons-material/Print';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import backgroundImage from '../assets/bldg.jpg';
@@ -16,13 +17,12 @@ import { Modal, Fade } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { keyframes } from '@mui/material/styles';
 import WindowControl from '../components/WindowControl';
+import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import ScanIcon from '@mui/icons-material/DocumentScanner';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
-
-import axios from 'axios';
   
 // Initialize PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -124,6 +124,7 @@ const Main = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [fullPreview, setFullPreview] = useState(false);
   const [savedDocuments, setSavedDocuments] = useState([]);
+  const [scanningStatus, setScanningStatus] = useState(''); 
 
   // Initialize form state with empty strings instead of undefined
   const [formValues, setFormValues] = useState({
@@ -184,11 +185,11 @@ const handleFileUpload = (file) => {
 };
 
 const handleScanButtonClick = () => {
-    if (!documentType) {
-        setError('Please select a document type');
-        return;
-    }
-    fileInputRef.current?.click();
+  if (!documentType) {
+      setError('Please select a document type');
+      return;
+  }
+  fileInputRef.current?.click();
 };
 
 const handleDragOver = (e) => {
@@ -201,11 +202,14 @@ const handleDragLeave = () => {
 };
 
 const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    handleFileUpload(file);
+  e.preventDefault();
+  setIsDragging(false);
+  
+  const file = e.dataTransfer.files[0];
+  if (file) {
+      setError(null); // Clear any existing error
+      handleFileUpload(file);
+  }
 };
 
 const handleSubmit = async (event) => {
@@ -353,59 +357,27 @@ const handleSubmit = async (event) => {
     return () => clearInterval(timer);
   }, []);
 
-//   const handleScanButtonClick = async () => {
-//     try {
-//         if (!documentType) {
-//             alert('Please select a document type');
-//             return;
-//         }
+// Add preview functionality
+const PreviewDocument = ({ docId }) => {
+    const [pdfUrl, setPdfUrl] = useState(null);
 
-//         setIsLoading(true);
-//         console.log('Starting scan...', { documentType });
-        
-//         const response = await fetch('http://localhost:5000/api/scan/start-scan', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify({ documentType })
-//         });
+    useEffect(() => {
+        if (docId) {
+            setPdfUrl(`http://localhost:5000/api/scan/document/${docId}`);
+        }
+    }, [docId]);
 
-//         const data = await response.json();
-//         console.log('Scan response:', data); // Add this log
-        
-//         if (!response.ok) {
-//             throw new Error(data.message || `HTTP error! status: ${response.status}`);
-//         }
+    if (!pdfUrl) return null;
 
-//         if (data.success && data.output) {
-//             try {
-//                 console.log('Processing scan output...');
-//                 const binaryString = window.atob(data.output);
-//                 const bytes = new Uint8Array(binaryString.length);
-//                 for (let i = 0; i < binaryString.length; i++) {
-//                     bytes[i] = binaryString.charCodeAt(i);
-//                 }
-//                 const blob = new Blob([bytes], { type: 'application/pdf' });
-//                 const pdfUrl = URL.createObjectURL(blob);
-                
-//                 console.log('PDF URL created:', pdfUrl);
-//                 setPdfFile(pdfUrl);
-//             } catch (error) {
-//                 console.error('Error processing PDF data:', error);
-//                 throw new Error('Failed to process scanned document');
-//             }
-//         } else {
-//             throw new Error(data.message || 'Scan failed');
-//         }
-//     } catch (error) {
-//         console.error('Scan error:', error);
-//         alert(`Scanning failed: ${error.message}`);
-//     } finally {
-//         setIsLoading(false);
-//     }
-// };
-
+    return (
+        <iframe
+            src={pdfUrl}
+            width="100%"
+            height="600px"
+            title="Document Preview"
+        />
+    );
+};
   useEffect(() => {
     // Cleanup PDF URL when component unmounts or when PDF changes
     return () => {
@@ -919,7 +891,7 @@ useEffect(() => {
                     { label: 'Last Name', required: true, field: 'lastName' },
                     { 
                       label: 'Blood Type', 
-                      required: false, // Changed from true to false
+                      required: false,
                       field: 'bloodType',
                       type: 'select',
                       options: bloodTypes
@@ -991,6 +963,14 @@ useEffect(() => {
                                 height: '45px',
                                 backgroundColor: 'rgba(255, 255, 255, 0.7)',
                                 borderRadius: '15px',
+                                '& .MuiSelect-select': {
+                                  padding: '0 14px',  // Add left padding
+                                  height: '45px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'flex-start',  // Align content to the left
+                                  textAlign: 'left',  // Text align left
+                                },
                                 '& .MuiOutlinedInput-notchedOutline': {
                                   borderRadius: '15px',
                                   borderColor: 'rgba(0, 0, 0, 0.23)',
@@ -1003,18 +983,12 @@ useEffect(() => {
                                 },
                                 '&.Mui-error .MuiOutlinedInput-notchedOutline': {
                                   borderColor: '#d32f2f',
-                                },
-                                '& .MuiSelect-select': {
-                                  padding: '0 14px',
-                                  height: '45px',
-                                  display: 'flex',
-                                  alignItems: 'center',
                                 }
                               }}
                               MenuProps={{
                                 PaperProps: {
                                   sx: {
-                                    maxHeight: 300,
+                                    maxHeight: 300, 
                                     borderRadius: 2,
                                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                     boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
@@ -1064,9 +1038,18 @@ useEffect(() => {
                                 width: '65%',
                                 '& .MuiOutlinedInput-input': {
                                   height: '45px',
-                                  padding: '0 14px',
+                                  padding: '0 14px',  // Add horizontal padding
                                   backgroundColor: 'rgba(255, 255, 255, 0.7)',
                                   borderRadius: '15px',
+                                  display: 'flex',
+                                  alignItems: 'center', // Center vertically
+                                  lineHeight: '45px', // Match height for vertical centering
+                                  textAlign: 'left', // Center horizontally
+                                },
+                                '& input': {  // Add this block
+                                  textAlign: 'left',
+                                  width: '100%',
+                                  padding: '0 14px',  // Add padding to input
                                 },
                                 '& .MuiOutlinedInput-notchedOutline': {
                                   borderRadius: '15px',

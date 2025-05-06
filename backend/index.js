@@ -6,6 +6,7 @@ const requestLogger = require('./middleware/logger');
 const logsRouter = require('./routes/logs');
 const recordsRouter = require('./routes/records');
 const scanRoutes = require('./routes/scanRoutes');
+const scannerRoutes = require('./routes/scannerRoutes');
 const pool = require('./config/db');
 
 const app = express();
@@ -34,6 +35,7 @@ app.get('/health', (req, res) => {
 app.use('/api/logs', logsRouter);
 app.use('/api/records', recordsRouter);
 app.use('/api/scan', scanRoutes);
+app.use('/api/scanner', scannerRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

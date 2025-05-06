@@ -21,11 +21,12 @@
     "files": [
       "electron/**/*",
       "frontend/dist/**/*",
+      "backend/**/*",
       "package.json"
     ],
     "win": {
       "target": "nsis",
-      "icon": "icon.ico",
+      "icon": "assets/coa.ico",
       "artifactName": "${productName}-Setup-${version}.exe"
     },
     "mac": {
