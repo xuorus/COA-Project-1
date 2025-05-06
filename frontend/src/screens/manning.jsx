@@ -722,22 +722,64 @@ const EditModal = ({ open, onClose }) => {
               sx={{ 
                 borderCollapse: 'collapse',
                 tableLayout: 'fixed',
-                minWidth: '150%'
+                minWidth: '150%',
+                '& .MuiTableCell-stickyHeader': {
+                  backgroundColor: '#f5f5f5',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 2,
+                }
               }}
             >
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ width: '8%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Sector</TableCell>
-                  <TableCell sx={{ width: '10%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>AG</TableCell>
-                  <TableCell sx={{ width: '8%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Team No.</TableCell>
-                  <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Official Station</TableCell>
-                  <TableCell sx={{ width: '24%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Auditees</TableCell>
                   <TableCell sx={{ 
+                    width: '8%', 
                     fontWeight: 'bold', 
                     backgroundColor: '#f5f5f5',
-                    width: '12%',
-                    position: 'relative',
-                    overflow: 'hidden',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>Sector</TableCell>
+                  <TableCell sx={{ 
+                    width: '10%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>AG</TableCell>
+                  <TableCell sx={{ 
+                    width: '8%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>Team No.</TableCell>
+                  <TableCell sx={{ 
+                    width: '16%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>Official Station</TableCell>
+                  <TableCell sx={{ 
+                    width: '24%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>Auditees</TableCell>
+                  <TableCell sx={{ 
+                    width: '12%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2,
                     '& .MuiIconButton-root': {
                       position: 'absolute',
                       right: 2,
@@ -745,10 +787,38 @@ const EditModal = ({ open, onClose }) => {
                       zIndex: 1
                     }
                   }}>Name</TableCell>
-                  <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Position</TableCell>
-                  <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Designation</TableCell>
-                  <TableCell sx={{ width: '6%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>No.</TableCell>
-                  <TableCell sx={{ width: '12%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Office Order</TableCell>
+                  <TableCell sx={{ 
+                    width: '16%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>Position</TableCell>
+                  <TableCell sx={{ 
+                    width: '16%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>Designation</TableCell>
+                  <TableCell sx={{ 
+                    width: '6%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>No.</TableCell>
+                  <TableCell sx={{ 
+                    width: '12%', 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 2
+                  }}>Office Order</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -1405,6 +1475,12 @@ useEffect(() => {
                           '& .MuiTableRow-root': {
                             height: 'auto',
                           },
+                          '& .MuiTableCell-stickyHeader': {
+                            backgroundColor: '#f5f5f5',
+                            position: 'sticky',
+                            top: 0,
+                            zIndex: 2,
+                          }
                         }}
                       >
                         <TableHead>
@@ -1412,34 +1488,50 @@ useEffect(() => {
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '8%'
+                              width: '8%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>Sector</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '10%'
+                              width: '10%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>AG</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '8%'
+                              width: '8%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>Team No.</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '16%'
+                              width: '16%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>Official Station</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '24%'
+                              width: '24%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>Auditees</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
                               width: '12%',
-                              position: 'relative',
-                              overflow: 'hidden',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2,
                               '& .MuiIconButton-root': {
                                 position: 'absolute',
                                 right: 2,
@@ -1450,22 +1542,34 @@ useEffect(() => {
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '16%'
+                              width: '16%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>Position</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '16%'
+                              width: '16%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>Designation</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold',   
                               backgroundColor: '#f5f5f5',
-                              width: '6%'
+                              width: '6%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>No.</TableCell>
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '12%'
+                              width: '12%',
+                              position: 'sticky',
+                              top: 0,
+                              zIndex: 2
                             }}>Office Order</TableCell>
                           </TableRow>
                         </TableHead>

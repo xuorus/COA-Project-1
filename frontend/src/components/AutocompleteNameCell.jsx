@@ -1,137 +1,106 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Autocomplete, Box } from '@mui/material';
+import { TextField, Autocomplete, IconButton, Tooltip } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import PropTypes from 'prop-types';
 
-const AutocompleteNameCell = ({ value, onSave, records, isEditing, onNameSelect }) => {
-  const [inputValue, setInputValue] = useState(value || '');
-  const [suggestions, setSuggestions] = useState([]);
+const AutocompleteNameCell = ({ value, records, onNameSelect, onCancel }) => {
+  const [open, setOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
-  // Create a list of unique names from records
   useEffect(() => {
-    if (records) {
-      const names = records.map(record => ({
-        fullName: `${record.lName || ''}, ${record.fName || ''} ${record.mName ? record.mName.charAt(0) + '.' : ''}`.trim(),
-        ...record
-      })).filter(record => record.fullName);
-      setSuggestions(names);
-    }
-  }, [records]);
+    setInputValue(value || '');
+  }, [value]);
 
+  // Remove handleBlur since it's now handled by parent
   const handleSelect = (event, selectedRecord) => {
     if (selectedRecord) {
-      onNameSelect(selectedRecord); // Pass the entire record object
+      onNameSelect(selectedRecord);
     }
   };
 
-  if (!isEditing) {
-    return value || '';
-  }
+  const handleKeyDown = (event) => {
+    if (event.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  const handleClear = (event) => {
+    event.stopPropagation();
+    onNameSelect(null); // Pass null to clear the name in parent component
+    onCancel(); // Close the editing mode
+  };
+
+  // Remove duplicates by combining lastName, firstName, and middleName
+  const uniqueRecords = records ? Array.from(new Map(
+    records.map(record => [
+      `${record.lName}-${record.fName}-${record.mName}`,
+      record
+    ])
+  ).values()) : [];
 
   return (
-    <Box sx={{ 
-      position: 'relative', 
-      width: '100%', 
-      height: '100%',
-      paddingRight: '24px' // Add padding for edit icon
-    }}>
-      {/* Move edit icon box outside of the content flow */}
-      <Box sx={{
-        position: 'absolute',
-        top: -8,  // Adjust to align with cell top
-        right: -8, // Adjust to align with cell right
-        zIndex: 2,
-        width: '24px',
-        height: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        {/* Edit icon goes here */}
-      </Box>
-      
-      <Autocomplete
-        freeSolo
-        value={inputValue}
-        onChange={(event, newValue) => {
-          if (typeof newValue === 'object' && newValue !== null) {
-            setInputValue(newValue.fullName);
-            onSave(newValue.fullName);
-          } else {
-            setInputValue(newValue);
-            onSave(newValue);
-          }
-        }}
-        onInputChange={(event, newInputValue) => {
-          setInputValue(newInputValue);
-        }}
-        options={suggestions}
-        getOptionLabel={(option) => {
-          if (typeof option === 'string') return option;
-          return option.fullName;
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            size="small"
-            fullWidth
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: 'white',
-                '&.Mui-focused': {
-                  backgroundColor: 'white',
-                },
-                // Add text truncation for long values
-                '& input': {
-                  textOverflow: 'ellipsis',
-                  overflow: 'hidden'
-                }
+    <Autocomplete
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      options={uniqueRecords}
+      inputValue={inputValue}
+      onInputChange={(event, newValue) => setInputValue(newValue)}
+      getOptionLabel={(record) => 
+        `${record.lName}, ${record.fName} ${record.mName ? record.mName.charAt(0) + '.' : ''}`
+      }
+      onChange={handleSelect}
+      clearOnBlur={false}
+      popupIcon={
+        <Tooltip title="Clear">
+          <IconButton 
+            size="small" 
+            onClick={handleClear}
+            sx={{ 
+              padding: '2px',
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.04)'
               }
             }}
-          />
-        )}
-        componentsProps={{
-          popper: {
-            sx: {
-              width: 'fit-content !important',
-              minWidth: '400px !important', // Wider dropdown
-              '& .MuiAutocomplete-listbox': {
-                '& .MuiAutocomplete-option': {
-                  whiteSpace: 'nowrap',
-                  paddingRight: '20px'
-                }
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      }
+      renderInput={(params) => (
+        <TextField 
+          {...params} 
+          size="small"
+          onKeyDown={handleKeyDown}
+          autoFocus
+          sx={{
+            '& .MuiInputBase-root': {
+              width: '250px',
+              backgroundColor: '#fff',
+              '& fieldset': {
+                borderColor: 'rgba(0, 0, 0, 0.23)',
+              },
+              '&:hover fieldset': {
+                borderColor: 'rgba(0, 0, 0, 0.23)',
               }
             }
-          }
-        }}
-        sx={{
-          width: '100%',
-          '& .MuiAutocomplete-input': {
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          },
-          '& .MuiAutocomplete-popper': {
-            zIndex: 9999
-          }
-        }}
-      />
-    </Box>
+          }}
+        />
+      )}
+      sx={{
+        width: '250px',
+        zIndex: 1000
+      }}
+      autoFocus
+    />
   );
 };
 
 AutocompleteNameCell.propTypes = {
   value: PropTypes.string,
-  onSave: PropTypes.func.isRequired,
   records: PropTypes.array,
-  isEditing: PropTypes.bool,
-  onNameSelect: PropTypes.func.isRequired
-};
-
-AutocompleteNameCell.defaultProps = {
-  value: '',
-  records: [],
-  isEditing: false
+  onNameSelect: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired
 };
 
 export default AutocompleteNameCell;
