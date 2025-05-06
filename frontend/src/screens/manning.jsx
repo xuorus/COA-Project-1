@@ -47,6 +47,9 @@ import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import EditableNameCell from '../components/EditableNameCell';
 import AutocompleteNameCell from '../components/AutocompleteNameCell';
+import { RecordsProvider } from '../context/RecordsContext';
+import NameCell from '../components/NameCell';
+import { useNumbering } from '../context/NumberingContext';
 
 const theme = createTheme({
   palette: {
@@ -729,7 +732,19 @@ const EditModal = ({ open, onClose }) => {
                   <TableCell sx={{ width: '8%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Team No.</TableCell>
                   <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Official Station</TableCell>
                   <TableCell sx={{ width: '24%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Auditees</TableCell>
-                  <TableCell sx={{ width: '12%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name</TableCell>
+                  <TableCell sx={{ 
+                    fontWeight: 'bold', 
+                    backgroundColor: '#f5f5f5',
+                    width: '12%',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '& .MuiIconButton-root': {
+                      position: 'absolute',
+                      right: 2,
+                      top: 2,
+                      zIndex: 1
+                    }
+                  }}>Name</TableCell>
                   <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Position</TableCell>
                   <TableCell sx={{ width: '16%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Designation</TableCell>
                   <TableCell sx={{ width: '6%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>No.</TableCell>
@@ -1099,353 +1114,362 @@ useEffect(() => {
   }, [selectedFilter]);
 
   return (
-    <ManningProvider>
-      <NumberingProvider>
-        <ThemeProvider theme={theme}>
-          <Box
-            sx={{
-              height: '100vh',
-              width: '100vw',
-              margin: 0,
-              padding: 0,
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              overflow: 'hidden',
-              '&::before': {
-                content: '""',
+    <RecordsProvider>
+      <ManningProvider>
+        <NumberingProvider>
+          <ThemeProvider theme={theme}>
+            <Box
+              sx={{
+                height: '100vh',
+                width: '100vw',
+                margin: 0,
+                padding: 0,
                 position: 'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundImage: `url(${backgroundImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                opacity: 1,
-                zIndex: -1
-              }
-            }}
-          >
-            <WindowControl />
-            <Header onMenuClick={() => setSidebarOpen(true)} />
-
-            <Sidebar 
-              open={sidebarOpen} 
-              onClose={() => setSidebarOpen(false)} 
-            />
-            
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '80px',
-                left: 0,
-                right: 0,
-                bottom: '40px',
-                padding: 2, // Reduced padding to give more space
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: `url(${backgroundImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  opacity: 1,
+                  zIndex: -1
+                }
               }}
             >
-              <Container maxWidth="lg">
-                <Box 
-                  sx={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(3px)',
-                    borderRadius: 2,
-                    padding: 3, // Reduced padding
-                    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    height: 'calc(100vh - 140px)', // Increased height
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    mb: 3 
-                  }}>
-                    <Box>
-                      <Typography variant="h5" component="h1" fontWeight="bold">
-                        Manning Complement
-                      </Typography>
-                      {(!selectedFilter || selectedFilter === 'all') ? (
-                        <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
-                          {currentSection}
+              <WindowControl />
+              <Header onMenuClick={() => setSidebarOpen(true)} />
+
+              <Sidebar 
+                open={sidebarOpen} 
+                onClose={() => setSidebarOpen(false)} 
+              />
+              
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: '80px',
+                  left: 0,
+                  right: 0,
+                  bottom: '40px',
+                  padding: 2, // Reduced padding to give more space
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                }}
+              >
+                <Container maxWidth="lg">
+                  <Box 
+                    sx={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      backdropFilter: 'blur(3px)',
+                      borderRadius: 2,
+                      padding: 3, // Reduced padding
+                      boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      height: 'calc(100vh - 140px)', // Increased height
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      mb: 3 
+                    }}>
+                      <Box>
+                        <Typography variant="h5" component="h1" fontWeight="bold">
+                          Manning Complement
                         </Typography>
-                      ) : (
-                        <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
-                          {selectedFilter === 'LGAS A-I' && 'Local Government Audit Sectors A-I'}
-                          {selectedFilter === 'NGAS Cluster 1-8' && 'National Government Audit Section Clusters 1-8'}
-                          {selectedFilter === 'CGAS Cluster 1-6' && 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 1 - 6'}
-                          {selectedFilter === 'NGAS SUCs & Other SAAs' && 'Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)'}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        gap: 1,
-                        alignItems: 'flex-end'
-                      }}>
-                        <TextField
-                          variant="outlined"
-                          size="small"
-                          placeholder="Search"
-                          value={searchQuery}
-                          onChange={(e) => handleSearchChange(e.target.value)}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <SearchIcon />
-                              </InputAdornment>
-                            ),
-                            sx: {
-                              borderRadius: '12px',
-                              '& fieldset': {
-                                borderRadius: '12px',
-                              },
-                            }
-                          }}
-                          sx={{
-                            width: '250px',
-                            '& .MuiOutlinedInput-root': {
-                              borderRadius: '20px',
-                              backgroundColor: 'none',
-                              '&.Mui-focused fieldset': {
-                                borderColor: 'black',
-                              },
-                              '&:hover fieldset': {
-                                borderColor: 'black',
-                              }
-                            }
-                          }}
-                        />
-                        
+                        {(!selectedFilter || selectedFilter === 'all') ? (
+                          <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
+                            {currentSection}
+                          </Typography>
+                        ) : (
+                          <Typography variant="subtitle1" sx={{ mt: 1, mb: -1, color: 'black' }}>
+                            {selectedFilter === 'LGAS A-I' && 'Local Government Audit Sectors A-I'}
+                            {selectedFilter === 'NGAS Cluster 1-8' && 'National Government Audit Section Clusters 1-8'}
+                            {selectedFilter === 'CGAS Cluster 1-6' && 'Reg X - Corporate Government Audit Sector (CGAS) Clusters 1 - 6'}
+                            {selectedFilter === 'NGAS SUCs & Other SAAs' && 'Reg X - National Government Audit Sector (NGAS) State Universities and Colleges (SUCs) & Other Stand Alone Agencies (SAAs)'}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
                         <Box sx={{ 
                           display: 'flex', 
+                          flexDirection: 'column', 
                           gap: 1,
-                          alignItems: 'center',
+                          alignItems: 'flex-end'
                         }}>
-                          <Select
-                            value={selectedFilter}
-                            onChange={(e) => setSelectedFilter(e.target.value)}
+                          <TextField
+                            variant="outlined"
                             size="small"
-                            displayEmpty
-                            MenuProps={{
-                              PaperProps: {
-                                style: {
-                                  maxHeight: 250, // Reduced height
-                                },
-                                sx: {
-                                  '&::-webkit-scrollbar': {
-                                    width: '6px', // Reduced scrollbar width
-                                  },
-                                  '&::-webkit-scrollbar-track': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                                  },
-                                  '&::-webkit-scrollbar-thumb': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                                    borderRadius: '5px',
-                                  }
-                                }
-                              },
-                            }}
-                            sx={{
-                              width: '170px',
-                              height: '32px',
-                              '& .MuiSelect-select': {
-                                py: 0.5,
-                              },
-                              '&.MuiOutlinedInput-root': {
+                            placeholder="Search"
+                            value={searchQuery}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <SearchIcon />
+                                </InputAdornment>
+                              ),
+                              sx: {
                                 borderRadius: '12px',
+                                '& fieldset': {
+                                  borderRadius: '12px',
+                                },
                               }
                             }}
-                          >
-                            <MenuItem value="" disabled>
-                            </MenuItem>
-                            <MenuItem value="all">Default</MenuItem>
-                            <MenuItem 
-                              value="LGAS A-I"
-                              sx={{
-                                '&.Mui-selected': {
-                                  backgroundColor: 'transparent',
+                            sx={{
+                              width: '250px',
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '20px',
+                                backgroundColor: 'none',
+                                '&.Mui-focused fieldset': {
+                                  borderColor: 'black',
                                 },
-                                '&.Mui-selected:hover': {
-                                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                '&:hover fieldset': {
+                                  borderColor: 'black',
+                                }
+                              }
+                            }}
+                          />
+                          
+                          <Box sx={{ 
+                            display: 'flex', 
+                            gap: 1,
+                            alignItems: 'center',
+                          }}>
+                            <Select
+                              value={selectedFilter}
+                              onChange={(e) => setSelectedFilter(e.target.value)}
+                              size="small"
+                              displayEmpty
+                              MenuProps={{
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 250, // Reduced height
+                                  },
+                                  sx: {
+                                    '&::-webkit-scrollbar': {
+                                      width: '6px', // Reduced scrollbar width
+                                    },
+                                    '&::-webkit-scrollbar-track': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                                    },
+                                    '&::-webkit-scrollbar-thumb': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                                      borderRadius: '5px',
+                                    }
+                                  }
+                                },
+                              }}
+                              sx={{
+                                width: '170px',
+                                height: '32px',
+                                '& .MuiSelect-select': {
+                                  py: 0.5,
+                                },
+                                '&.MuiOutlinedInput-root': {
+                                  borderRadius: '12px',
                                 }
                               }}
                             >
-                              LGAS A-I
-                            </MenuItem>
-                            <MenuItem value="NGAS Cluster 1-8">NGAS Cluster 1-8</MenuItem>
-                            <MenuItem value="NGAS SUCs & Other SAAs">NGAS SUCs & Other SAAs</MenuItem>
-                            <MenuItem value="CGAS Cluster 1-6">CGAS Cluster 1-6</MenuItem>
-                            <MenuItem value="CGAS WD & Other SAAs">CGAS WD & Other SAAs</MenuItem>
-                            <MenuItem value="ORD">ORD</MenuItem>
-                            <MenuItem value="OARD">OARD</MenuItem>
-                            <MenuItem value="ATFD">ATFD</MenuItem>
-                            <MenuItem value="ATFD FS">ATFD FS</MenuItem>
-                            <MenuItem value="ATFD FS/Cashier">ATFD FS/Cashier</MenuItem>
-                            <MenuItem value="ATFD HRMS">ATFD HRMS</MenuItem>
-                            <MenuItem value="ATFD RMS">ATFD RMS</MenuItem>
-                            <MenuItem value="ATFD TS">ATFD TS</MenuItem>
-                            <MenuItem value="ATFD IT">ATFD IT</MenuItem>
-                            <MenuItem value="ATFD GSS">ATFD GSS</MenuItem>
-                            <MenuItem value="FRAUD AUDIT DIVISION">FRAUD AUDIT DIVISION</MenuItem>
-                            <MenuItem value="LEGAL & ADJUCATION">LEGAL & ADJUCATION</MenuItem>
-                            <MenuItem value="AGAD">AGAD</MenuItem>
-                            <MenuItem value="TECHNICAL AUDIT GROUP A-D">TECHNICAL AUDIT GROUP A-D</MenuItem>
-                          </Select>
+                              <MenuItem value="" disabled>
+                              </MenuItem>
+                              <MenuItem value="all">Default</MenuItem>
+                              <MenuItem 
+                                value="LGAS A-I"
+                                sx={{
+                                  '&.Mui-selected': {
+                                    backgroundColor: 'transparent',
+                                  },
+                                  '&.Mui-selected:hover': {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                  }
+                                }}
+                              >
+                                LGAS A-I
+                              </MenuItem>
+                              <MenuItem value="NGAS Cluster 1-8">NGAS Cluster 1-8</MenuItem>
+                              <MenuItem value="NGAS SUCs & Other SAAs">NGAS SUCs & Other SAAs</MenuItem>
+                              <MenuItem value="CGAS Cluster 1-6">CGAS Cluster 1-6</MenuItem>
+                              <MenuItem value="CGAS WD & Other SAAs">CGAS WD & Other SAAs</MenuItem>
+                              <MenuItem value="ORD">ORD</MenuItem>
+                              <MenuItem value="OARD">OARD</MenuItem>
+                              <MenuItem value="ATFD">ATFD</MenuItem>
+                              <MenuItem value="ATFD FS">ATFD FS</MenuItem>
+                              <MenuItem value="ATFD FS/Cashier">ATFD FS/Cashier</MenuItem>
+                              <MenuItem value="ATFD HRMS">ATFD HRMS</MenuItem>
+                              <MenuItem value="ATFD RMS">ATFD RMS</MenuItem>
+                              <MenuItem value="ATFD TS">ATFD TS</MenuItem>
+                              <MenuItem value="ATFD IT">ATFD IT</MenuItem>
+                              <MenuItem value="ATFD GSS">ATFD GSS</MenuItem>
+                              <MenuItem value="FRAUD AUDIT DIVISION">FRAUD AUDIT DIVISION</MenuItem>
+                              <MenuItem value="LEGAL & ADJUCATION">LEGAL & ADJUCATION</MenuItem>
+                              <MenuItem value="AGAD">AGAD</MenuItem>
+                              <MenuItem value="TECHNICAL AUDIT GROUP A-D">TECHNICAL AUDIT GROUP A-D</MenuItem>
+                            </Select>
 
-                          <IconButton
-                            onClick={handleEditClick}
-                            sx={{
-                              padding: '4px',
-                            '&:focus': {
+                            <IconButton
+                              onClick={handleEditClick}
+                              sx={{
+                                padding: '4px',
+                              '&:focus': {
+                                outline: 'none'
+                              },
+                            }}
+                            >
+                              {isEditMode ? (
+                                <CheckIcon sx={{ 
+                                  fontSize: 22,
+                                  color: hasChanges ? '#1976d2' : 'inherit' // Blue when there are changes
+                                }} />
+                              ) : (
+                                <BorderColorRoundedIcon sx={{ fontSize: 22 }} />
+                              )}
+                            </IconButton>
+
+                            <IconButton
+                              onClick={exportToExcel}
+                              sx={{
+                                padding: '4px',
+                              '&:focus': {
                               outline: 'none'
                             },
                           }}
-                          >
-                            {isEditMode ? (
-                              <CheckIcon sx={{ 
-                                fontSize: 22,
-                                color: hasChanges ? '#1976d2' : 'inherit' // Blue when there are changes
-                              }} />
-                            ) : (
-                              <BorderColorRoundedIcon sx={{ fontSize: 22 }} />
-                            )}
-                          </IconButton>
-
-                          <IconButton
-                            onClick={exportToExcel}
-                            sx={{
-                              padding: '4px',
-                            '&:focus': {
-                            outline: 'none'
-                          },
-                        }}
-                          >
-                            <GetAppRoundedIcon sx={{mt:0.5  , fontSize: 27 }} />
-                          </IconButton>
+                            >
+                              <GetAppRoundedIcon sx={{mt:0.5  , fontSize: 27 }} />
+                            </IconButton>
+                          </Box>
                         </Box>
                       </Box>
                     </Box>
-                  </Box>
 
-                  <TableContainer 
-                    ref={tableContainerRef}
-                    component={Paper} 
-                    sx={{ 
-                      flexGrow: 1, 
-                      overflow: 'auto',
-                      borderRadius: 2,
-                      boxShadow: 3,
-                      mt: -1,
-                      maxHeight: 'calc(100vh - 280px)',
-                      '& .MuiTableCell-root': {
-                        textAlign: 'center',
-                        verticalAlign: 'middle',
-                        border: '1px solid #ddd',
-                        padding: '8px 16px',
-                        whiteSpace: 'normal',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        minHeight: '48px',
-                        display: 'table-cell',
-                      },
-                      '&::-webkit-scrollbar': {
-                        width: '6px', // Reduced scrollbar width
-                        height: '6px',
-                      },
-                      '&::-webkit-scrollbar-track': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                        borderRadius: '3px',
-                      },
-                      '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.15)',
-                        borderRadius: '4px',
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                        },
-                      },
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: 'rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.05)',
-                    }}
-                  >
-                    <Table 
-                      stickyHeader 
-                      size="small" 
+                    <TableContainer 
+                      ref={tableContainerRef}
+                      component={Paper} 
                       sx={{ 
-                        borderCollapse: 'collapse',
-                        tableLayout: 'fixed',
-                        minWidth: '150%',
-                        '& .MuiTableRow-root': {
-                          height: 'auto',
+                        flexGrow: 1, 
+                        overflow: 'auto',
+                        borderRadius: 2,
+                        boxShadow: 3,
+                        mt: -1,
+                        maxHeight: 'calc(100vh - 280px)',
+                        '& .MuiTableCell-root': {
+                          textAlign: 'center',
+                          verticalAlign: 'middle',
+                          border: '1px solid #ddd',
+                          padding: '8px 16px',
+                          whiteSpace: 'normal',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          minHeight: '48px',
+                          display: 'table-cell',
                         },
+                        '&::-webkit-scrollbar': {
+                          width: '6px', // Reduced scrollbar width
+                          height: '6px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                          borderRadius: '3px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.15)',
+                          borderRadius: '4px',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                          },
+                        },
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.05)',
                       }}
                     >
-                      <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '8%'
-                          }}>Sector</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '10%'
-                          }}>AG</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '8%'
-                          }}>Team No.</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '16%'
-                          }}>Official Station</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '24%'
-                          }}>Auditees</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '12%'
-                          }}>Name</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '16%'
-                          }}>Position</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '16%'
-                          }}>Designation</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold',   
-                            backgroundColor: '#f5f5f5',
-                            width: '6%'
-                          }}>No.</TableCell>
-                          <TableCell sx={{ 
-                            fontWeight: 'bold', 
-                            backgroundColor: '#f5f5f5',
-                            width: '12%'
-                          }}>Office Order</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
+                      <Table 
+                        stickyHeader 
+                        size="small" 
+                        sx={{ 
+                          borderCollapse: 'collapse',
+                          tableLayout: 'fixed',
+                          minWidth: '150%',
+                          '& .MuiTableRow-root': {
+                            height: 'auto',
+                          },
+                        }}
+                      >
+                        <TableHead>
+                          <TableRow>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '8%'
+                            }}>Sector</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '10%'
+                            }}>AG</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '8%'
+                            }}>Team No.</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '16%'
+                            }}>Official Station</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '24%'
+                            }}>Auditees</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '12%',
+                              position: 'relative',
+                              overflow: 'hidden',
+                              '& .MuiIconButton-root': {
+                                position: 'absolute',
+                                right: 2,
+                                top: 2,
+                                zIndex: 1
+                              }
+                            }}>Name</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '16%'
+                            }}>Position</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '16%'
+                            }}>Designation</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold',   
+                              backgroundColor: '#f5f5f5',
+                              width: '6%'
+                            }}>No.</TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 'bold', 
+                              backgroundColor: '#f5f5f5',
+                              width: '12%'
+                            }}>Office Order</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
   {selectedFilter === 'all' || !selectedFilter ? (
     <>
       <LgasA isEditable={isEditMode} />
@@ -1518,16 +1542,17 @@ useEffect(() => {
   ) : null}
 </TableBody>
 
-                    </Table>
-                  </TableContainer>
-                </Box>
-              </Container>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                </Container>
+              </Box>
+              <Footer currentTime={currentTime} />
             </Box>
-            <Footer currentTime={currentTime} />
-          </Box>
-        </ThemeProvider>
-      </NumberingProvider>
-    </ManningProvider>
+          </ThemeProvider>
+        </NumberingProvider>
+      </ManningProvider>
+    </RecordsProvider>
   );
 };
 
