@@ -774,7 +774,7 @@ const EditModal = ({ open, onClose }) => {
                     zIndex: 2
                   }}>Auditees</TableCell>
                   <TableCell sx={{ 
-                    width: '12%', 
+                    width: '16%', 
                     fontWeight: 'bold', 
                     backgroundColor: '#f5f5f5',
                     position: 'sticky',
@@ -1528,7 +1528,7 @@ useEffect(() => {
                             <TableCell sx={{ 
                               fontWeight: 'bold', 
                               backgroundColor: '#f5f5f5',
-                              width: '12%',
+                              width: '24%',
                               position: 'sticky',
                               top: 0,
                               zIndex: 2,
